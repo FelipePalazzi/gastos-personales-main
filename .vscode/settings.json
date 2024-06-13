@@ -1,0 +1,6 @@
+{
+    "AutoPreview.serverURL": "http://localhost:8081",
+    "AutoPreview.center": true,
+    "AutoPreview.background": "transparent",
+    "AutoPreview.locked": true
+}

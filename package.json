@@ -1,0 +1,92 @@
+{
+  "name": "gastos-personales",
+  "version": "1.0.0",
+  "main": "expo/AppEntry.js",
+  "type": "module",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "generate": "drizzle-kit generate",
+    "dev": "npx nodemon App.js",
+    "migrate": "drizzle-kit migrate"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@expo/metro-runtime": "~3.2.1",
+    "@expo/vector-icons": "^14.0.2",
+    "@fortawesome/fontawesome-svg-core": "^6.5.2",
+    "@fortawesome/free-brands-svg-icons": "^6.5.2",
+    "@fortawesome/free-regular-svg-icons": "^6.5.2",
+    "@fortawesome/free-solid-svg-icons": "^6.5.2",
+    "@neondatabase/serverless": "^0.9.3",
+    "@react-native-community/datetimepicker": "^8.0.1",
+    "@react-native-picker/picker": "^2.7.6",
+    "@types/react": "~18.2.79",
+    "axios": "^1.7.2",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.30.10",
+    "expo": "~51.0.7",
+    "expo-status-bar": "~1.12.1",
+    "express": "^4.19.2",
+    "moment": "^2.30.1",
+    "morgan": "^1.10.0",
+    "node-cron": "^3.0.3",
+    "pg": "^8.11.5",
+    "postgres": "^3.4.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-native": "0.74.1",
+    "react-native-chart-kit": "^6.12.0",
+    "react-native-modal-datetime-picker": "^17.1.0",
+    "react-native-paper": "^5.12.3",
+    "react-native-sortable-list": "^0.0.25",
+    "react-native-svg": "^15.3.0",
+    "react-native-table-component": "^1.2.2",
+    "react-native-vector-icons": "^10.1.0",
+    "react-native-web": "~0.19.10",
+    "react-router-dom": "^6.23.1",
+    "react-router-native": "^6.23.1",
+    "react-table": "^7.8.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^20.12.12",
+    "@types/pg": "^8.11.6",
+    "@types/react-native-table-component": "^1.2.8",
+    "babel-eslint": "^10.1.0",
+    "drizzle-kit": "^0.21.2",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-config-standard-jsx": "^11.0.0",
+    "eslint-config-standard-react": "^13.0.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-react": "^7.34.1",
+    "nodemon": "^3.1.0",
+    "react-native-reanimated-table": "^0.0.2",
+    "ts-node": "^10.9.2"
+  },
+  "engines": {
+    "node": ">=18.18.0 <19.0.0"
+  },
+  "private": true,
+  "eslintConfig": {
+    "parser": "babel.eslint",
+    "extends": [
+      "standard",
+      "standard-jsx",
+      "standard-react"
+    ],
+    "rules": {
+      "react/prop-types": "off"
+    }
+  }
+}
