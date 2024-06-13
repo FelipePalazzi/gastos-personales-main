@@ -37,4 +37,4 @@ yarn-error.*
 *.tsbuildinfo
 
 dbDrizzle.js 
-src/db/config.js 
+config.js 

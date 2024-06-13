@@ -1,5 +1,5 @@
 const { Pool } = require('pg');
-import { db } from "./config";
+import { db } from "../../config";
 
 export  const pool = new Pool({
     user: db.user,
