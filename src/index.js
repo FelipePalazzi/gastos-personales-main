@@ -11,7 +11,7 @@ import router7 from "./routes/resumen.routes.js"
 import cron from 'node-cron';
 import {pagina,symbols } from './constants'
 
-const { port } = require('./db/config.js')
+const { port } = require('../config.js')
 
 
 const app = express()
