@@ -1,4 +1,4 @@
-import { pagina_url } from '@env';
+import { PAGINA_URL } from '../config';
 
 export const alerts = {
     exito: 'Éxito',
@@ -54,7 +54,7 @@ export const alerts = {
   }
   export const pagina = {
     mensaje:'Gastos Personales',
-    pagina: pagina_url,
+    pagina: PAGINA_URL,
     pagina_gasto:'gasto',
     pagina_ingreso: 'ingreso',
     pagina_new:'new',
