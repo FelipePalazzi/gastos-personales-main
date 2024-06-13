@@ -1,3 +1,5 @@
+import { pagina_url } from '@env';
+
 export const alerts = {
     exito: 'Éxito',
     missing_data: 'Faltan datos',
@@ -52,7 +54,7 @@ export const alerts = {
   }
   export const pagina = {
     mensaje:'Gastos Personales',
-    pagina:'https://gastos-personales.onrender.com',
+    pagina: pagina_url,
     pagina_gasto:'gasto',
     pagina_ingreso: 'ingreso',
     pagina_new:'new',
