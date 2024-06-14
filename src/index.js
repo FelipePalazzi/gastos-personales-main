@@ -10,9 +10,9 @@ import router6 from "./routes/responsableingreso.routes.js"
 import router7 from "./routes/resumen.routes.js"
 import cron from 'node-cron';
 import {pagina,symbols } from './constants'
-import port from '../config.js'
+import PORT from '../config.js'
 
-const PORT = port
+const port = PORT
 
 
 const app = express()
@@ -53,5 +53,5 @@ cron.schedule('*/12 * * * *', () => {
 });
 
 app.listen(port, () => {
-  console.log(`Server on port ${PORT}`)
+  console.log(`Server on port ${port}`)
 })
