@@ -10,7 +10,7 @@ import router6 from "./routes/responsableingreso.routes.js"
 import router7 from "./routes/resumen.routes.js"
 import cron from 'node-cron';
 import {pagina,symbols } from './constants'
-import PORT from '../config.js'
+import PORT from './config.js'
 
 const port = PORT
 
