@@ -2,7 +2,7 @@ import react from "react"
 import {View,StyleSheet, ScrollView, TouchableHighlight} from "react-native"
 import StyledText from "./StyledText.jsx"
 import Constants from 'expo-constants'
-import theme from '../theme.js'
+import theme from '../styles/theme.js'
 import {Link, useLocation} from 'react-router-native'
 import {pagina,symbols } from '../constants'
 

@@ -9,7 +9,7 @@ import {useNavigate} from 'react-router-native'
 import {Picker} from '@react-native-picker/picker'
 import DateTimePickerModal from "react-native-modal-datetime-picker"
 import Icon from 'react-native-vector-icons/FontAwesome'
-import theme from '../theme'
+import theme from '../styles/theme'
 import { ActivityIndicator ,Dialog, Portal, TextInput,} from 'react-native-paper'
 import { Dimensions } from 'react-native'
 import moment from 'moment'

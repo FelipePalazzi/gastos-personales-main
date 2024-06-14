@@ -1,13 +1,14 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet,Dimensions, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet,Dimensions, ScrollView, RefreshControl } from 'react-native';
 import { DataTable,Searchbar, ActivityIndicator,Card } from 'react-native-paper';
 import {useNavigate} from 'react-router-native'
-import theme from '../theme.js';
+import theme from '../styles/theme.js';
 import moment from 'moment'
 import { Feather } from '@expo/vector-icons'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { alerts, button_text, atributos, symbols, pagina } from '../constants';
-import { filterData, sortData, handlePress, getSortIcon } from '../utils';
+import { filterData, sortData,  getSortIcon } from '../utils';
+import styleLista from '../styles/styles.js';
 
 const useFetchGastos = () => {
   const [gastos, setGastos] = useState([]);
@@ -51,7 +52,6 @@ const GastoList = () => {
     await fetchGastos();
     setRefreshing(false);
   };
-
   useEffect(() => {
     fetchGastos();
   }, []);
@@ -75,8 +75,6 @@ const GastoList = () => {
     const ordenInverso = (orden === 'asc'? 'desc' : orden === 'desc'? 'no orden' : 'asc');
     setOrden(ordenInverso);
   }, [orden]);
-
-
 
   const selectedGasto = useMemo(() => {
     if (selectedGastoId) {
@@ -116,9 +114,9 @@ const onDelete = async (id) => {
   await deleteGasto(id) 
 } 
   return (
-    <ScrollView     showsVerticalScrollIndicator={true}
+    <ScrollView  showsVerticalScrollIndicator={true}
     vertical
-    style={styles.scroll}
+    style={styleLista.scroll}
     onScroll={handleScroll}
     scrollEventThrottle={theme.scroll.desplazamiento}
     ref={scrollViewRef}
@@ -128,95 +126,100 @@ const onDelete = async (id) => {
         onRefresh={onRefresh}
       />
     }>
-    <View style={styles.container}>
+    <View>
       <Searchbar
         placeholder="Filtrar"
-        style={styles.search}
+        style={styleLista.search}
         elevation={theme.search.elevation}
         onChangeText={setSearch}
         value={search}
       />
+    </View>
+    <View style={styleLista.container}>
       <DataTable>
-        <DataTable.Header style={styles.headerRow}>
+        <DataTable.Header style={styleLista.headerRow}>
           <DataTable.Title
             onPress={() => handleSort('fecha')}
-            style={styles.headerCell}
           >
-            <Text style={styles.text}>{atributos.fecha}</Text>
+            <Text style={styleLista.text}>{atributos.fecha}</Text>
             <Feather name={getIcon('fecha')} size={theme.icons.ordenar} color={columna === 'fecha'? theme.colors.white : theme.colors.gray} />
           </DataTable.Title>
           <DataTable.Title
             onPress={() => handleSort('tipogasto')}
-            style={styles.headerCell}
+            style={{marginHorizontal:5,marginLeft:20}}
           >
-            <Text style={styles.text}>{atributos.tipo}</Text>
+            <Text style={styleLista.text}>{atributos.tipo}</Text>
             <Feather name={getIcon('tipogasto')} size={theme.icons.ordenar} color={columna === 'tipogasto'? theme.colors.white : theme.colors.gray} />
           </DataTable.Title>
           <DataTable.Title
             onPress={() => handleSort('totalar')}
-            style={styles.headerCell}
+            style={{marginHorizontal:5,marginLeft:5}}
           >
-            <Text style={styles.text}>{`${symbols.peso}${atributos.ar}`}</Text>
+            <Text style={styleLista.text}>{`${symbols.peso}${atributos.ar}`}</Text>
             <Feather name={getIcon('totalar')} size={theme.icons.ordenar} color={columna === 'totalar'? theme.colors.white : theme.colors.gray} />
           </DataTable.Title>
           <DataTable.Title
             onPress={() => handleSort('total')}
-            style={styles.headerCell}
+            style={{marginLeft:5}}
           >
-            <Text style={styles.text}>{`${symbols.peso}${atributos.uy}`}</Text>
+            <Text style={styleLista.text}>{`${symbols.peso}${atributos.uy}`}</Text>
             <Feather name={getIcon('total')} size={theme.icons.ordenar} color={columna === 'total'? theme.colors.white : theme.colors.gray} />
           </DataTable.Title>
         </DataTable.Header>
-
-
         {loading? (
-  <View style={styles.loadingContainer}>
-    <ActivityIndicator animating={true} color={theme.colors.primary} size={theme.icons.big} />
-    <Text style={styles.loadingText}>{alerts.cargando}</Text>
-  </View>
-) : (
+        <View style={styleLista.loadingContainer}>
+          <ActivityIndicator animating={true} color={theme.colors.primary} size={theme.icons.big} />
+          <Text style={styleLista.loadingText}>{alerts.cargando}</Text>
+        </View>
+        ) : (
   sortedData.slice(page * pageSize, (page + 1) * pageSize).map((gasto, index) => (
     <React.Fragment key={index}>
-      <DataTable.Row style={styles.row} onPress={() => handlePressGasto(gasto.id, index)}>
-        <DataTable.Cell>{moment.utc(gasto.fecha).format('DD/MM/YY')}</DataTable.Cell>
+      <DataTable.Row style={styleLista.row} onPress={() => handlePressGasto(gasto.id, index)}>
+        <DataTable.Cell style={{marginHorizontal:10,marginStart:30}}>{moment.utc(gasto.fecha).format('DD/MM/YY')}</DataTable.Cell>
         <DataTable.Cell>{gasto.tipogasto}</DataTable.Cell>
         <DataTable.Cell>{`${gasto.totalar}`}</DataTable.Cell>
         <DataTable.Cell>{`${gasto.total}`}</DataTable.Cell>
       </DataTable.Row>
       {expanded[gasto.id] && (
-        <Card style={styles.card}>
+        <Card style={styleLista.card}>
           <Card.Content>
-            <View style={styles.descriptionRow}>
-              <Text style={styles.description}>{`${atributos.responsable}${symbols.colon}`}</Text>
+            <View style={styleLista.descriptionRow}>
+              <Text style={styleLista.description}>{`${atributos.responsable}${symbols.colon}`}</Text>
               <Text>{gasto.responsable}</Text>
             </View>
-            <View style={styles.descriptionRow}>
-              <Text style={styles.description}>{`${atributos.categoria}${symbols.colon}`}</Text>
+            <View style={styleLista.descriptionRow}>
+              <Text style={styleLista.description}>{`${atributos.categoria}${symbols.colon}`}</Text>
               <Text>{gasto.categoria}</Text>
             </View>
-            <View style={styles.descriptionRow}>
-              <Text style={styles.description}>{`${atributos.cambio}${symbols.colon}`}</Text>
+            <View style={styleLista.descriptionRow}>
+              <Text style={styleLista.description}>{`${atributos.cambio}${symbols.colon}`}</Text>
               <Text>{`${symbols.peso}${gasto.tipocambio}`}</Text>
             </View>
-            <View style={styles.descriptionRow}>
-              <Text style={styles.description}>{`${atributos.descripcion}${symbols.colon}`}</Text>
+            <View style={styleLista.descriptionRow}>
+              <Text style={styleLista.description}>{`${atributos.descripcion}${symbols.colon}`}</Text>
               <Text>{gasto.descripcion}</Text>
             </View>
-            <View style={styles.buttonContainer}>
+            <View style={styleLista.buttonContainer}>
             <Card.Actions>
+            <View>
               <Icon.Button
                 backgroundColor={theme.colors.edit}
                 name={theme.icons.editar}
                 title=""
                 onPress={() => onEdit(gasto)}
-              >{button_text.edit}</Icon.Button>
+              >{button_text.edit}
+              </Icon.Button>
+              </View>
+              <View>
               <Icon.Button
                 backgroundColor={theme.colors.delete}
                 name={theme.icons.borrar}
                 title=""
                 onPress={() => onDelete(gasto.id)}
-              >{button_text.delete}</Icon.Button>
-              </Card.Actions>
+              >{button_text.delete}
+              </Icon.Button>
+              </View>
+            </Card.Actions>
             </View>
           </Card.Content>
         </Card>
@@ -224,107 +227,32 @@ const onDelete = async (id) => {
     </React.Fragment>
   ))
 )}
-        <DataTable.Pagination
-          page={page}
-          numberOfPages={Math.ceil(sortedData.length / pageSize)}
-          onPageChange={handlePageChange}
-          label={`Página ${page + 1} de ${Math.ceil(sortedData.length / pageSize)}`}
-          onItemsPerPageChange={handleItemsPerPageChange}
-          selectPageDropdownLabel={'Cant.'}
-          numberOfItemsPerPageList={numberOfItemsPerPageList}
-          numberOfItemsPerPage={numberOfItemsPerPage}
-
-        />
    </DataTable>
-      <View style={styles.button}>
+   </View>
+   <View>
+  <DataTable.Pagination
+    page={page}
+    numberOfPages={Math.ceil(sortedData.length / pageSize)}
+    onPageChange={handlePageChange}
+    label={`Página ${page + 1} de ${Math.ceil(sortedData.length / pageSize)}`}
+    onItemsPerPageChange={handleItemsPerPageChange}
+    selectPageDropdownLabel={'Cant.'}
+    numberOfItemsPerPageList={numberOfItemsPerPageList}
+    numberOfItemsPerPage={numberOfItemsPerPage}
+  />
+      <View style={styleLista.button}>
         <Icon.Button
           backgroundColor={theme.colors.agregar}
           name={theme.icons.agregar}
           title=""
           onPress={() => handleSubmit(gasto)}
-        >{`${button_text.agregar}${symbols.space}${atributos.gasto}`}</Icon.Button>
+        >{`${button_text.agregar}${symbols.space}${atributos.gasto}`}
+        </Icon.Button>
       </View>
     </View>
     </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-},
-  loadingText: {
-    fontSize: theme.fontSizes.body,
-    fontWeight: theme.fontWeights.bold,
-    color: theme.colors.primary,
-},
-  container: {
-    flex: 1,
-    padding: 16, 
-    paddingTop: 20
-},
-  text: {
-    textAlign: 'center',
-    padding: 10,
-},
-  row: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    backgroundColor: theme.colors.table
-},
-card: {
-  elevation:2,
-  backgroundColor: theme.colors.card
-},
-  description: {
-    fontWeight: theme.fontWeights.bold,
-},
-  descriptionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-},
-  headerdescription: {
-    backgroundColor: theme.colors.tableSecondary,
-    textAlign: 'center'
-},
-  cell: {
-    width: screenWidth/4,
-    height: 40,
-    borderWidth: 1,
-    borderColor: theme.colors.cell,
-    fontWeight: theme.fontWeights.bold,
-},
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop:20,
-    backgroundColor: theme.colors.primary,
-    
-},
-  scroll: { 
-    flex:1
-},
-  button: {
-    padding: 16,
-    backgroundColor: theme.colors.white,
-    alignItems: 'center',
-},
-  search:{
-    paddingBottom:1,
-    backgroundColor: theme.colors.search,
-},
-  headerCell:{
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    maxWidth:screenWidth/4,
-    paddingHorizontal: 20,
-}
-});
 
 export default GastoList;

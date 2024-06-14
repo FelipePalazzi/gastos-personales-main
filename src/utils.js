@@ -1,5 +1,5 @@
 import moment from 'moment'
-import theme from './theme'
+import theme from './styles/theme'
 
 export const filterData = (data, search, monedaProp, fechaProp) => {
     if (!search) {

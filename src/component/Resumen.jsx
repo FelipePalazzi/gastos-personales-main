@@ -1,7 +1,7 @@
 import { View, Text, Dimensions, StyleSheet,Alert } from "react-native";
 import { useState, useMemo, useEffect } from "react";
 import { LineChart } from "react-native-chart-kit";
-import theme from "../theme";
+import theme from "../styles/theme";
 import { Searchbar, Tooltip, Portal,Dialog } from 'react-native-paper';
 import { filterData } from '../utils';
 import useResumen from "../hooks/useResumen";

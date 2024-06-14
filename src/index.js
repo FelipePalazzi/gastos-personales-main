@@ -43,7 +43,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message })
 });
 
-cron.schedule('*/14 * * * *', () => {
+cron.schedule('*/12 * * * *', () => {
   console.log('Actualizando server');
   fetch(`${pagina.pagina}${symbols.barra}`)
    .then(response => response.json())

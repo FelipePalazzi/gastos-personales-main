@@ -1,14 +1,14 @@
 import React, { useState,useCallback, useMemo, useEffect,useRef} from 'react'
-import { View, Text, TouchableOpacity, StyleSheet,  ScrollView,Dimensions, RefreshControl} from 'react-native'
-import theme from '../theme.js'
-import { Table,TableWrapper,Cell } from 'react-native-table-component'
+import { View, Text,  StyleSheet,  ScrollView,Dimensions, RefreshControl} from 'react-native'
+import theme from '../styles/theme.js'
 import moment from 'moment'
 import { Feather } from '@expo/vector-icons'
 import {useNavigate} from 'react-router-native'
 import Icon from 'react-native-vector-icons/FontAwesome'
-import { Searchbar, ActivityIndicator } from 'react-native-paper'
-import  {filterData, handlePress, sortData, getSortIcon} from '../utils'
+import { DataTable,Searchbar, ActivityIndicator,Card } from 'react-native-paper'
+import  {filterData,  sortData, getSortIcon} from '../utils'
 import { alerts,button_text, atributos, symbols,pagina } from '../constants'
+import styleLista from '../styles/styles.js';
 
 const useFetchIngresos = () => {
   const [ingresos, setIngresos] = useState([])
@@ -30,6 +30,7 @@ const useFetchIngresos = () => {
 }
 
 const screenWidth = Dimensions.get('window').width
+const numberOfItemsPerPageList = [5,6,7,8,9,10];
 
 const IngresoList = () => {
 
@@ -41,13 +42,20 @@ const IngresoList = () => {
   const [totalar, setTotalar] = useState('')
   const [refreshing, setRefreshing] = useState(false)
   const { ingresos, loading, fetchIngresos } = useFetchIngresos()
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(7);
+  const [numberOfItemsPerPage, onItemsPerPageChange] = useState(7);
+  const [expanded, setExpanded] = useState({});
+
+  const handlePressIngreso = useCallback((ingresoId, index) => {
+    setExpanded((prevExpanded) => ({ ...prevExpanded, [ingresoId]: !prevExpanded[ingresoId] }));
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true)
     await fetchIngresos()
     setRefreshing(false)
   }
-
   useEffect(() => {
     fetchIngresos()
   }, [])
@@ -72,10 +80,6 @@ const IngresoList = () => {
     setContentOffset(event.nativeEvent.contentOffset)
   }
 
-  const handlePressIngreso = useCallback((ingresoId, index) => {
-    handlePress(ingresoId, index, setSelectedIngreso, scrollViewRef);
-  }, [setSelectedIngreso, scrollViewRef]);
-
   const selectedIngreso = useMemo(() => {
     if (selectedIngresoId) {
       const selectedIngreso = ingresos.find((ingreso) => ingreso.id === selectedIngresoId)
@@ -88,6 +92,16 @@ const IngresoList = () => {
 
   const getIcon = (columna) => {
     return getSortIcon(columna, orden, columna);
+  };
+
+  const handlePageChange = (page) => {
+    setPage(page);
+  };
+
+  const handleItemsPerPageChange = (value) => {
+    setPage(0);
+    setPageSize(value);
+    onItemsPerPageChange(value);
   };
 
   const handleSubmit = async (ingreso) => {
@@ -106,235 +120,147 @@ const onDelete = async (id) => {
 }
 
 return (
-  <View style={styles.container}>
-  <View>  
+  <ScrollView  showsVerticalScrollIndicator={true}
+  vertical
+  style={styleLista.scroll}
+  onScroll={handleScroll}
+  scrollEventThrottle={theme.scroll.desplazamiento}
+  ref={scrollViewRef}
+  refreshControl={
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+    />
+  }>
+    <View>
     <Searchbar
       placeholder="Filtrar"
-      style={styles.search}
+      style={styleLista.search}
       elevation={theme.search.elevation}
       onChangeText={setSearch}
       value={search}
     />
-    <View><Text></Text></View>
-      <View style={styles.headerRow}>
-        <TouchableOpacity onPress={() => handleSort('fecha')}>
-          <View style={styles.headerCell}>
-            <Text style={styles.text}>{atributos.fecha}</Text>
-            <Feather name={getIcon('fecha')} size={theme.icons.ordenar} color={columna === 'fecha' ? theme.colors.white : theme.colors.gray} />
+    </View>
+  <View style={styleLista.container}>
+      <DataTable>
+        <DataTable.Header style={styleLista.headerRow}>
+          <DataTable.Title
+            onPress={() => handleSort('fecha')}
+          >
+            <Text >{atributos.fecha}</Text>
+            <Feather name={getIcon('fecha')} size={theme.icons.ordenar} color={columna === 'fecha'? theme.colors.white : theme.colors.gray} />
+          </DataTable.Title>
+          <DataTable.Title
+            onPress={() => handleSort('responsable')}
+            style={{marginHorizontal:30,marginLeft:30}}
+          >
+            <Text>{atributos.responsable}</Text>
+            <Feather name={getIcon('responsable')} size={theme.icons.ordenar} color={columna === 'responsable'? theme.colors.white : theme.colors.gray} />
+          </DataTable.Title>
+          <DataTable.Title
+            onPress={() => handleSort('importe')}
+            style={{marginLeft:20}}
+          >
+            <Text>{atributos.importe}</Text>
+            <Feather name={getIcon('importe')} size={theme.icons.ordenar} color={columna === 'importe'? theme.colors.white : theme.colors.gray} />
+          </DataTable.Title>
+        </DataTable.Header>
+        {loading? (
+          <View style={styleLista.loadingContainer}>
+            <ActivityIndicator animating={true} color={theme.colors.primary} size={theme.icons.big} />
+            <Text style={styleLista.loadingText}>{alerts.cargando}</Text>
           </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleSort('responsable')}>
-          <View style={styles.headerCell}>
-            <Text style={styles.text}>{atributos.responsable}</Text>
-            <Feather name={getIcon('responsable')} size={theme.icons.ordenar} color={columna === 'responsable' ? theme.colors.white : theme.colors.gray} />
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleSort('importe')}>
-          <View style={styles.headerCell}>
-            <Text style={styles.text}>{atributos.importe}</Text>
-            <Feather name={getIcon('importe')} size={theme.icons.ordenar} color={columna === 'importe' ? theme.colors.white : theme.colors.gray} />
-          </View>
-        </TouchableOpacity>
-      </View>
-      
-  </View>
-
-  <ScrollView
-    showsVerticalScrollIndicator={true}
-    vertical
-    style={styles.scroll}
-    onScroll={handleScroll}
-    scrollEventThrottle={theme.scroll.desplazamiento}
-    ref={scrollViewRef}
-    refreshControl={
-      <RefreshControl
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-      />
-    }
-  >
-
-    <Table >
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator animating={true} color={theme.colors.primary} size={theme.icons.big} />
-          <Text style={styles.loadingText}>{alerts.cargando}</Text>
-        </View>
-      ) : (
-        <View>
-          {sortedData.map((ingreso, index) => (
-            <View key={index}>
-              <TableWrapper style={styles.row}>
-                <TouchableOpacity onPress={() => {
-                  if (selectedIngreso && selectedIngreso.id === ingreso.id) {
-                    setSelectedIngreso(null)
-                  } else {
-                    handlePressIngreso(ingreso.id, index)
-                  }
-                }}>
-                  <Cell data={moment.utc(ingreso.fecha).format('DD/MM/YY')} style={styles.cell} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => {
-                  if (selectedIngreso && selectedIngreso.id === ingreso.id) {
-                    setSelectedIngreso(null)
-                  } else {
-                    handlePressIngreso(ingreso.id, index)
-                  }
-                }}>
-                  <Cell data={ingreso.responsable} style={styles.cell}/>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => {
-                  if (selectedIngreso && selectedIngreso.id === ingreso.id) {
-                    setSelectedIngreso(null)
-                  } else {
-                    handlePressIngreso(ingreso.id, index)
-                  }
-                }}>
-                  <Cell data={[ingreso.moneda,' ',ingreso.importe]} style={styles.cell} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => {
-                  if (selectedIngreso && selectedIngreso.id === ingreso.id) {
-                    setSelectedIngreso(null)
-                  } else {
-                    handlePressIngreso(ingreso.id, index)
-
-                  }
-                }}>
-                </TouchableOpacity>
-              </TableWrapper>
-              <ScrollView ref={(scrollView) => this.scrollView = scrollView}>
-              {selectedIngreso && selectedIngreso.id === ingreso.id && (
-                <View style={styles.headerdescription}>
-                  <View style={styles.descriptionRow}>
-                    <Text style={styles.description}>{selectedIngreso && selectedIngreso.moneda === `${atributos.uy}`
+        ) : (
+          sortedData.slice(page * pageSize, (page + 1) * pageSize).map((ingreso, index) => (
+            <React.Fragment key={index}>
+              <DataTable.Row style={styleLista.row} onPress={() => handlePressIngreso(ingreso.id, index)}> 
+                <DataTable.Cell style={{marginHorizontal:10,marginStart:30}}>{moment.utc(ingreso.fecha).format('DD/MM/YY')}</DataTable.Cell>
+                <DataTable.Cell >{ingreso.responsable}</DataTable.Cell>
+                <DataTable.Cell>{`${ingreso.moneda}${symbols.space}${ingreso.importe}`}</DataTable.Cell>   
+              </DataTable.Row>
+              {expanded[ingreso.id] && (
+                <Card style={styleLista.card}>
+                  <Card.Content>
+                    <View style={styleLista.descriptionRow}>
+                      <Text style={styleLista.description}>{ingreso.moneda === `${atributos.uy}`
                             ? `${atributos.ar}${symbols.guion}${ingreso.moneda}${symbols.colon}`
-                            : selectedIngreso && selectedIngreso.moneda === `${atributos.usd}`
+                            :  ingreso.moneda === `${atributos.usd}`
                             ? `${ingreso.moneda}${symbols.guion}${atributos.ar}${symbols.colon}`
-                            : selectedIngreso && selectedIngreso.moneda === `${atributos.ar}`
+                            :  ingreso.moneda === `${atributos.ar}`
                             ? `${ingreso.moneda}${symbols.guion}${atributos.uy}${symbols.colon}`
-                            : null}</Text>
-                    <Text>{ selectedIngreso.tipocambio}</Text>
-                  </View>
-                  <View style={styles.descriptionRow}>
-                    <Text style={styles.description}>{selectedIngreso && selectedIngreso.moneda === 3 
-                    ? `${atributos.total_uyu}${symbols.colon}`
-                    :`${atributos.total_arg}${symbols.colon}`}</Text>
-                    <Text>
-                        {selectedIngreso && selectedIngreso.moneda === `${atributos.uy}`
-                            ? `$ ${(selectedIngreso.importe / selectedIngreso.tipocambio).toFixed(2)}`
-                            : selectedIngreso && selectedIngreso.moneda === `${atributos.usd}`
-                            ? `$ ${(selectedIngreso.importe * selectedIngreso.tipocambio).toFixed(2)}`
-                            : selectedIngreso && selectedIngreso.moneda === `${atributos.ar}`
-                            ? `$ ${(selectedIngreso.tipocambio * selectedIngreso.importe).toFixed(2)}`
                             : null}
-                        </Text>
-                  </View>
-                  <View style={styles.descriptionRow}>
-                    <Text style={styles.description}>{`${atributos.descripcion}${symbols.colon}`}</Text>
-                    <Text>{selectedIngreso.descripcion}</Text>
-                  </View>
-                  <View style={styles.buttonContainer}>
-                    <Icon.Button
-                      backgroundColor={theme.colors.edit}
-                      name={theme.icons.editar}
-                      title=""
-                      onPress={() => onEdit(selectedIngreso)}
-                    >{button_text.edit}</Icon.Button>
-                    <Icon.Button
-                      backgroundColor={theme.colors.delete}
-                      name={theme.icons.borrar}
-                      title=""
-                      onPress={() => onDelete(selectedIngreso.id)}
-                    >{button_text.delete}</Icon.Button>
-                  </View>
-                </View>
+                      </Text>
+                      <Text>{ingreso.tipocambio}</Text>
+                    </View>
+                    <View style={styleLista.descriptionRow}>
+                      <Text style={styleLista.description}>{ingreso.moneda === 3 
+                    ? `${atributos.total_uyu}${symbols.colon}`
+                    :`${atributos.total_arg}${symbols.colon}`}
+                      </Text>
+                      <Text>{ingreso.moneda === `${atributos.uy}`
+                            ? `$ ${(ingreso.importe / ingreso.tipocambio).toFixed(2)}`
+                            : ingreso && ingreso.moneda === `${atributos.usd}`
+                            ? `$ ${(ingreso.importe * ingreso.tipocambio).toFixed(2)}`
+                            : ingreso && ingreso.moneda === `${atributos.ar}`
+                            ? `$ ${(ingreso.tipocambio * ingreso.importe).toFixed(2)}`
+                            : null}
+                      </Text>
+                    </View>    
+                    <View style={styleLista.descriptionRow}>
+                      <Text style={styleLista.description}>{`${atributos.descripcion}${symbols.colon}`}</Text>
+                      <Text>{ingreso.descripcion}</Text>
+                    </View>
+                    <Card.Actions>
+                    <View>
+                      <Icon.Button
+                        backgroundColor={theme.colors.edit}
+                        name={theme.icons.editar}
+                        title=""
+                        onPress={() => onEdit(ingreso)}
+                      >{button_text.edit}
+                      </Icon.Button>
+                      </View>
+                      <View>
+                      <Icon.Button
+                        backgroundColor={theme.colors.delete}
+                        name={theme.icons.borrar}
+                        title=""
+                        onPress={() => onDelete(ingreso.id)}
+                      >{button_text.delete}
+                      </Icon.Button>
+                      </View>
+                      </Card.Actions>
+                  </Card.Content>
+                </Card>
               )}
-              </ScrollView>
-            </View>
-          ))}
-        </View>
-      )}
-    </Table>
-
-  </ScrollView>
-  <View style={styles.button}>
-    <Icon.Button backgroundColor={theme.colors.agregar} name={theme.icons.agregar} title="" onPress={() => { handleSubmit(ingreso) }}>{`${button_text.agregar}${symbols.space}${atributos.ingreso}`}</Icon.Button>
-  </View>
-
-  </View>
-)}
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-},
-  loadingText: {
-    fontSize: theme.fontSizes.body,
-    fontWeight: theme.fontWeights.bold,
-    color: theme.colors.primary,
-},
-  container: {
-    flex: 1,
-    padding: 16, 
-    paddingTop: 20
-},
-  text: {
-    textAlign: 'center',
-    padding: 10
-},
-  row: {
-    flexDirection: 'row',
-    backgroundColor: theme.colors.table
-},
-  description: {
-    backgroundColor: theme.colors.tableSecondary,
-    fontWeight: theme.fontWeights.bold,
-},
-  descriptionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-},
-  headerdescription: {
-    backgroundColor: theme.colors.tableSecondary,
-    textAlign: 'center'
-},
-  cell: {
-    width: screenWidth/3-10,
-    height: 40,
-    borderWidth: 1,
-    borderColor: theme.colors.cell,
-    fontWeight: theme.fontWeights.bold
-},
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: theme.colors.primary,
-},
-  scroll: { 
-    flex:1
-},
-  button: {
-    padding: 16,
-    backgroundColor: theme.colors.white,
-    alignItems: 'center',
-},
-  search:{
-    paddingBottom:1,
-    backgroundColor: theme.colors.search,
-},
-  headerCell:{
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderEndWidth: 1,
-    borderColor: theme.colors.cell,
-    width: screenWidth/3-10.4,
-    paddingHorizontal: 5,
-}
-})
+              </React.Fragment>
+            ))
+          )}
+   </DataTable>
+   </View>
+   <View>
+   <DataTable.Pagination
+          page={page}
+          numberOfPages={Math.ceil(sortedData.length / pageSize)}
+          onPageChange={handlePageChange}
+          label={`Página ${page + 1} de ${Math.ceil(sortedData.length / pageSize)}`}
+          onItemsPerPageChange={handleItemsPerPageChange}
+          selectPageDropdownLabel={'Cant.'}
+          numberOfItemsPerPageList={numberOfItemsPerPageList}
+          numberOfItemsPerPage={numberOfItemsPerPage}
+        />
+      <View style={styleLista.button}>
+        <Icon.Button
+          backgroundColor={theme.colors.agregar}
+          name={theme.icons.agregar}
+          title=""
+          onPress={() => handleSubmit(ingreso)}
+        >{`${button_text.agregar}${symbols.space}${atributos.ingreso}`}
+        </Icon.Button>
+      </View>
+      </View>
+    </ScrollView>
+  );
+};
 
 export default IngresoList
