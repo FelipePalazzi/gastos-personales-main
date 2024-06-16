@@ -11,7 +11,7 @@ import router7 from "./routes/resumen.routes.js"
 import cron from 'node-cron';
 import {pagina,symbols } from './constants'
 
-const port = process.env.PORT
+const port = process.env.PORT || 4000
 
 
 const app = express()
@@ -40,6 +40,7 @@ app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err)
   }
+  console.log(err)
   res.status(500).json({ error: err.message })
 });
 
