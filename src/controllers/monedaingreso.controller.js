@@ -1,7 +1,9 @@
-const { pool }= require ("../db/dbConnection");
+import pool from "../db/dbConnection.js"
 
 
-exports.getmonedaIngreso = async (req, res, next) => {
+const monedaingresoController = {};
+
+monedaingresoController.getmonedaIngreso = async (req, res, next) => {
   try {
     const result = await pool.query(`SELECT * FROM moneda`);
     res.status(200).json(result.rows);
@@ -10,7 +12,7 @@ exports.getmonedaIngreso = async (req, res, next) => {
   }
 };
 
-exports.getmonedaIngresobyID = async (req, res, next) => {
+monedaingresoController.getmonedaIngresobyID = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`SELECT * FROM moneda WHERE id = $1`, [id]);
@@ -22,7 +24,7 @@ exports.getmonedaIngresobyID = async (req, res, next) => {
   }
 };
 
-exports.createmonedaIngreso = async (req, res, next) => {
+monedaingresoController.createmonedaIngreso = async (req, res, next) => {
   try {
     const {descripcion} = req.body;
     const newmonedaingreso = await pool.query(`INSERT INTO moneda (descripcion) VALUES ($1) RETURNING *`,
@@ -33,7 +35,7 @@ exports.createmonedaIngreso = async (req, res, next) => {
   }
 };
 
-exports.updatemonedaIngreso = async (req, res, next) => {
+monedaingresoController.updatemonedaIngreso = async (req, res, next) => {
   try {
     const { id } = req.params;
     const {descripcion} = req.body;
@@ -47,7 +49,7 @@ exports.updatemonedaIngreso = async (req, res, next) => {
   }
 };
 
-exports.deletemonedaIngreso = async (req, res, next) => {
+monedaingresoController.deletemonedaIngreso = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`DELETE FROM ingreso WHERE id = $1`, [id]);
@@ -59,3 +61,4 @@ exports.deletemonedaIngreso = async (req, res, next) => {
     }
   };
 
+  export default monedaingresoController

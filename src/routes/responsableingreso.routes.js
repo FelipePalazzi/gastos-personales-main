@@ -1,6 +1,6 @@
 import { Router } from "express";
-import responsableingresoController from '../controllers/responsableingreso.controller'
-import {pagina,symbols } from '../constants'
+import responsableingresoController from '../controllers/responsableingreso.controller.js'
+import {pagina,symbols } from '../constants.js'
 const router = Router();
 
 router.get(`${symbols.barra}${pagina.pagina_responsable}`, responsableingresoController.getresponsableIngreso);

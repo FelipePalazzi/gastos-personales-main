@@ -1,7 +1,9 @@
-const { pool }= require ("../db/dbConnection");
+import pool from "../db/dbConnection.js"
 
 
-exports.getcategoriaGastos = async (req, res, next) => {
+const categoriagastoController = {};
+
+categoriagastoController.getcategoriaGastos = async (req, res, next) => {
   try {
     const result = await pool.query(`SELECT * FROM categoria`);
     res.status(200).json(result.rows);
@@ -10,7 +12,7 @@ exports.getcategoriaGastos = async (req, res, next) => {
   }
 };
 
-exports.getcategoriaGastobyID = async (req, res, next) => {
+categoriagastoController.getcategoriaGastobyID = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`SELECT * FROM categoria WHERE id = $1`, [id]);
@@ -22,7 +24,7 @@ exports.getcategoriaGastobyID = async (req, res, next) => {
   }
 };
 
-exports.createcategoriaGasto = async (req, res, next) => {
+categoriagastoController.createcategoriaGasto = async (req, res, next) => {
   try {
     const {descripcion} = req.body;
     const newcategoriagasto = await pool.query(`INSERT INTO categoria (descripcion) VALUES ($1) RETURNING *`,
@@ -33,7 +35,7 @@ exports.createcategoriaGasto = async (req, res, next) => {
   }
 };
 
-exports.updatecategoriaGasto = async (req, res, next) => {
+categoriagastoController.updatecategoriaGasto = async (req, res, next) => {
   try {
     const { id } = req.params;
     const {descripcion} = req.body;
@@ -47,7 +49,7 @@ exports.updatecategoriaGasto = async (req, res, next) => {
   }
 };
 
-exports.deletecategoriaGasto = async (req, res, next) => {
+categoriagastoController.deletecategoriaGasto = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`DELETE FROM categoria WHERE id = $1`, [id]);
@@ -59,3 +61,4 @@ exports.deletecategoriaGasto = async (req, res, next) => {
     }
   };
 
+  export default categoriagastoController;

@@ -9,9 +9,10 @@ import router5 from "./routes/monedaingreso.routes.js"
 import router6 from "./routes/responsableingreso.routes.js"
 import router7 from "./routes/resumen.routes.js"
 import cron from 'node-cron';
-import {pagina,symbols } from './constants'
+import { pagina,symbols } from "./constants.js"
+import { PORT } from "../config.js"
 
-const port = process.env.PORT || 4000
+const port = PORT || 3000
 
 
 const app = express()

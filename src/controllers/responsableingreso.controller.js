@@ -1,7 +1,9 @@
-const { pool }= require ("../db/dbConnection");
+import pool from "../db/dbConnection.js"
 
 
-exports.getresponsableIngreso = async (req, res, next) => {
+const responsableingresoController = {};
+
+responsableingresoController.getresponsableIngreso = async (req, res, next) => {
   try {
     const result = await pool.query(`SELECT * FROM responsable`);
     res.status(200).json(result.rows);
@@ -10,7 +12,7 @@ exports.getresponsableIngreso = async (req, res, next) => {
   }
 };
 
-exports.getresponsableIngresobyID = async (req, res, next) => {
+responsableingresoController.getresponsableIngresobyID = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`SELECT * FROM responsable WHERE id = $1`, [id]);
@@ -22,7 +24,7 @@ exports.getresponsableIngresobyID = async (req, res, next) => {
   }
 };
 
-exports.createresponsableIngreso = async (req, res, next) => {
+responsableingresoController.createresponsableIngreso = async (req, res, next) => {
   try {
     const {nombre} = req.body;
     const newresponsableingreso = await pool.query(`INSERT INTO responsable (nombre) VALUES ($1) RETURNING *`,
@@ -33,7 +35,7 @@ exports.createresponsableIngreso = async (req, res, next) => {
   }
 };
 
-exports.updateresponsableIngreso = async (req, res, next) => {
+responsableingresoController.updateresponsableIngreso = async (req, res, next) => {
   try {
     const { id } = req.params;
     const {nombre} = req.body;
@@ -47,7 +49,7 @@ exports.updateresponsableIngreso = async (req, res, next) => {
   }
 };
 
-exports.deleteresponsableIngreso = async (req, res, next) => {
+responsableingresoController.deleteresponsableIngreso = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`DELETE FROM ingreso WHERE id = $1`, [id]);
@@ -59,3 +61,4 @@ exports.deleteresponsableIngreso = async (req, res, next) => {
     }
   };
 
+  export default responsableingresoController

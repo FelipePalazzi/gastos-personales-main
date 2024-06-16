@@ -1,6 +1,6 @@
 import { Router } from "express";
-import monedaingresoController from '../controllers/monedaingreso.controller'
-import {pagina,symbols } from '../constants'
+import monedaingresoController from '../controllers/monedaingreso.controller.js'
+import {pagina,symbols } from '../constants.js'
 const router = Router();
 
 router.get(`${symbols.barra}${pagina.pagina_moneda_ingreso}`, monedaingresoController.getmonedaIngreso);

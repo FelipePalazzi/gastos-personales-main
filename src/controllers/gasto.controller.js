@@ -1,7 +1,8 @@
-const { pool }= require ("../db/dbConnection");
+import pool from "../db/dbConnection.js"
 
+const gastoController = {};
 
-exports.getGastos = async (req, res, next) => {
+gastoController.getGastos = async (req, res, next) => {
   try {
     const result = await pool.query(`SELECT g.id, g.fecha, tg.descripcion as tipogasto, g.tipocambio, g.totalar, g.total , g.descripcion, r.nombre as responsable, c.descripcion as categoria FROM gasto g
             INNER JOIN tipogasto tg ON g.tipogasto = tg.id
@@ -13,7 +14,7 @@ exports.getGastos = async (req, res, next) => {
   }
 };
 
-exports.getGastobyID = async (req, res, next) => {
+gastoController.getGastobyID = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`SELECT g.id, g.fecha, tg.descripcion as tipogasto, g.tipocambio, g.totalar, g.total , g.descripcion, r.nombre as responsable, c.descripcion as categoria FROM gasto g
@@ -29,7 +30,7 @@ exports.getGastobyID = async (req, res, next) => {
   }
 };
 
-exports.createGasto = async (req, res, next) => {
+gastoController.createGasto = async (req, res, next) => {
   try {
     const { fecha, tipogasto, tipocambio, totalar, total, descripcion, responsable} = req.body;
 
@@ -42,7 +43,7 @@ exports.createGasto = async (req, res, next) => {
   }
 };
 
-exports.updateGasto = async (req, res, next) => {
+gastoController.updateGasto = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { fecha, tipogasto, tipocambio, totalar, total, descripcion, responsable} = req.body;
@@ -67,7 +68,7 @@ exports.updateGasto = async (req, res, next) => {
   }
 };
 
-exports.deleteGasto = async (req, res, next) => {
+gastoController.deleteGasto = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`DELETE FROM gasto WHERE id = $1`, [id]);
@@ -79,3 +80,4 @@ exports.deleteGasto = async (req, res, next) => {
   }
 };
 
+export default gastoController;

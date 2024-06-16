@@ -1,7 +1,9 @@
-const { pool }= require ("../db/dbConnection");
+import pool from "../db/dbConnection.js"
 
 
-exports.getResumen1 = async (req, res, next) => {
+const resumenController = {};
+
+resumenController.getResumen1 = async (req, res, next) => {
   try {
     const result = await pool.query(`SELECT 
   YEAR, 
@@ -49,3 +51,5 @@ ORDER BY
     next(err);
   }
 };
+
+export default resumenController

@@ -1,4 +1,4 @@
-import { PAGINA_URL } from '../config';
+import { PAGINA_URL } from '../config.js';
 
 export const alerts = {
     exito: 'Éxito',

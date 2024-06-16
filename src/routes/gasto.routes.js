@@ -1,6 +1,8 @@
 import { Router } from "express";
-import gastoController from '../controllers/gasto.controller'
-import {pagina,symbols } from '../constants'
+import {pagina,symbols } from '../constants.js'
+
+import gastoController from '../controllers/gasto.controller.js'
+
 const router = Router();
 
 router.get(`${symbols.barra}${pagina.pagina_gasto}`, gastoController.getGastos);

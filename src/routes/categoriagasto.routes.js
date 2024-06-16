@@ -1,6 +1,6 @@
 import { Router } from "express";
-import categoriagastoController from'../controllers/categoriagasto.controller'
-import {pagina,symbols } from '../constants'
+import categoriagastoController from'../controllers/categoriagasto.controller.js'
+import {pagina,symbols } from '../constants.js'
 
 const router = Router();
 

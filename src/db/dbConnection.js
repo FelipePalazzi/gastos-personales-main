@@ -1,7 +1,8 @@
-const { Pool } = require('pg');
-import { db } from "../../config";
+import pkg from 'pg';
+const {Pool} = pkg;
+import { db } from "../../config.js";
 
-export  const pool = new Pool({
+const pool = new Pool({
     user: db.user,
     password: db.password,
     host: db.host,
@@ -10,3 +11,5 @@ export  const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 pool.on('connect', () => console.log('DB connected'))
+
+export default pool

@@ -1,6 +1,6 @@
 import { Router } from "express";
-import tipogastoController from '../controllers/tipogasto.controller'
-import {pagina,symbols } from '../constants'
+import tipogastoController from '../controllers/tipogasto.controller.js'
+import {pagina,symbols } from '../constants.js'
 
 const router = Router();
 
