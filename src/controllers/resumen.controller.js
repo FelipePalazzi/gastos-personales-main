@@ -1,6 +1,5 @@
 import pool from "../db/dbConnection.js"
 
-
 const resumenController = {};
 
 resumenController.getResumen1 = async (req, res, next) => {
@@ -99,6 +98,7 @@ ORDER BY
     next(err);
   }
 };
+
 
 
 export default resumenController
