@@ -17,15 +17,12 @@ const useResumen = () => {
   };
 
   useEffect(() => {
-    fetchResumen('1');
+    Promise.all([fetchResumen('1'), fetchResumen('2')]).then(() => {
+      setLoading(false);
+    });
   }, []);
 
-  useEffect(() => {
-    fetchResumen('2');
-    setLoading(false);
-  }, []);
-
-  return { loading, data: resumenData };
+  return { loading, resumen: resumenData };
 };
 
 export default useResumen;

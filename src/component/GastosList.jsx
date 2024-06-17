@@ -57,7 +57,7 @@ const GastoList = () => {
   }, []);
 
   
-  const filteredData = filterData(gastos, search, ['totalar', 'total'], 'fecha');
+  const filteredData = filterData(gastos, search, ['totalar', 'total'], 'fecha','fecha');
 
   const sortedData = useMemo(() => {
     return sortData(filteredData, orden, columna);

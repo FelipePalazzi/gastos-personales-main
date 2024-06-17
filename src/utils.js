@@ -1,7 +1,7 @@
 import moment from 'moment'
 import theme from './styles/theme'
 
-export const filterData = (data, search, monedaProp, fechaProp) => {
+export const filterData = (data, search, monedaProp, fechaProp, yearProp) => {
     if (!search) {
       return data;
     } else {
@@ -9,13 +9,16 @@ export const filterData = (data, search, monedaProp, fechaProp) => {
       const totalSearch = searchParts[1] && parseFloat(searchParts[1]) > 0? parseFloat(searchParts[1]) : null;
       const monedaSearch = searchParts[0] && searchParts[1]? searchParts[0].toLowerCase() : null;
       const fechaRegex = /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)(?:\s+(\d{4}))?$/i;
+      const añoRegex = /^(\d{4})?$/i;
       const fechaMatch = search.match(fechaRegex);
+      const añoMatch = search.match(añoRegex);
 
       if (fechaMatch) {
         const mes = fechaMatch[1].toLowerCase();
         const año = fechaMatch[2]? parseInt(fechaMatch[2]) : null;
         const mesNumerico = moment.utc().month(mes).format('M');
-  
+
+      if (fechaProp) {
         return data.filter((dato) => {
           const fechaDato = moment.utc(dato[fechaProp]);
           return (
@@ -23,10 +26,27 @@ export const filterData = (data, search, monedaProp, fechaProp) => {
             (fechaDato.month() + 1) === parseInt(mesNumerico)
           );
         });
+      } else {
+        return data;
       }
+    }
   
+      if (añoMatch) {
+        const año = parseInt(añoMatch[1]);
+  
+      if (yearProp) {
+        return data.filter((dato) => {
+          const fechaDato = moment.utc(dato[yearProp]);
+          return fechaDato.year() === año;
+        });
+      } else {
+        return data
+      }
+    }
+
       return data.filter((dato) => {
         if (monedaSearch && totalSearch) {
+          if (monedaProp) { 
             return monedaProp.some((prop) => {
               if (!(prop in dato)) return false
               let valor = dato[prop];
@@ -53,7 +73,9 @@ export const filterData = (data, search, monedaProp, fechaProp) => {
               }
               return false;
             });
-          } 
+            
+
+        }
           return (
             (dato.responsable.toLowerCase().includes(search.toLocaleLowerCase()) ||
             ('categoria' in dato && (
@@ -66,8 +88,13 @@ export const filterData = (data, search, monedaProp, fechaProp) => {
             ))
           )
           );
+        } else {
+          return data
+        }
       });
-    }
+      
+        }
+    
   };
 
   export function sortData(data, orden, columna) {

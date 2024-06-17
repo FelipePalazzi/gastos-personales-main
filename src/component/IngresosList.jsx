@@ -66,7 +66,7 @@ const IngresoList = () => {
     setOrden(ordenInverso);
   }, [orden]);
 
-  const filteredData = filterData(ingresos, search, ['moneda'], 'fecha');
+  const filteredData = filterData(ingresos, search, ['moneda'], 'fecha','fecha');
   
   const sortedData = useMemo(() => {
     return sortData(filteredData, orden, columna);
