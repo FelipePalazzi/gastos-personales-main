@@ -10,9 +10,10 @@ const useResumen = () => {
     try {
       const response = await globalThis.fetch(`${pagina.pagina}${symbols.barra}${pagina.pagina_resumen}${symbols.barra}${id}`);
       const json = await response.json();
+      Promise.all([fetchResumen('1'), fetchResumen('2')]).then(() => {
       setResumenData((prevData) => ({...prevData, [id]: json }));
       setLoading(false);
-    } catch (error) {
+    })} catch (error) {
       console.error(`${alerts.error_ocurrido}${pagina.pagina_resumen}${id}`, error);
     }
   };
