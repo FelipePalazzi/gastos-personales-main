@@ -38,3 +38,4 @@ yarn-error.*
 
 dbDrizzle.js 
 config.js 
+src/component/ResumenPrueba.jsx

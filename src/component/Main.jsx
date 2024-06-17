@@ -7,6 +7,7 @@ import  IngresoList  from "./IngresosList";
 import AgregarGasto from "./GastoForm.jsx";
 import AgregarIngreso from './IngresoForm.jsx'
 import Resumen from "./Resumen.jsx";
+import ResumenPrueba from "./ResumenPrueba.jsx";
 import {pagina,symbols } from '../constants'
 import StyledText from "./StyledText.jsx";
 
@@ -20,7 +21,7 @@ const Main= () => {
                         <StyledText  fontWeight = 'bold' color = 'secondary' alignText = 'center'>En desarrollo</StyledText>
                     }
                 />
-                <Route path={`${symbols.barra}${pagina.pagina_resumen}`} element={<Resumen/>}/>
+                <Route path={`${symbols.barra}${pagina.pagina_resumen}`} element={<ResumenPrueba/>}/>
 
                 <Route path={`${symbols.barra}${pagina.pagina_ingreso}`} element={<IngresoList/>}/>
                 <Route path={`${symbols.barra}${pagina.pagina_ingreso}${symbols.barra}${pagina.pagina_new}`}  element={<AgregarIngreso/>}/>

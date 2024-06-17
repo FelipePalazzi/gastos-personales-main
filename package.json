@@ -43,6 +43,8 @@
     "react-native": "0.74.1",
     "react-native-chart-kit": "^6.12.0",
     "react-native-dotenv": "^3.4.11",
+    "react-native-gifted-charts": "^1.4.10",
+    "react-native-linear-gradient": "^2.8.3",
     "react-native-modal-datetime-picker": "^17.1.0",
     "react-native-paper": "^5.12.3",
     "react-native-sortable-list": "^0.0.25",
