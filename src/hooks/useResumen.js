@@ -11,7 +11,6 @@ const useResumen = () => {
       const response = await globalThis.fetch(`${pagina.pagina}${symbols.barra}${pagina.pagina_resumen}${symbols.barra}${id}`);
       const json = await response.json();
       setResumenData((prevData) => ({...prevData, [id]: json }));
-      setLoading(false);
     } catch (error) {
       console.error(`${alerts.error_ocurrido}${pagina.pagina_resumen}${id}`, error);
     }
@@ -19,7 +18,11 @@ const useResumen = () => {
 
   useEffect(() => {
     fetchResumen('1');
+  }, []);
+
+  useEffect(() => {
     fetchResumen('2');
+    setLoading(false);
   }, []);
 
   return { loading, data: resumenData };
