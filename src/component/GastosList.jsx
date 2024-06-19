@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet,Dimensions, ScrollView, RefreshControl } from 'react-native';
+import { View, Text,ScrollView, RefreshControl } from 'react-native';
 import { DataTable,Searchbar, ActivityIndicator,Card } from 'react-native-paper';
 import {useNavigate} from 'react-router-native'
 import theme from '../styles/theme.js';
@@ -8,7 +8,7 @@ import { Feather } from '@expo/vector-icons'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { alerts, button_text, atributos, symbols, pagina } from '../constants';
 import { filterData, sortData,  getSortIcon } from '../utils';
-import styleLista from '../styles/styles.js';
+import {styleLista} from '../styles/styles.js';
 
 const useFetchGastos = () => {
   const [gastos, setGastos] = useState([]);
@@ -27,7 +27,6 @@ const useFetchGastos = () => {
   return { gastos, loading, fetchGastos };
 };
 
-const screenWidth = Dimensions.get('window').width;
 const numberOfItemsPerPageList = [5,6,7,8,9,10];
 
 const GastoList = () => {
@@ -63,9 +62,10 @@ const GastoList = () => {
     return sortData(filteredData, orden, columna);
   }, [orden, columna, filteredData]);
 
-  const [selectedGastoId, setSelectedGasto] = useState(null) 
   const scrollViewRef = useRef(null) 
+
   const [contentOffset, setContentOffset] = useState({ y: 0 }) 
+
   const handleScroll = (event) => {
     setContentOffset(event.nativeEvent.contentOffset) 
   } 
@@ -75,16 +75,6 @@ const GastoList = () => {
     const ordenInverso = (orden === 'asc'? 'desc' : orden === 'desc'? 'no orden' : 'asc');
     setOrden(ordenInverso);
   }, [orden]);
-
-  const selectedGasto = useMemo(() => {
-    if (selectedGastoId) {
-      const selectedGasto = gastos.find((gasto) => gasto.id === selectedGastoId);
-      return {
-       ...selectedGasto,
-      };
-    }
-    return null;
-  }, [selectedGastoId, gastos]);
 
   const getIcon = (columna) => {
     return getSortIcon(columna, orden, columna);
@@ -109,10 +99,11 @@ const GastoList = () => {
     await updateGasto(updatedGasto) 
   } 
 
-const onDelete = async (id) => {
-  navigate(`${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${id}`, { state: { deleteMode: true } }) 
-  await deleteGasto(id) 
-} 
+  const onDelete = async (id) => {
+    navigate(`${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${id}`, { state: { deleteMode: true } }) 
+    await deleteGasto(id) 
+  } 
+
   return (
     <ScrollView  showsVerticalScrollIndicator={true}
     vertical
@@ -230,16 +221,16 @@ const onDelete = async (id) => {
    </DataTable>
    </View>
    <View>
-  <DataTable.Pagination
-    page={page}
-    numberOfPages={Math.ceil(sortedData.length / pageSize)}
-    onPageChange={handlePageChange}
-    label={`Página ${page + 1} de ${Math.ceil(sortedData.length / pageSize)}`}
-    onItemsPerPageChange={handleItemsPerPageChange}
-    selectPageDropdownLabel={'Cant.'}
-    numberOfItemsPerPageList={numberOfItemsPerPageList}
-    numberOfItemsPerPage={numberOfItemsPerPage}
-  />
+      <DataTable.Pagination
+        page={page}
+        numberOfPages={Math.ceil(sortedData.length / pageSize)}
+        onPageChange={handlePageChange}
+        label={`Página ${page + 1} de ${Math.ceil(sortedData.length / pageSize)}`}
+        onItemsPerPageChange={handleItemsPerPageChange}
+        selectPageDropdownLabel={'Cant.'}
+        numberOfItemsPerPageList={numberOfItemsPerPageList}
+        numberOfItemsPerPage={numberOfItemsPerPage}
+      />
       <View style={styleLista.button}>
         <Icon.Button
           backgroundColor={theme.colors.agregar}

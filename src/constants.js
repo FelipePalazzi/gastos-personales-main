@@ -1,4 +1,5 @@
 import { PAGINA_URL } from '../config.js';
+import { screenWidth } from './styles/styles.js';
 
 export const alerts = {
     exito: 'Éxito',
@@ -10,7 +11,6 @@ export const alerts = {
     error_ocurrido: 'Ocurrió un error',
     delete_question: '¿Estás seguro de eliminar este gasto?',
     cargando: 'Cargando...',
-    // ...
   };
   export const symbols = {
     space: ' ',
@@ -19,7 +19,6 @@ export const alerts = {
     and:' y ',
     guion: '-',
     barra:'/',
-    // ...
   };
   export const button_text = {
     ok: 'OK',
@@ -31,7 +30,6 @@ export const alerts = {
     ingresar: 'Ingresar',
     agregar:'Agregar',
     opcional: '(Opcional)',
-    // ...
   };
   export const atributos = {
     gasto: 'Gasto',
@@ -64,4 +62,31 @@ export const alerts = {
     pagina_responsable:'responsableIngreso',
     pagina_tipo_gasto: 'tipogasto',
 
+  }
+  export const lineChart = {
+    animacionDuration: 1500,
+    xAxisTextNumberOfLines: 2,
+    width: screenWidth-95,
+    height: 220,
+    initialSpacing: 10,
+    spacing:50,
+    thickness:2,
+    startOpacity: 0.9,
+    endOpacity:0.2,
+    noOfSections: 5,
+    yAxisThickness:0,
+  }
+  
+  export const pointerConfig={
+    dataPointLabelShiftX: 10,
+    dataPointLabelShiftY: 20,
+    pointerStripHeight: 250,
+    strokeDashArray: [2, 5],
+    pointerStripWidth: 2,
+    radius: 6,
+    pointerLabelWidth: 100,
+    pointerLabelHeight: 90,
+    activatePointersOnLongPress: true,
+    pointerVanishDelay: 2000,
+    autoAdjustPointerLabelPosition: false,
   }

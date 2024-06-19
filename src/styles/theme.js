@@ -28,6 +28,7 @@ const theme= {
         subheading: 28,
         cell: 40,
         ingresar: 16,
+        pointer: 14,
     },
     fonts: {
         main: 'System'

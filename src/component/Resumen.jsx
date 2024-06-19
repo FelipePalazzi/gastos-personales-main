@@ -1,13 +1,12 @@
-import { View, Text, Dimensions, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useState, useEffect, useRef } from "react";
-import theme from "../styles/theme";
-import { Searchbar, Portal } from 'react-native-paper';
+import  {styleResumen, styleLista} from "../styles/styles.js";
+import { Searchbar, Portal, ActivityIndicator,SegmentedButtons } from 'react-native-paper';
 import useResumen from "../hooks/useResumen";
-import * as React from 'react';
 import { LineChart } from "react-native-gifted-charts";
 import { filterData } from '../utils';
-
-const CHART_WIDTH = Dimensions.get("window").width;
+import theme from "../styles/theme.js";
+import { lineChart, pointerConfig, alerts, atributos, symbols} from "../constants.js";
 
 const Resumen = () => {
   const [search, setSearch] = useState('');
@@ -16,6 +15,21 @@ const Resumen = () => {
   const [maxValue, setMaxValue] = useState(0);
   const { loading, resumen } = useResumen();
   const [months0, setMonths0] = useState({});
+
+  const [selectedValue, setSelectedValue] = useState('Dia');
+
+  const handleValueChange = (value) => {
+    setSelectedValue(value);
+    showOrHidePointer(0);
+  };
+
+  const scrollViewRef = useRef(null) 
+
+  const [contentOffset, setContentOffset] = useState({ y: 0 }) 
+
+  const handleScroll = (event) => {
+    setContentOffset(event.nativeEvent.contentOffset) 
+  } 
 
   const months = {
     '1': 'Ene',
@@ -34,54 +48,44 @@ const Resumen = () => {
 
   useEffect(() => {
     if (!loading && resumen && resumen[2]) {
-      
-    const data = resumen[2];
 
-    const filteredData = filterData(data, search,'','','year');
+      const data = resumen[selectedValue === 'Dia'? 2 : 1];
 
-    const monthsObj = {};
-    filteredData.forEach(item => {
-      if (!monthsObj[item.month]) {
-        monthsObj[item.month] = true;
-      }
-    });
-    setMonths0(monthsObj);
-    const maxGastoAr = Math.max(...filteredData.map(item => parseInt(item["GASTO AR"])));
-    const maxIngresoAr = Math.max(...filteredData.map(item => parseInt(item["INGRESO AR"])));
-    const maxValue = Math.max(maxGastoAr, maxIngresoAr);
-    setMaxValue(maxValue + 10000);
-  
-    const areaChartData = filteredData.map((item, index) => ({
-      value: parseInt(item["GASTO AR"] || 0),
-      date: `${item.day} ${months[item.month]}`, 
-      label: `${search.length!== 4? `${item.day} ${months[item.month]}\n${item.year}` : `${item.day} ${months[item.month]}`}`,
-      labelTextStyle: { fontSize: 13,margin:-8},
-      customDataPoint: customDataPoint,
-    }));
-    const areaChartData2 = filteredData.map((item2, index) => ({
-      value: parseInt(item2["INGRESO AR"] || 0),
-      date: `${item2.day} ${months[item2.month]}`, 
-      label: `${search.length!== 4? `${item2.day} ${months[item2.month]}\n${item2.year}` : `${item2.day} ${months[item2.month]}`}`,
-      customDataPoint: customDataPoint,
-    }));
-      setAreaChartData(areaChartData);
-      setAreaChartData2(areaChartData2);
+      const filteredData = filterData(data, search,'','','year');
+
+      const monthsObj = {};
+      filteredData.forEach(item => {
+        if (!monthsObj[item.month]) {
+          monthsObj[item.month] = true;
+        }
+      });
+      setMonths0(monthsObj);
+      const maxGastoAr = Math.max(...filteredData.map(item => parseInt(item["GASTO AR"])));
+      const maxIngresoAr = Math.max(...filteredData.map(item => parseInt(item["INGRESO AR"])));
+      const maxValue = Math.max(maxGastoAr, maxIngresoAr);
+      setMaxValue(maxValue + 10000);
+    
+      const areaChartData = filteredData.map((item, index) => ({
+        value: parseInt(item["GASTO AR"] || 0),
+        date: selectedValue === 'Dia' ? `${item.day} ${months[item.month]}` : months[item.month],
+        label: selectedValue === 'Dia' ? `${search.length!== 4? `${item.day} ${months[item.month]}\n${item.year}` : `${item.day} ${months[item.month]}`}` : `${months[item.month]}\n${item.year}`,
+        labelTextStyle: { fontSize: 13,margin:-8},
+        customDataPoint: customDataPoint,
+      }));
+      const areaChartData2 = filteredData.map((item2, index) => ({
+        value: parseInt(item2["INGRESO AR"] || 0),
+        date: selectedValue === 'Dia' ? `${item2.day} ${months[item2.month]}` : months[item2.month],
+        label: selectedValue === 'Dia' ? `${search.length!== 4? `${item2.day} ${months[item2.month]}\n${item2.year}` : `${item2.day} ${months[item2.month]}`}` : `${months[item2.month]}\n${item2.year}`,
+        customDataPoint: customDataPoint,
+      }));
+        setAreaChartData(areaChartData);
+        setAreaChartData2(areaChartData2);
     }
-  }, [loading, resumen, search]);
+  }, [loading, resumen, search, selectedValue]);
 
   const customDataPoint = () => {
     return (
-        <View
-        style={{
-            width: 8,
-            height: 8,
-            marginBottom:5,
-            backgroundColor: 'white',
-            borderWidth: 1.5,
-            borderRadius: 10,
-            borderColor: theme.colors.primary,
-        }}
-        />
+        <View style={styleResumen.datapoint}/>
     );
 };
 
@@ -97,50 +101,61 @@ const showOrHidePointer = (ind) => {
   }
 };
 
+const formatYLabel = (value) => {
+  if (value > 1000) {
+    return `$${(value / 1000).toFixed(0)}k`;
+  } else {
+    return `$${value}`;
+  }
+};
 
 return (
+  <ScrollView  showsVerticalScrollIndicator={true}
+  vertical
+  style={styleLista.scroll}
+  onScroll={handleScroll}
+  scrollEventThrottle={theme.scroll.desplazamiento}
+  ref={scrollViewRef}
+  >
   <View>
+
     <Searchbar
       placeholder="Ingrese Año"
-      style={{
-        margin: 20,
-        backgroundColor: theme.colors.search,
-        borderRadius: 8,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-      }}
+      style={styleLista.search}
       elevation={theme.search.elevation}
       onChangeText={setSearch}
       value={search}
     />
-    
+    {loading  &&(
+        <View style={styleLista.loadingContainer}>
+          <ActivityIndicator animating={true} color={theme.colors.primary} size={theme.icons.big} />
+          <Text style={styleLista.loadingText}>{alerts.cargando}</Text>
+        </View>
+      )}
     {areaChartData && areaChartData2 && (
-      <View
-        style={{
-          paddingBottom: 25,
-          paddingTop:10,
-          paddingLeft: 20,
-          margin: 10,
-          backgroundColor: theme.colors.table,
-        }}
-      >
-        <Text style={styles.title}>
-          {`Ingresos y Gastos por Mes`}
+      <View style={styleResumen.container}>
+        <Text style={styleResumen.title}>
+          {`${atributos.ingreso}${symbols.and}${atributos.gasto} por ${selectedValue}`}
           {search.length === 4 && search.match(/^\d{4}$/)? ` ${search}` : ''}
         </Text>
-        <View style={{ flexDirection: 'row', marginLeft: CHART_WIDTH / 7, marginBottom:10 }}>
-              {search.length === 4 ? (
+        <SegmentedButtons
+        value={selectedValue}
+        onValueChange={handleValueChange}
+        buttons={[
+          {
+            value: 'Dia', label: 'Dia',
+          },
+          { value: 'Mes', label: 'Mes' },
+        ]}
+      />
+        <View style={styleResumen.Containerbutton}>
+              {search.length === 4 && selectedValue === 'Dia' ? (
                 <>
                   {months2.map((item, index) => {
                     return (
                       <TouchableOpacity
                         key={index}
-                        style={{
-                          padding: 15,
-                          margin: 4,
-                          backgroundColor: theme.colors.primary, 
-                          borderRadius: 8,
-                        }}
+                        style={styleResumen.button}
                         onPress={() => showOrHidePointer(index)}
                       >
                         <Text>{item}</Text>
@@ -151,126 +166,71 @@ return (
               ) : null}
             </View>
         <LineChart
-          formatYLabel={(value) => {
-            if (value > 1000) {
-              return `$${(value / 1000).toFixed(0)}k`;
-            } else {
-              return `$${value}`;
-            }
-          }}
+          formatYLabel={formatYLabel}
           scrollRef={ref}
+          data={areaChartData}
+          data2={areaChartData2}
+          maxValue={maxValue}
           isAnimated
-          animationDuration={1500}
           areaChart
           curved
           rotateLabel
-          xAxisTextNumberOfLines={2}
-          data={areaChartData}
-          data2={areaChartData2}
-          width={CHART_WIDTH - 95}
-          height={220}
           showVerticalLines
-          initialSpacing={10}
-          verticalLinesColor="rgba(14,164,164,0.5)"
-          spacing={50}
+          animationDuration={lineChart.animacionDuration}
+          xAxisTextNumberOfLines={lineChart.xAxisTextNumberOfLines}
+          width={lineChart.width}
+          height={lineChart.height}
+          initialSpacing={lineChart.initialSpacing}
+          spacing={lineChart.spacing}
+          thickness={lineChart.thickness}
+          startOpacity={lineChart.startOpacity}
+          endOpacity={lineChart.endOpacity}
+          noOfSections={lineChart.noOfSections}
+          yAxisThickness={lineChart.yAxisThickness}
+          verticalLinesColor={theme.colors.primary}
           color1={theme.colors.delete}
           color2={theme.colors.agregar}
           startFillColor1={theme.colors.delete}
           startFillColor2={theme.colors.agregar}
           endFillColor1={theme.colors.white}
           endFillColor2={theme.colors.white}
-          thickness={2}
-          startFillColor="rgba(20,105,81,0.3)"
-          endFillColor="rgba(20,85,81,0.01)"
-          startOpacity={0.9}
-          endOpacity={0.2}
-          noOfSections={5}
-          maxValue={maxValue}
-          yAxisThickness={0}
-          rulesColor="rgba(14,164,164,0.5)"
-          yAxisTextStyle={{ color: theme.colors.textPrimary }}
-          xAxisColor="lightgray"
-          yAxisColor="lightgray"
+          rulesColor={theme.colors.primary}
+          yAxisTextStyle={styleResumen.ejeYstyle}
           pointerConfig={{
-            dataPointLabelShiftX: 10,
-            dataPointLabelShiftY: 20,
-            pointerStripHeight: 250,
-            strokeDashArray: [2, 5],
-            pointerStripColor: 'lightgray',
-            pointerStripWidth: 2,
-            pointerColor: 'lightgray',
-            radius: 6,
-            pointerLabelWidth: 100,
-            pointerLabelHeight: 90,
-            activatePointersOnLongPress: true,
-            pointerVanishDelay: 2000,
-            autoAdjustPointerLabelPosition: false,
+            dataPointLabelShiftX: pointerConfig.dataPointLabelShiftX,
+            dataPointLabelShiftY: pointerConfig.dataPointLabelShiftY,
+            pointerStripHeight: pointerConfig.pointerStripHeight,
+            strokeDashArray: pointerConfig.strokeDashArray,
+            pointerStripColor: theme.colors.gray,
+            pointerStripWidth: pointerConfig.pointerStripWidth,
+            pointerColor: theme.colors.gray,
+            radius: pointerConfig.radius,
+            pointerLabelWidth: pointerConfig.pointerLabelWidth,
+            pointerLabelHeight: pointerConfig.pointerLabelHeight,
+            activatePointersOnLongPress: pointerConfig.activatePointersOnLongPress,
+            pointerVanishDelay: pointerConfig.pointerVanishDelay,
+            autoAdjustPointerLabelPosition: pointerConfig.autoAdjustPointerLabelPosition,
             pointerLabelComponent: (items) => {
               return (
                 <Portal>
-                  <View
-                    style={{
-                      position: 'absolute',
-                      top: 360,
-                      left: 150,
-                      height: 90,
-                      width: 100,
-                      justifyContent: 'center',
-                      marginTop: -30,
-                      marginLeft: -40,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: theme.colors.textPrimary,
-                        fontSize: 14,
-                        marginBottom: 6,
-                        textAlign: 'center',
-                      }}
-                    >
+                  <View style={styleResumen.pointer}>
+                    <View style={styleResumen.fechaContainerPointer}> 
+                    <Text style={styleResumen.fechaPointer}>
                       {items[0].date}
                     </Text>
-                    <View
-                      style={{
-                        paddingHorizontal: 14,
-                        paddingVertical: 6,
-                        borderRadius: 16,
-                        backgroundColor: theme.colors.card,
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: theme.colors.textPrimary,
-                          fontSize: 14,
-                          fontWeight: 800,
-                        }}
-                      >
-                        {'Gasto'}
+                    </View>
+                    <View style={styleResumen.containerPointer}>
+                      <Text style={styleResumen.titlePointer}>
+                        {atributos.gasto}
                       </Text>
-                      <Text
-                        style={{
-                          fontWeight: 'bold',
-                          textAlign: 'center',
-                        }}
-                      >
-                        {'$' + items[0].value + '.0'}
+                      <Text style={styleResumen.textPointer}>
+                        {symbols.peso + items[0].value}
                       </Text>
-                      <Text
-                        style={{
-                          color: theme.colors.textPrimary,
-                          fontSize: 14,
-                          fontWeight: 800,
-                        }}
-                      >
-                        {'Ingreso'}
+                      <Text style={styleResumen.titlePointer}>
+                        {atributos.ingreso}
                       </Text>
-                      <Text
-                        style={{
-                          fontWeight: 'bold',
-                          textAlign: 'center',
-                        }}
-                      >
-                        {'$' + items[1].value + '.0'}
+                      <Text style={styleResumen.textPointer}>
+                        {symbols.peso + items[1].value}
                       </Text>
                     </View>
                   </View>
@@ -281,43 +241,8 @@ return (
         />
       </View>
     )}
-    {loading && <Text>Loading...</Text>}
   </View>
-);
-}
-const styles = StyleSheet.create({
-  search: {
-    margin: 20,
-    backgroundColor: theme.colors.search, 
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  title: {
-    textAlign: 'center',
-    marginBottom:20,
-    fontWeight:'800',
-    fontSize:20,
-
-    
-  },
-  button: {
-    marginTop: 20,
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  loadingText: {
-    fontSize: theme.fontSizes.body,
-    fontWeight: theme.fontWeights.bold,
-    color: theme.colors.primary,
-  },
-});
-
+  </ScrollView>
+)}
 
 export default Resumen;

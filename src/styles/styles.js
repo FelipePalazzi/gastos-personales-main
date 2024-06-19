@@ -5,7 +5,6 @@ const screenWidth = Dimensions.get('window').width;
 
 const styleLista = StyleSheet.create({
     loadingContainer: {
-      flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
       padding: 20,
@@ -57,5 +56,83 @@ const styleLista = StyleSheet.create({
       backgroundColor: theme.colors.search,
   }
   });
+  const styleResumen = StyleSheet.create({
+    datapoint: {
+      width: 8,
+      height: 8,
+      marginBottom:5,
+      backgroundColor: theme.colors.white,
+      borderWidth: 1.5,
+      borderRadius: 10,
+      borderColor: theme.colors.primary,
+    },
+    container:{
+      paddingBottom: 25,
+      paddingTop:10,
+      paddingLeft: 20,
+      margin: 10,
+      backgroundColor: theme.colors.table,
+    },
+    title: {
+      textAlign: 'center',
+      marginBottom:20,
+      fontWeight:theme.fontWeights.bold,
+      fontSize:theme.fontSizes.bold,
+    },
+    Containerbutton: {
+      flexDirection: 'row',
+      marginLeft: screenWidth / 7,
+      marginBottom:10,
+    },
+    button:{
+      padding: 15,
+      margin: 4,
+      backgroundColor: theme.colors.primary, 
+      borderRadius: 8,
+    },
+    ejeYstyle:{
+      color: theme.colors.textPrimary,
+    },
+    pointer:{
+      position:'absolute',
+      justifyContent:'center',
+      top: 360,
+      left: 150,
+      height: 90,
+      width: 100,
+      marginTop: -30,
+      marginLeft: -40,
+    },
+    fechaPointer:{
+      color: theme.colors.white,
+      fontSize: theme.fontSizes.pointer,
+      marginBottom: 6,
+      textAlign: 'center',
+    },
+    containerPointer:{
+      paddingHorizontal: 14,
+      paddingVertical: 6,
+      borderRadius: 16,
+      backgroundColor: theme.colors.card,
+    },
+    fechaContainerPointer:{
+      paddingHorizontal: 5,
+      paddingVertical: 6,
+      width: 80,
+      marginHorizontal:10,
+      borderTopRightRadius: 16,
+      borderTopLeftRadius:16,
+      backgroundColor: theme.colors.textPrimary,
+    },
+    titlePointer:{
+      color: theme.colors.textPrimary,
+      fontSize: theme.fontSizes.pointer,
+      fontWeight: theme.fontWeights.bold,
+    },
+    textPointer:{
+      fontWeight: theme.fontWeights.bold,
+      textAlign: 'center',
+    }
 
-  export default styleLista;
+  })
+  export {styleLista, styleResumen, screenWidth};

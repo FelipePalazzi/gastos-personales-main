@@ -1,5 +1,5 @@
 import React, { useState,useCallback, useMemo, useEffect,useRef} from 'react'
-import { View, Text,  StyleSheet,  ScrollView,Dimensions, RefreshControl} from 'react-native'
+import { View, Text, ScrollView, RefreshControl} from 'react-native'
 import theme from '../styles/theme.js'
 import moment from 'moment'
 import { Feather } from '@expo/vector-icons'
@@ -8,7 +8,7 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import { DataTable,Searchbar, ActivityIndicator,Card } from 'react-native-paper'
 import  {filterData,  sortData, getSortIcon} from '../utils'
 import { alerts,button_text, atributos, symbols,pagina } from '../constants'
-import styleLista from '../styles/styles.js';
+import {styleLista} from '../styles/styles.js';
 
 const useFetchIngresos = () => {
   const [ingresos, setIngresos] = useState([])
@@ -29,7 +29,6 @@ const useFetchIngresos = () => {
   return { ingresos, loading, fetchIngresos }
 }
 
-const screenWidth = Dimensions.get('window').width
 const numberOfItemsPerPageList = [5,6,7,8,9,10];
 
 const IngresoList = () => {
@@ -72,23 +71,13 @@ const IngresoList = () => {
     return sortData(filteredData, orden, columna);
   }, [orden, columna, filteredData]);
   
-
-  const [selectedIngresoId, setSelectedIngreso] = useState(null)
   const scrollViewRef = useRef(null)
+
   const [contentOffset, setContentOffset] = useState({ y: 0 })
+
   const handleScroll = (event) => {
     setContentOffset(event.nativeEvent.contentOffset)
   }
-
-  const selectedIngreso = useMemo(() => {
-    if (selectedIngresoId) {
-      const selectedIngreso = ingresos.find((ingreso) => ingreso.id === selectedIngresoId)
-      return {
-       ...selectedIngreso
-      }
-    }
-    return null
-  }, [selectedIngresoId, ingresos])
 
   const getIcon = (columna) => {
     return getSortIcon(columna, orden, columna);
@@ -239,16 +228,16 @@ return (
    </DataTable>
    </View>
    <View>
-   <DataTable.Pagination
-          page={page}
-          numberOfPages={Math.ceil(sortedData.length / pageSize)}
-          onPageChange={handlePageChange}
-          label={`Página ${page + 1} de ${Math.ceil(sortedData.length / pageSize)}`}
-          onItemsPerPageChange={handleItemsPerPageChange}
-          selectPageDropdownLabel={'Cant.'}
-          numberOfItemsPerPageList={numberOfItemsPerPageList}
-          numberOfItemsPerPage={numberOfItemsPerPage}
-        />
+    <DataTable.Pagination
+        page={page}
+        numberOfPages={Math.ceil(sortedData.length / pageSize)}
+        onPageChange={handlePageChange}
+        label={`Página ${page + 1} de ${Math.ceil(sortedData.length / pageSize)}`}
+        onItemsPerPageChange={handleItemsPerPageChange}
+        selectPageDropdownLabel={'Cant.'}
+        numberOfItemsPerPageList={numberOfItemsPerPageList}
+        numberOfItemsPerPage={numberOfItemsPerPage}
+      />
       <View style={styleLista.button}>
         <Icon.Button
           backgroundColor={theme.colors.agregar}
