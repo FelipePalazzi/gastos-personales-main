@@ -67,27 +67,34 @@ const styleLista = StyleSheet.create({
       borderColor: theme.colors.primary,
     },
     container:{
-      paddingBottom: 25,
+      flex:1,
       paddingTop:10,
-      paddingLeft: 20,
+      paddingBottom:10,
+      paddingHorizontal: 5,
       margin: 10,
       backgroundColor: theme.colors.table,
+      borderRadius: 7,
     },
     title: {
       textAlign: 'center',
-      marginBottom:20,
       fontWeight:theme.fontWeights.bold,
-      fontSize:theme.fontSizes.bold,
+      fontSize:theme.fontSizes.body,
+      color: theme.colors.edit,
+      marginTop:15,
+    },
+    titleContainer:{
+      marginHorizontal:10,
+      backgroundColor: theme.colors.primary,
+      borderRadius: 8,
     },
     Containerbutton: {
       flexDirection: 'row',
-      marginLeft: screenWidth / 7,
+      marginLeft: screenWidth / 10,
       marginBottom:10,
     },
     button:{
-      padding: 15,
-      margin: 4,
-      backgroundColor: theme.colors.primary, 
+      paddingHorizontal: 10,
+      marginTop:10,
       borderRadius: 8,
     },
     ejeYstyle:{
@@ -96,12 +103,12 @@ const styleLista = StyleSheet.create({
     pointer:{
       position:'absolute',
       justifyContent:'center',
-      top: 360,
-      left: 150,
+      top: 20,
       height: 90,
       width: 100,
       marginTop: -30,
       marginLeft: -40,
+      
     },
     fechaPointer:{
       color: theme.colors.white,
@@ -132,6 +139,9 @@ const styleLista = StyleSheet.create({
     textPointer:{
       fontWeight: theme.fontWeights.bold,
       textAlign: 'center',
+    },
+    rightCardTitle:{
+      marginEnd:15,
     }
 
   })

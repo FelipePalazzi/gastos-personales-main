@@ -22,6 +22,8 @@ const theme= {
         cancelar: '#81021F',
         notFocused: '#B5C7C4',
         card: '#8ADEE8',
+        segmented: '#5AEEC9',
+        gasto:'#993D64',
     },
     fontSizes: {
         body: 24,

@@ -11,6 +11,7 @@ export const alerts = {
     error_ocurrido: 'Ocurrió un error',
     delete_question: '¿Estás seguro de eliminar este gasto?',
     cargando: 'Cargando...',
+    noData:'No hay datos registrado',
   };
   export const symbols = {
     space: ' ',
@@ -75,14 +76,15 @@ export const alerts = {
     endOpacity:0.2,
     noOfSections: 5,
     yAxisThickness:0,
+    xAxisThickness:0,
   }
   
   export const pointerConfig={
     dataPointLabelShiftX: 10,
     dataPointLabelShiftY: 20,
-    pointerStripHeight: 250,
-    strokeDashArray: [2, 5],
-    pointerStripWidth: 2,
+    pointerStripHeight:150,
+    strokeDashArray: [2, 1],
+    pointerStripWidth: 4,
     radius: 6,
     pointerLabelWidth: 100,
     pointerLabelHeight: 90,

@@ -1,7 +1,7 @@
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
-import { useState, useEffect, useRef } from "react";
+import { View, Text, TouchableOpacity, ScrollView, PanResponder, Animated, Dimensions} from "react-native";
+import { useState, useEffect, useRef,createRef } from "react";
 import  {styleResumen, styleLista} from "../styles/styles.js";
-import { Searchbar, Portal, ActivityIndicator,SegmentedButtons } from 'react-native-paper';
+import { Searchbar, Portal, ActivityIndicator,SegmentedButtons, Card, Icon } from 'react-native-paper';
 import useResumen from "../hooks/useResumen";
 import { LineChart } from "react-native-gifted-charts";
 import { filterData } from '../utils';
@@ -15,8 +15,11 @@ const Resumen = () => {
   const [maxValue, setMaxValue] = useState(0);
   const { loading, resumen } = useResumen();
   const [months0, setMonths0] = useState({});
-
+const [card, setCard] = useState(false)
   const [selectedValue, setSelectedValue] = useState('Dia');
+  const [selectedMonth, setSelectedMonth] = useState('May');
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [tooltipText, setTooltipText] = useState('')
 
   const handleValueChange = (value) => {
     setSelectedValue(value);
@@ -95,10 +98,12 @@ const ref = useRef(null);
 
 const showOrHidePointer = (ind) => {
   const month = months2[ind];
+  setSelectedMonth(month)
   const firstDateIndex = areaChartData.findIndex(item => item.date.includes(month));
   if (firstDateIndex!== -1) {
     ref.current?.scrollTo({ x: firstDateIndex * 50 });
   }
+
 };
 
 const formatYLabel = (value) => {
@@ -109,6 +114,37 @@ const formatYLabel = (value) => {
   }
 };
 
+const lineChartRef = useRef(null);
+
+const position = useRef({ x: 0, y: 0 }).current;
+const [touchPosition, setTouchPosition] = useState({ x: 0, y: 0 });
+
+const deviceWidth = Dimensions.get("window").width;
+
+const panResponder = useRef(
+   PanResponder.create({
+     onStartShouldSetPanResponder: () => true,
+     onMoveShouldSetPanResponder: () => true,
+     onPanResponderGrant: (evt, gestureState) => {
+       // The touch has started
+       position.x = gestureState.x0;
+       position.y = gestureState.y0;
+       setTouchPosition({ x: gestureState.x0, y: gestureState.y0 });
+     },
+     onPanResponderMove: (evt, gestureState) => {
+       // The touch is moving
+       position.x = gestureState.moveX;
+       position.y = gestureState.moveY;
+       setTouchPosition({ x: gestureState.moveX, y: gestureState.moveY });
+     },
+     onPanResponderRelease: (evt, gestureState) => {
+       // The touch has ended
+       position.x = gestureState.moveX;
+       position.y = gestureState.moveY;
+       setTouchPosition({ x: gestureState.moveX, y: gestureState.moveY });
+     },
+   }),
+ ).current;
 return (
   <ScrollView  showsVerticalScrollIndicator={true}
   vertical
@@ -133,39 +169,63 @@ return (
         </View>
       )}
     {areaChartData && areaChartData2 && (
-      <View style={styleResumen.container}>
-        <Text style={styleResumen.title}>
-          {`${atributos.ingreso}${symbols.and}${atributos.gasto} por ${selectedValue}`}
-          {search.length === 4 && search.match(/^\d{4}$/)? ` ${search}` : ''}
-        </Text>
+  <View>
+    {((search.length >= 0 && search.length < 4)   || (search.length === 4 && (areaChartData.some(item => item.value === 0) || areaChartData2.some(item2 => item2.value === 0)))) ? (
+      <>
+      <Card style={styleResumen.titleContainer} >
+
+<TouchableOpacity onPress={() => setCard(!card)}>
+    <Card.Title
+      title={`${atributos.ingreso}${symbols.and}${atributos.gasto} por ${selectedValue} ${search.length === 4 && search.match(/^\d{4}$/)? search : ''}`}
+      titleStyle={styleResumen.title}
+      right={(props) => <Icon source={card? theme.icons.arriba : theme.icons.abajo} size={theme.fontSizes.body} color={theme.colors.edit} />}
+      rightStyle={styleResumen.rightCardTitle}
+    />
+  </TouchableOpacity>
+
+      {card && (  <Card.Content style={styleResumen.container}>
+
         <SegmentedButtons
-        value={selectedValue}
-        onValueChange={handleValueChange}
-        buttons={[
-          {
-            value: 'Dia', label: 'Dia',
-          },
-          { value: 'Mes', label: 'Mes' },
-        ]}
-      />
+          style={styleResumen.button}
+          theme={{ colors: { secondaryContainer: theme.colors.segmented } }}
+          value={selectedValue}
+          onValueChange={handleValueChange}
+          buttons={[
+            {
+              value: 'Dia', label: 'Dia',
+            },
+            { value: 'Mes', label: 'Mes' },
+          ]}
+        />
         <View style={styleResumen.Containerbutton}>
-              {search.length === 4 && selectedValue === 'Dia' ? (
-                <>
-                  {months2.map((item, index) => {
-                    return (
-                      <TouchableOpacity
-                        key={index}
-                        style={styleResumen.button}
-                        onPress={() => showOrHidePointer(index)}
-                      >
-                        <Text>{item}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </>
-              ) : null}
-            </View>
+          {search.length === 4 && selectedValue === 'Dia' ? (
+            <SegmentedButtons
+              style={styleResumen.button}
+              theme={{ colors: { secondaryContainer: theme.colors.segmented } }}
+              value={selectedMonth}
+              onValueChange={(month) => showOrHidePointer(months2.indexOf(month))}
+              buttons={months2.map((item, index) => ({
+                value: item,
+                label: item,
+              }))}
+            />
+          ) : null}
+        </View>
+        <View
+     {...panResponder.panHandlers}
+     style={{}}
+ >
         <LineChart
+          ref={lineChartRef}
+          onScroll={(event) => {
+            const x = event.nativeEvent.contentOffset.x+10;
+            const graphWidth = lineChart.width;
+            const monthWidth = graphWidth / (months2.length*0.2);
+            const visibleMonthIndex = Math.floor(x / monthWidth);
+            const visibleMonth = months2[visibleMonthIndex];
+            setSelectedMonth(visibleMonth);
+          }}
+
           formatYLabel={formatYLabel}
           scrollRef={ref}
           data={areaChartData}
@@ -187,32 +247,33 @@ return (
           endOpacity={lineChart.endOpacity}
           noOfSections={lineChart.noOfSections}
           yAxisThickness={lineChart.yAxisThickness}
+          xAxisThickness={lineChart.xAxisThickness}
           verticalLinesColor={theme.colors.primary}
-          color1={theme.colors.delete}
+          color1={theme.colors.gasto}
           color2={theme.colors.agregar}
-          startFillColor1={theme.colors.delete}
+          startFillColor1={theme.colors.gasto}
           startFillColor2={theme.colors.agregar}
           endFillColor1={theme.colors.white}
           endFillColor2={theme.colors.white}
           rulesColor={theme.colors.primary}
           yAxisTextStyle={styleResumen.ejeYstyle}
+          focusEnabled={true}
           pointerConfig={{
-            dataPointLabelShiftX: pointerConfig.dataPointLabelShiftX,
-            dataPointLabelShiftY: pointerConfig.dataPointLabelShiftY,
+            hidePointer1: true,
+            hidePointer2: true,
             pointerStripHeight: pointerConfig.pointerStripHeight,
             strokeDashArray: pointerConfig.strokeDashArray,
-            pointerStripColor: theme.colors.gray,
+            pointerStripColor: theme.colors.edit,
             pointerStripWidth: pointerConfig.pointerStripWidth,
             pointerColor: theme.colors.gray,
             radius: pointerConfig.radius,
             pointerLabelWidth: pointerConfig.pointerLabelWidth,
             pointerLabelHeight: pointerConfig.pointerLabelHeight,
-            activatePointersOnLongPress: pointerConfig.activatePointersOnLongPress,
-            pointerVanishDelay: pointerConfig.pointerVanishDelay,
-            autoAdjustPointerLabelPosition: pointerConfig.autoAdjustPointerLabelPosition,
-            pointerLabelComponent: (items) => {
+            activatePointersOnLongPress: true,
+            autoAdjustPointerLabelPosition: false,
+            shiftPointerLabelX: touchPosition.x < deviceWidth / 4 ? 40 : touchPosition.x > deviceWidth * 0.6 ? -60  : 0 ,
+            pointerLabelComponent: items => {
               return (
-                <Portal>
                   <View style={styleResumen.pointer}>
                     <View style={styleResumen.fechaContainerPointer}> 
                     <Text style={styleResumen.fechaPointer}>
@@ -234,12 +295,21 @@ return (
                       </Text>
                     </View>
                   </View>
-                </Portal>
+     
               );
-            },
+           },
           }}
         />
-      </View>
+</View>
+</Card.Content>
+)}
+  </Card>
+      </>
+    ) : (
+      <Text style={styleResumen.title}>{`${alerts.noData}${' para el año '}${search}`}</Text>
+    )}
+  </View>
+
     )}
   </View>
   </ScrollView>
