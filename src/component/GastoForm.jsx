@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text,  StyleSheet,Alert,} from 'react-native'
+import { View, Text,  StyleSheet,Alert, ScrollView,} from 'react-native'
 import useGastos from '../hooks/useGastos'
 import useTipoGasto from '../hooks/useTipoGasto'
 import useCategoriaGasto from '../hooks/useCategoriaGasto'
@@ -33,7 +33,7 @@ const AgregarGasto = () => {
   const { tipogastos } = useTipoGasto()
   const {responsableIngresos} = useResponsableIngreso()
   const {categoriaGastos} = useCategoriaGasto()  
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false)
+  const [datePickerVisible, setDatePickerVisible] = useState(false)
   const [selectedDate, setSelectedDate] = useState(moment())
   const params = useParams()
   const id = params.id
@@ -99,22 +99,25 @@ const AgregarGasto = () => {
     if (tipogastoSeleccionado) {
       setCategoria(tipogastoSeleccionado.categoria)
       setResponsable(tipogastoSeleccionado.responsable)
+    } else {
+      setCategoria('')
+      setResponsable('')
     }
   }
 
   const showDatePicker = () => {
-    setDatePickerVisibility(true)
+    setDatePickerVisible(true)
   }
   
   const hideDatePicker = () => {
-    setDatePickerVisibility(false)
+    setDatePickerVisible(false)
   }
 
   const handleConfirm = (date) => {
+    hideDatePicker()
     const utcDate = moment(date)
     setSelectedDate(utcDate)
     setFecha(utcDate)
-    hideDatePicker()
   }
 
   const createGasto = async (gasto) => {
@@ -227,17 +230,29 @@ const AgregarGasto = () => {
 )
 }
 }
+
+
   return (
+    <>
+    <ScrollView  showsVerticalScrollIndicator={true}
+    vertical
+    style={styles.scroll}
+    scrollEventThrottle={theme.scroll.desplazamiento}
+    >
     <View >
-      <View><Text></Text></View>
-      <View><Text></Text></View>
+       <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>{`${button_text.formulario}${atributos.gasto}`}</Text>
+      </View>
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator animating={true} color={theme.colors.primary} size={theme.icons.big} />
           <Text style={styles.loadingText}>{alerts.cargando}</Text>
         </View>
-      ) : (<View>
-      <View >
+      ) : (
+        <>
+      <View style={styles.backgroundContainer}>
+       <View style={styles.container}> 
+
           <View style={styles.rowContainer}>
       <Text style={styles.text}>{`${atributos.fecha}${symbols.colon}`}</Text>
         <Text style={styles.dateText}>{selectedDate.format('LL')}</Text>
@@ -245,42 +260,45 @@ const AgregarGasto = () => {
   <Icon.Button name={theme.icons.calendar} title="" onPress={showDatePicker}>{`${button_text.select}`}</Icon.Button>
       </View>
       <DateTimePickerModal
-        isVisible={isDatePickerVisible}
+        isVisible={datePickerVisible}
         mode="date"
         onConfirm={handleConfirm}
         onCancel={hideDatePicker}
       />
     </View>
-    </View>
-    <View >
+
   <View style={styles.rowContainer}>
     <Text style={styles.text}>{`${atributos.tipo_gasto}${symbols.colon}`}</Text>
     <Picker
         selectedValue={tipogasto}
         onValueChange={handleTipogastoChange}
         style={styles.picker}
+        mode='dropdown'
+        dropdownIconColor={theme.colors.textSecondary}
       >
-        <Picker.Item label={`${button_text.select}`} value="" />
+        <Picker.Item label={`${button_text.select} ${atributos.tipo_gasto}`} value="" color={theme.colors.gray}/>
         {tipogastos.map((tg) => (
           <Picker.Item key={tg.id} label={tg.descripcion} value={tg.id} />
         ))}
       </Picker>
   </View>
-</View>
+
 <View style={styles.rowContainer}>
     <Text style={styles.text}>{`${atributos.responsable}${symbols.colon}`}</Text>
     <Picker
         selectedValue={responsable}
         onValueChange={(text) => setResponsable(text)}
         style={styles.picker}
+        mode='dropdown'
+        dropdownIconColor={theme.colors.textSecondary}
       >
-        <Picker.Item label={`${button_text.select}`} value='' />
+        <Picker.Item label={`${button_text.select} ${atributos.responsable}`} value='' color={theme.colors.gray}/>
         {responsableIngresos.map((r) => (
           <Picker.Item key={r.id} label={r.nombre} value={r.id} />
         ))}
       </Picker>
   </View>
-<View>
+
   <View style={styles.rowContainer}>
     <Text style={styles.text}>{`${atributos.tipo_cambio}${symbols.colon}`}</Text>
     <TextInput
@@ -290,11 +308,12 @@ const AgregarGasto = () => {
       placeholder={atributos.tipo_cambio}
       keyboardType="numeric"
       style={styles.text_input}
+      outlineStyle={{borderColor:theme.colors.primary}}
     />
   </View>
-</View>
 
-<View>
+
+
   <View style={styles.rowContainer}>
     <Text style={styles.text}>{`${atributos.total_arg}${symbols.colon}`}</Text>
     <TextInput
@@ -304,21 +323,22 @@ const AgregarGasto = () => {
       placeholder={atributos.total_arg}
       keyboardType="numeric"
       style={styles.text_input}
+      outlineStyle={{borderColor:theme.colors.primary}}
     />
   </View>
-</View>
-<View>
+
+
   <View style={styles.rowContainer}>
     <Text style={styles.text}>{`${atributos.total_uyu}${symbols.colon}`}</Text>
-    <Text>{totalar? 
-  (tipocambio? totalar * tipocambio : <TextInput style={styles.text_input} mode='outlined' disabled >{`${button_text.ingresar}${symbols.space}${atributos.tipo_cambio}`}</TextInput>) 
+   {totalar? 
+  (tipocambio? totalar * tipocambio && <TextInput style={styles.text_input} mode='outlined' disabled>{totalar}</TextInput> : <TextInput style={styles.text_input} mode='outlined' disabled >{`${button_text.ingresar}${symbols.space}${atributos.tipo_cambio}`}</TextInput>) 
   : 
   (tipocambio? <TextInput style={styles.text_input} mode='outlined' disabled>{`${button_text.ingresar}${symbols.space}${atributos.total_arg}`}</TextInput> 
   : <TextInput style={styles.text_input}  mode='outlined' disabled>{`${button_text.ingresar}${symbols.space}${atributos.total_arg}${symbols.and}${atributos.tipo_cambio}`}</TextInput>)
-}</Text>
+}
   </View>
-</View>
-<View >
+
+
   <View style={styles.rowContainer}>
       <Text style={styles.text}>{`${atributos.descripcion}${symbols.colon}`}</Text>
       <TextInput
@@ -327,21 +347,23 @@ const AgregarGasto = () => {
         onChangeText={(text) => setDescripcion(text)}
         placeholder={`${atributos.descripcion}${symbols.space}${button_text.opcional}`}
         style={styles.text_input}
+        outlineStyle={{borderColor:theme.colors.primary}}
       />
   </View>
-</View>
+
+
+
 <View>
-<View>
-<View>
+
       <View style={styles.rowContainer}>
         <Text style={styles.text}>{`${atributos.categoria}${symbols.colon}`}</Text>
-        <View>
-          {categoria ? <Text>{categoriaGastos.find((c) => c.id === categoria).descripcion}</Text> : <Text>{`${button_text.select}${symbols.space}${atributos.tipo_cambio}`}</Text>}
-        </View>
+          {categoria ? <TextInput style={styles.text_input} mode='outlined' disabled>{categoriaGastos.find((c) => c.id === categoria).descripcion}</TextInput> : 
+          <TextInput style={styles.text_input} mode='outlined' disabled>{`${button_text.select}${symbols.space}${atributos.tipo_gasto}`}</TextInput>}
       </View>
     </View>
+
     </View>
-    </View>
+
     <Portal>
       <Dialog visible={visible} onDismiss={() => setVisible(false)}>
         <Dialog.Icon icon="alert" />
@@ -354,6 +376,8 @@ const AgregarGasto = () => {
             </Dialog.Actions>
       </Dialog>
     </Portal>
+    </View>
+
     <View style={styles.rowButton}>
       <View style={styles.button}>
       <Icon.Button backgroundColor={theme.colors.cancelar} name={theme.icons.close} title="" onPress={handleCancel}>{button_text.cancel}</Icon.Button>
@@ -370,9 +394,13 @@ const AgregarGasto = () => {
     </View>
       )}
       </View>
-      </View>
+      </>
+
      )}
+     
     </View>
+    </ScrollView>
+    </>
   )
 }
 
@@ -396,7 +424,6 @@ const styles = StyleSheet.create({
   },
   button: {
     padding: 16,
-    backgroundColor: theme.colors.white,
     alignItems: 'center',
   },
   text:{
@@ -415,11 +442,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
+    marginEnd:20,
+    width:screenWidth*0.97,
   },
   picker: {
+    flex: 1,
     fontSize: theme.fontSizes.ingresar,
-    padding: 8,
     height: 40,
+    marginEnd:16,
     width: screenWidth * 0.6,
     borderColor: theme.colors.gray,
     borderWidth: 1,
@@ -430,7 +460,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 16,
-    marginTop: 150
   },
    title: {
     textAlign: 'center',
@@ -442,7 +471,18 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingVertical: 8,
     fontSize:13,
-  },
+  }, 
+  container: {
+    padding:10,
+    paddingHorizontal:10,
+    marginEnd:20,
+},
+backgroundContainer:{
+  backgroundColor: theme.colors.table,
+},
+scroll:{
+  flex:1,
+}
 })
 
 export default AgregarGasto

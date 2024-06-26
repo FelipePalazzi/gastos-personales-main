@@ -31,6 +31,7 @@ export const alerts = {
     ingresar: 'Ingresar',
     agregar:'Agregar',
     opcional: '(Opcional)',
+    formulario:'Formulario ',
   };
   export const atributos = {
     gasto: 'Gasto',
