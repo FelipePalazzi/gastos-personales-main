@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text,  StyleSheet,Alert, ScrollView,} from 'react-native'
+import { View, Text,  StyleSheet, ScrollView,} from 'react-native'
 import useGastos from '../hooks/useGastos'
 import useTipoGasto from '../hooks/useTipoGasto'
 import useCategoriaGasto from '../hooks/useCategoriaGasto'
@@ -23,8 +23,8 @@ const AgregarGasto = () => {
   const location = useLocation()
   const deleteMode = location.state?.deleteMode
   const [tipogasto, setTipogasto] = useState('')
-  const [tipocambio, setTipocambio] = useState('')
-  const [totalar, setTotalar] = useState('')
+  const [tipocambio, settipocambio] = useState(0)
+  const [totalar, setTotalar] = useState(0)
   const [total, setTotal] = useState(0)
   const [descripcion, setDescripcion] = useState('')
   const [categoria, setCategoria] = useState('')
@@ -38,12 +38,15 @@ const AgregarGasto = () => {
   const params = useParams()
   const id = params.id
   const [visible, setVisible] = useState(false);
+  const [visibleOK, setvisibleOK] = useState(false);
+  const [visibleDelete, setvisibleDelete] = useState(false);
+  const [visibleOKDelete, setvisibleOKDelete] = useState(false);
   const [message, setMessage] = useState([]);
 
   useEffect(() => {
       const fetchData = async () => {
         const gasto = await obtenerGasto(id)
-        setTipocambio(gasto[0].tipocambio.toFixed(4))
+        settipocambio(gasto[0].tipocambio.toFixed(4))
         setTotalar(gasto[0].totalar.toFixed(0))
         setTotal(gasto[0].total.toFixed(2))
         setDescripcion(gasto[0].descripcion)
@@ -65,32 +68,26 @@ const AgregarGasto = () => {
     return gasto
   }
   
-  const handleTipocambioChange = (text) => {
-    setTipocambio(text)
-    const totalAR = parseFloat(totalar)
-    const tipocambio = parseFloat(text)
-    if (totalAR && tipocambio) {
-      const total = totalAR * tipocambio
+  const handletipoCambioChange = (text) => {
+    settipocambio(text)
+    if (totalar && tipocambio) {
+      const total = totalar * text
       setTotal(total.toFixed(2))
     } else {
-      setTotal('')
+      setTotal(0)
     }
   }
   const handleTotalarChange = (text) => {
-    if (text === '') {
+    if (text === 0) {
       setTotalar(null)
     } else {
-    const totalAR = parseFloat(text)
-    if (!isNaN(totalAR)) {
-      setTotalar(totalAR)
-      const tipocambio = parseFloat(tipocambio)
-      if (totalAR && tipocambio) {
-        const total = totalAR * tipocambio
-        setTotal(total)
+     setTotalar(text)
+      if (totalar && tipocambio) {
+        const total = text * tipocambio
+        setTotal(total.toFixed(2))
       } else {
-        setTotal('')
+        setTotal(0)
       }
-    }
   }}
 
   const handleTipogastoChange = (itemValue) => {
@@ -130,9 +127,7 @@ const AgregarGasto = () => {
         body: JSON.stringify(gasto),
       })
       const data = await response.json()
-      Alert.alert(alerts.exito, alerts.guardado_exito, [
-        { text: button_text.ok, onPress: () => navigate(`${symbols.barra}${pagina.pagina_gasto}`, { replace: true }) },
-      ])
+      setvisibleOK(true);
     } catch (error) {
       console.error(error)
     }
@@ -147,9 +142,7 @@ const AgregarGasto = () => {
         },
         body: JSON.stringify(gasto),
       })
-      Alert.alert(alerts.exito, alerts.actualizado_exito, [
-        { text: button_text.ok, onPress: () => navigate(`${symbols.barra}${pagina.pagina_gasto}`, { replace: true }) },
-      ])
+      setvisibleOK(true);
     } catch (error) {
       console.error(error)
     }
@@ -200,36 +193,10 @@ const AgregarGasto = () => {
 
   const handleDelete = async () => {
     if (id) {
-      Alert.alert(
-        `${button_text.delete}${atributos.gasto}`,
-        alerts.delete_question,
-        [
-          {
-            text: button_text.cancel,
-            style: theme.alerts.cancelar,
-          },
-          {
-            text: button_text.delete,
-            onPress: async () => {
-              try {
-        const response = await fetch(`${pagina.pagina}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        Alert.alert(alerts.exito, alerts.delete_exito, [
-          { text: button_text.ok, onPress: () => navigate(`${symbols.barra}${pagina.pagina_gasto}`, { replace: true }) },
-        ])
-      } catch (error) {
-        console.error(`${alerts.error_ocurrido}${atributos.gasto}${error.message}`)
-      }
+      setvisibleDelete(true);
     }
   }
-]
-)
-}
-}
+
 
 
   return (
@@ -304,7 +271,7 @@ const AgregarGasto = () => {
     <TextInput
     mode='outlined'
       value={tipocambio}
-      onChangeText={handleTipocambioChange}
+      onChangeText={handletipoCambioChange}
       placeholder={atributos.tipo_cambio}
       keyboardType="numeric"
       style={styles.text_input}
@@ -331,7 +298,7 @@ const AgregarGasto = () => {
   <View style={styles.rowContainer}>
     <Text style={styles.text}>{`${atributos.total_uyu}${symbols.colon}`}</Text>
    {totalar? 
-  (tipocambio? totalar * tipocambio && <TextInput style={styles.text_input} mode='outlined' disabled>{totalar}</TextInput> : <TextInput style={styles.text_input} mode='outlined' disabled >{`${button_text.ingresar}${symbols.space}${atributos.tipo_cambio}`}</TextInput>) 
+  (tipocambio?  <TextInput style={styles.text_input} mode='outlined' disabled>{total}</TextInput> : <TextInput style={styles.text_input} mode='outlined' disabled >{`${button_text.ingresar}${symbols.space}${atributos.tipo_cambio}`}</TextInput>) 
   : 
   (tipocambio? <TextInput style={styles.text_input} mode='outlined' disabled>{`${button_text.ingresar}${symbols.space}${atributos.total_arg}`}</TextInput> 
   : <TextInput style={styles.text_input}  mode='outlined' disabled>{`${button_text.ingresar}${symbols.space}${atributos.total_arg}${symbols.and}${atributos.tipo_cambio}`}</TextInput>)
@@ -363,7 +330,7 @@ const AgregarGasto = () => {
     </View>
 
     </View>
-
+{/* Mensaje de faltan datos */}
     <Portal>
       <Dialog visible={visible} onDismiss={() => setVisible(false)}>
         <Dialog.Icon icon="alert" />
@@ -376,6 +343,46 @@ const AgregarGasto = () => {
             </Dialog.Actions>
       </Dialog>
     </Portal>
+{/* Mensaje de todo OK */}
+    <Portal>
+      <Dialog visible={visibleOK} onDismiss={() => setvisibleOK(false)}>
+        <Dialog.Icon icon="emoticon-cool-outline" />
+        <Dialog.Title style={styles.title}>{alerts.guardado_exito}</Dialog.Title>
+        <Dialog.Actions>
+              <Icon.Button name="angellist" onPress={() => navigate(`${symbols.barra}${pagina.pagina_gasto}`, { replace: true })}>{button_text.ok}</Icon.Button>
+            </Dialog.Actions>
+      </Dialog>
+    </Portal>
+{/* Mensaje de borrado */}
+    <Portal>
+      <Dialog visible={visibleDelete} onDismiss={() => setvisibleDelete(false)}>
+        <Dialog.Icon icon="delete-alert" />
+        <Dialog.Title style={styles.title}>{alerts.delete_question}</Dialog.Title>
+        <Dialog.Actions style={{justifyContent:'center', justifyContent:'space-between'}}>
+              <Icon.Button name={theme.icons.close} backgroundColor="transparent" color={theme.colors.edit} onPress={() => setvisibleDelete(false)}>{button_text.cancel}</Icon.Button>
+              <Icon.Button name="trash" backgroundColor={theme.colors.delete} onPress={async () => {try {
+          const response = await fetch(`${pagina.pagina}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${id}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+              })
+            setvisibleDelete(false)
+            setvisibleOKDelete(true)}
+              catch {(error)}}}>{button_text.delete}
+              </Icon.Button>
+            </Dialog.Actions>
+      </Dialog>
+    </Portal>
+    <Portal>
+    <Dialog visible={visibleOKDelete} onDismiss={() => setvisibleOKDelete(false)}>
+        <Dialog.Icon icon="delete-empty" />
+        <Dialog.Title style={styles.title}>{alerts.delete_exito}</Dialog.Title>
+        <Dialog.Actions>
+              <Icon.Button name="angellist" onPress={() => navigate(`${symbols.barra}${pagina.pagina_gasto}`, { replace: true })}>{button_text.ok}</Icon.Button>
+            </Dialog.Actions>
+      </Dialog>
+      </Portal>
     </View>
 
     <View style={styles.rowButton}>
