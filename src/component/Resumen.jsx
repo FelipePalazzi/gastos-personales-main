@@ -1,12 +1,12 @@
-import { View, Text, TouchableOpacity, ScrollView, PanResponder, Animated, Dimensions} from "react-native";
-import { useState, useEffect, useRef,createRef } from "react";
-import  {styleResumen, styleLista} from "../styles/styles.js";
-import { Searchbar, Portal, ActivityIndicator,SegmentedButtons, Card, Icon } from 'react-native-paper';
+import { View, Text, TouchableOpacity, ScrollView, PanResponder, Dimensions} from "react-native";
+import { useState, useEffect, useRef} from "react";
+import  {styleResumen, styleLista, screenWidth} from "../styles/styles.js";
+import { Searchbar, ActivityIndicator,SegmentedButtons, Card, Icon } from 'react-native-paper';
 import useResumen from "../hooks/useResumen";
 import { LineChart } from "react-native-gifted-charts";
 import { filterData } from '../utils';
 import theme from "../styles/theme.js";
-import { lineChart, pointerConfig, alerts, atributos, symbols} from "../constants.js";
+import { lineChart, pointerConfig, alerts, atributos, symbols, button_text} from "../constants.js";
 
 const Resumen = () => {
   const [search, setSearch] = useState('');
@@ -18,8 +18,6 @@ const Resumen = () => {
 const [card, setCard] = useState(false)
   const [selectedValue, setSelectedValue] = useState('Dia');
   const [selectedMonth, setSelectedMonth] = useState('May');
-  const [tooltipVisible, setTooltipVisible] = useState(false);
-  const [tooltipText, setTooltipText] = useState('')
 
   const handleValueChange = (value) => {
     setSelectedValue(value);
@@ -63,20 +61,20 @@ const [card, setCard] = useState(false)
         }
       });
       setMonths0(monthsObj);
-      const maxGastoAr = Math.max(...filteredData.map(item => parseInt(item["GASTO AR"])));
-      const maxIngresoAr = Math.max(...filteredData.map(item => parseInt(item["INGRESO AR"])));
+      const maxGastoAr = Math.max(...filteredData.map(item => parseInt(item[atributos.gastoResumen])));
+      const maxIngresoAr = Math.max(...filteredData.map(item => parseInt(item[atributos.ingresoResumen])));
       const maxValue = Math.max(maxGastoAr, maxIngresoAr);
       setMaxValue(maxValue + 10000);
     
       const areaChartData = filteredData.map((item, index) => ({
-        value: parseInt(item["GASTO AR"] || 0),
+        value: parseInt(item[atributos.gastoResumen] || 0),
         date: selectedValue === 'Dia' ? `${item.day} ${months[item.month]}` : months[item.month],
         label: selectedValue === 'Dia' ? `${search.length!== 4? `${item.day} ${months[item.month]}\n${item.year}` : `${item.day} ${months[item.month]}`}` : `${months[item.month]}\n${item.year}`,
         labelTextStyle: { fontSize: 13,margin:-8},
         customDataPoint: customDataPoint,
       }));
       const areaChartData2 = filteredData.map((item2, index) => ({
-        value: parseInt(item2["INGRESO AR"] || 0),
+        value: parseInt(item2[atributos.ingresoResumen] || 0),
         date: selectedValue === 'Dia' ? `${item2.day} ${months[item2.month]}` : months[item2.month],
         label: selectedValue === 'Dia' ? `${search.length!== 4? `${item2.day} ${months[item2.month]}\n${item2.year}` : `${item2.day} ${months[item2.month]}`}` : `${months[item2.month]}\n${item2.year}`,
         customDataPoint: customDataPoint,
@@ -108,18 +106,16 @@ const showOrHidePointer = (ind) => {
 
 const formatYLabel = (value) => {
   if (value > 1000) {
-    return `$${(value / 1000).toFixed(0)}k`;
+    return `${symbols.peso}${(value / 1000).toFixed(0)}${symbols.mil}`;
   } else {
-    return `$${value}`;
+    return `${symbols.peso}${value}`;
   }
 };
-
-const lineChartRef = useRef(null);
 
 const position = useRef({ x: 0, y: 0 }).current;
 const [touchPosition, setTouchPosition] = useState({ x: 0, y: 0 });
 
-const deviceWidth = Dimensions.get("window").width;
+const deviceWidth = screenWidth;
 
 const panResponder = useRef(
    PanResponder.create({
@@ -145,6 +141,7 @@ const panResponder = useRef(
      },
    }),
  ).current;
+
 return (
   <ScrollView  showsVerticalScrollIndicator={true}
   vertical
@@ -156,7 +153,7 @@ return (
   <View>
 
     <Searchbar
-      placeholder="Ingrese Año"
+      placeholder={button_text.ingreseAño}
       style={styleLista.search}
       elevation={theme.search.elevation}
       onChangeText={setSearch}
@@ -170,7 +167,7 @@ return (
       )}
     {areaChartData && areaChartData2 && (
   <View>
-    {((search.length >= 0 && search.length < 4)   || (search.length === 4 && (areaChartData.some(item => item.value === 0) || areaChartData2.some(item2 => item2.value === 0)))) ? (
+    {((search.length >= 0 && search.length < 4)   || (search.length === 4 && search.match(/^\d{4}$/) && (areaChartData.some(item => item.value === 0) || areaChartData2.some(item2 => item2.value === 0)))) ? (
       <>
       <Card style={styleResumen.titleContainer} >
 
@@ -178,7 +175,7 @@ return (
     <Card.Title
       title={`${atributos.ingreso}${symbols.and}${atributos.gasto} por ${selectedValue} ${search.length === 4 && search.match(/^\d{4}$/)? search : ''}`}
       titleStyle={styleResumen.title}
-      right={(props) => <Icon source={card? theme.icons.arriba : theme.icons.abajo} size={theme.fontSizes.body} color={theme.colors.edit} />}
+      right={(props) => <Icon source={card? theme.icons.arriba : theme.icons.abajo} size={theme.fontSizes.body} color={theme.colors.white} />}
       rightStyle={styleResumen.rightCardTitle}
     />
   </TouchableOpacity>
@@ -216,7 +213,6 @@ return (
      style={{}}
  >
         <LineChart
-          ref={lineChartRef}
           onScroll={(event) => {
             const x = event.nativeEvent.contentOffset.x+10;
             const graphWidth = lineChart.width;
@@ -271,7 +267,7 @@ return (
             pointerLabelHeight: pointerConfig.pointerLabelHeight,
             activatePointersOnLongPress: true,
             autoAdjustPointerLabelPosition: false,
-            shiftPointerLabelX: touchPosition.x < deviceWidth / 4 ? 40 : touchPosition.x > deviceWidth * 0.6 ? -60  : 0 ,
+            shiftPointerLabelX: touchPosition.x < deviceWidth / 4 ? 40 : touchPosition.x > deviceWidth * 0.6 ? -40  : 0 ,
             pointerLabelComponent: items => {
               return (
                   <View style={styleResumen.pointer}>
@@ -306,10 +302,11 @@ return (
   </Card>
       </>
     ) : (
-      <Text style={styleResumen.title}>{`${alerts.noData}${' para el año '}${search}`}</Text>
+      <View style={[styleResumen.titleContainer, {backgroundColor:theme.colors.gasto}]}>
+      <Text style={[styleResumen.title, {marginBottom:15},{marginHorizontal:20}, {color: theme.colors.white}]}>{`${alerts.noData}${' para el año '}${search}`}</Text>
+      </View>
     )}
   </View>
-
     )}
   </View>
   </ScrollView>

@@ -1,5 +1,5 @@
 import React, { useState,useCallback, useMemo, useEffect,useRef} from 'react'
-import { View, Text, ScrollView, RefreshControl} from 'react-native'
+import { View, Text, ScrollView, RefreshControl, BackHandler} from 'react-native'
 import theme from '../styles/theme.js'
 import moment from 'moment'
 import { Feather } from '@expo/vector-icons'
@@ -38,7 +38,6 @@ const IngresoList = () => {
   const navigate = useNavigate()
   const [ingreso, setIngresos] = useState({})
   const [search, setSearch] = useState('')
-  const [totalar, setTotalar] = useState('')
   const [refreshing, setRefreshing] = useState(false)
   const { ingresos, loading, fetchIngresos } = useFetchIngresos()
   const [page, setPage] = useState(0);
@@ -108,6 +107,20 @@ const onDelete = async (id) => {
   await deleteIngreso(id)
 }
 
+useEffect(() => {
+  const backAction = () => {
+    navigate(`${symbols.barra}`, { replace: true }) 
+    return true;
+  };
+  
+  const backHandler = BackHandler.addEventListener(
+    'hardwareBackPress',
+    backAction,
+  );
+
+  return () => backHandler.remove();
+}, []);
+
 return (
   <ScrollView  showsVerticalScrollIndicator={true}
   vertical
@@ -123,7 +136,7 @@ return (
   }>
     <View>
     <Searchbar
-      placeholder="Filtrar"
+      placeholder={button_text.filtrar}
       style={styleLista.search}
       elevation={theme.search.elevation}
       onChangeText={setSearch}
@@ -162,7 +175,7 @@ return (
         ) : (
           sortedData.slice(page * pageSize, (page + 1) * pageSize).map((ingreso, index) => (
             <React.Fragment key={index}>
-              <DataTable.Row style={styleLista.row} onPress={() => handlePressIngreso(ingreso.id, index)}> 
+              <DataTable.Row style={[styleLista.row, expanded[ingreso.id] && { backgroundColor: theme.colors.tableSecondary }]} onPress={() => handlePressIngreso(ingreso.id, index)}> 
                 <DataTable.Cell style={{marginHorizontal:10,marginStart:30}}>{moment.utc(ingreso.fecha).format('DD/MM/YY')}</DataTable.Cell>
                 <DataTable.Cell >{ingreso.responsable}</DataTable.Cell>
                 <DataTable.Cell>{`${ingreso.moneda}${symbols.space}${ingreso.importe}`}</DataTable.Cell>   
@@ -176,7 +189,7 @@ return (
                             :  ingreso.moneda === `${atributos.usd}`
                             ? `${ingreso.moneda}${symbols.guion}${atributos.ar}${symbols.colon}`
                             :  ingreso.moneda === `${atributos.ar}`
-                            ? `${ingreso.moneda}${symbols.guion}${atributos.uy}${symbols.colon}`
+                            ? `${ingreso.moneda}${symbols.guion}${atributos.ar}${symbols.colon}`
                             : null}
                       </Text>
                       <Text>{ingreso.tipocambio}</Text>
@@ -191,7 +204,7 @@ return (
                             : ingreso && ingreso.moneda === `${atributos.usd}`
                             ? `$ ${(ingreso.importe * ingreso.tipocambio).toFixed(2)}`
                             : ingreso && ingreso.moneda === `${atributos.ar}`
-                            ? `$ ${(ingreso.tipocambio * ingreso.importe).toFixed(2)}`
+                            ? `$ ${(ingreso.importe).toFixed(2)}`
                             : null}
                       </Text>
                     </View>    
@@ -204,7 +217,6 @@ return (
                       <Icon.Button
                         backgroundColor={theme.colors.edit}
                         name={theme.icons.editar}
-                        title=""
                         onPress={() => onEdit(ingreso)}
                       >{button_text.edit}
                       </Icon.Button>
@@ -213,7 +225,6 @@ return (
                       <Icon.Button
                         backgroundColor={theme.colors.delete}
                         name={theme.icons.borrar}
-                        title=""
                         onPress={() => onDelete(ingreso.id)}
                       >{button_text.delete}
                       </Icon.Button>
@@ -232,9 +243,9 @@ return (
         page={page}
         numberOfPages={Math.ceil(sortedData.length / pageSize)}
         onPageChange={handlePageChange}
-        label={`Página ${page + 1} de ${Math.ceil(sortedData.length / pageSize)}`}
+        label={`${pagina.nombre} ${page + 1} ${symbols.de} ${Math.ceil(sortedData.length / pageSize)}`}
         onItemsPerPageChange={handleItemsPerPageChange}
-        selectPageDropdownLabel={'Cant.'}
+        selectPageDropdownLabel={alerts.cantidad}
         numberOfItemsPerPageList={numberOfItemsPerPageList}
         numberOfItemsPerPage={numberOfItemsPerPage}
       />
@@ -242,7 +253,6 @@ return (
         <Icon.Button
           backgroundColor={theme.colors.agregar}
           name={theme.icons.agregar}
-          title=""
           onPress={() => handleSubmit(ingreso)}
         >{`${button_text.agregar}${symbols.space}${atributos.ingreso}`}
         </Icon.Button>

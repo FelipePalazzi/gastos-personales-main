@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { View, Text,ScrollView, RefreshControl } from 'react-native';
+import { View, Text,ScrollView, RefreshControl, BackHandler } from 'react-native';
 import { DataTable,Searchbar, ActivityIndicator,Card } from 'react-native-paper';
 import {useNavigate} from 'react-router-native'
 import theme from '../styles/theme.js';
@@ -103,6 +103,19 @@ const GastoList = () => {
     navigate(`${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${id}`, { state: { deleteMode: true } }) 
     await deleteGasto(id) 
   } 
+  useEffect(() => {
+    const backAction = () => {
+      navigate(`${symbols.barra}`, { replace: true }) 
+      return true;
+    };
+    
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+  
+    return () => backHandler.remove();
+  }, []);
 
   return (
     <ScrollView  showsVerticalScrollIndicator={true}
@@ -119,7 +132,7 @@ const GastoList = () => {
     }>
     <View>
       <Searchbar
-        placeholder="Filtrar"
+        placeholder={button_text.filtrar}
         style={styleLista.search}
         elevation={theme.search.elevation}
         onChangeText={setSearch}
@@ -165,7 +178,7 @@ const GastoList = () => {
         ) : (
   sortedData.slice(page * pageSize, (page + 1) * pageSize).map((gasto, index) => (
     <React.Fragment key={index}>
-      <DataTable.Row style={styleLista.row} onPress={() => handlePressGasto(gasto.id, index)}>
+      <DataTable.Row style={[styleLista.row, expanded[gasto.id] && { backgroundColor: theme.colors.tableSecondary }]} onPress={() => handlePressGasto(gasto.id, index)}>
         <DataTable.Cell style={{marginHorizontal:10,marginStart:30}}>{moment.utc(gasto.fecha).format('DD/MM/YY')}</DataTable.Cell>
         <DataTable.Cell>{gasto.tipogasto}</DataTable.Cell>
         <DataTable.Cell>{`${gasto.totalar}`}</DataTable.Cell>
@@ -196,7 +209,6 @@ const GastoList = () => {
               <Icon.Button
                 backgroundColor={theme.colors.edit}
                 name={theme.icons.editar}
-                title=""
                 onPress={() => onEdit(gasto)}
               >{button_text.edit}
               </Icon.Button>
@@ -205,7 +217,6 @@ const GastoList = () => {
               <Icon.Button
                 backgroundColor={theme.colors.delete}
                 name={theme.icons.borrar}
-                title=""
                 onPress={() => onDelete(gasto.id)}
               >{button_text.delete}
               </Icon.Button>
@@ -225,9 +236,9 @@ const GastoList = () => {
         page={page}
         numberOfPages={Math.ceil(sortedData.length / pageSize)}
         onPageChange={handlePageChange}
-        label={`Página ${page + 1} de ${Math.ceil(sortedData.length / pageSize)}`}
+        label={`${pagina.nombre} ${page + 1} ${symbols.de} ${Math.ceil(sortedData.length / pageSize)}`}
         onItemsPerPageChange={handleItemsPerPageChange}
-        selectPageDropdownLabel={'Cant.'}
+        selectPageDropdownLabel={alerts.cantidad}
         numberOfItemsPerPageList={numberOfItemsPerPageList}
         numberOfItemsPerPage={numberOfItemsPerPage}
       />
@@ -235,7 +246,6 @@ const GastoList = () => {
         <Icon.Button
           backgroundColor={theme.colors.agregar}
           name={theme.icons.agregar}
-          title=""
           onPress={() => handleSubmit(gasto)}
         >{`${button_text.agregar}${symbols.space}${atributos.gasto}`}
         </Icon.Button>

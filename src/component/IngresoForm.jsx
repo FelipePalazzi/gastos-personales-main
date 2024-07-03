@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, TextInput, StyleSheet,Alert,} from 'react-native'
+import { View, Text, ScrollView, BackHandler} from 'react-native'
 import useIngresos from '../hooks/useIngresos'
 import useMonedaIngreso from '../hooks/useMonedaIngreso'
 import useResponsableIngreso from '../hooks/useResponsableIngreso'
@@ -9,13 +9,11 @@ import {Picker} from '@react-native-picker/picker'
 import DateTimePickerModal from "react-native-modal-datetime-picker"
 import Icon from 'react-native-vector-icons/FontAwesome'
 import theme from '../styles/theme'
-import { ActivityIndicator } from 'react-native-paper'
-import { Dimensions } from 'react-native'
+import { ActivityIndicator ,Dialog, Portal, TextInput, } from 'react-native-paper'
 import moment from 'moment'
 import 'moment/locale/es'
 import { alerts,button_text, atributos, symbols,pagina } from '../constants'
-
-const screenWidth = Dimensions.get('window').width
+import { styleForm } from '../styles/styles.js'
 
 const AgregarIngreso = () => {
   const navigate = useNavigate()
@@ -29,22 +27,25 @@ const AgregarIngreso = () => {
   const { loading } = useIngresos()
   const { monedaIngresos } = useMonedaIngreso()
   const { responsableIngresos } = useResponsableIngreso()
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false)
+  const [datePickerVisible, setDatePickerVisible] = useState(false)
   const [selectedDate, setSelectedDate] = useState(moment())
-  const [isFocused, setIsFocused] = useState(false)
   const params = useParams()
   const id = params.id
-  
+  const [visible, setVisible] = useState(false);
+  const [visibleOK, setvisibleOK] = useState(false);
+  const [visibleDelete, setvisibleDelete] = useState(false);
+  const [visibleOKDelete, setvisibleOKDelete] = useState(false);
+  const [visibleBack, setVisibleBack] = useState(false);
+  const [message, setMessage] = useState([]);
+
   useEffect(() => {
       const fetchData = async () => {
         const ingreso = await obtenerGasto(id)
-        setResponsable(ingreso[0].responsable)
         setTipocambio(ingreso[0].tipocambio.toFixed(4))
-        setMoneda(ingreso[0].moneda)
         setImporte(ingreso[0].importe.toFixed(2))
         setDescripcion(ingreso[0].descripcion)
-        responsableIngresos.find((ri) => ri.nombre === ingreso[0].responsable)
-        monedaIngresos.find((mi) => mi.descripcion === ingreso[0].moneda)
+        setResponsable(responsableIngresos.find((r) => r.nombre === ingreso[0].responsable).id)
+        setMoneda(monedaIngresos.find((mi) => mi.descripcion === ingreso[0].moneda).id)
       }
       fetchData()
   }, [id, responsableIngresos,monedaIngresos])
@@ -61,11 +62,11 @@ const AgregarIngreso = () => {
     setTipocambio(text)
   }
   const showDatePicker = () => {
-    setDatePickerVisibility(true)
+    setDatePickerVisible(true)
   }
   
   const hideDatePicker = () => {
-    setDatePickerVisibility(false)
+    setDatePickerVisible(false)
   }
   const handleConfirm = (date) => {
     const utcDate = moment(date)
@@ -84,9 +85,7 @@ const AgregarIngreso = () => {
         body: JSON.stringify(ingreso),
       })
       const data = await response.json()
-      Alert.alert(alerts.exito, alerts.guardado_exito, [
-        { text:button_text.ok, onPress: () => navigate(`${symbols.barra}${pagina.pagina_ingreso}`, { replace: true }) },
-      ])
+      setvisibleOK(true);
     } catch (error) {
       console.error(error)
     }
@@ -101,15 +100,14 @@ const AgregarIngreso = () => {
         },
         body: JSON.stringify(ingreso),
       })
-      Alert.alert(alerts.exito, alerts.actualizado_exito, [
-        { text: button_text.ok, onPress: () => navigate(`${symbols.barra}${pagina.pagina_ingreso}`, { replace: true }) },
-      ])
+      setvisibleOK(true);
     } catch (error) {
       console.error(error)
     }
   }
 
   const handleSubmitForm = async (e) => {
+    e.preventDefault()
     const missingFields = [];
             
     if (!responsable) {
@@ -128,10 +126,12 @@ const AgregarIngreso = () => {
     }
    
     if (missingFields.length > 0) {
-      const message = missingFields.map((field) => `→ ${field}`).join('\n');
-      Alert.alert(`${alerts.missing_data}${symbols.colon}`, message);
+      const message = missingFields.map((field) => `\n\n→ ${field}`).join('\n');
+      setMessage(message)
+      setVisible(true);
       return;
     }
+
     const ingreso = {
     fecha: selectedDate.format('YYYY-MM-DD HH:mm:ss'),
       responsable,
@@ -153,56 +153,69 @@ const AgregarIngreso = () => {
 
   const handleDelete = async () => {
     if (id) {
-      Alert.alert(
-       `${button_text.delete}${atributos.gasto}`,
-        alerts.delete_question,
-        [
-          {
-            text: button_text.cancel,
-            style: theme.alerts.cancelar,
-          },
-          {
-            text: button_text.delete,
-            onPress: async () => {
-              try {
-        const response = await fetch(`${pagina.pagina}${symbols.barra}${pagina.pagina_ingreso}${symbols.barra}${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        Alert.alert(alerts.exito, alerts.delete_exito, [
-          { text: button_text.ok, onPress: () => navigate(`${symbols.barra}${pagina.pagina_ingreso}`, { replace: true }) },
-        ])
-      } catch (error) {
-        console.error(`${alerts.error_ocurrido}${atributos.ingreso}${error.message}`)
-      }
-    }
-  }
-]
-)
+      setvisibleDelete(true);
 }
 }
-  return (
-    <View >
 
-      <View><Text></Text></View>
-      <View><Text></Text></View>
+useEffect(() => {
+  const backAction = () => {
+    setVisibleBack(true)
+    return true;
+  };
+  
+  const backHandler = BackHandler.addEventListener(
+    'hardwareBackPress',
+    backAction,
+  );
+
+  return () => backHandler.remove();
+}, []);
+
+  return (
+    <>
+    <ScrollView  showsVerticalScrollIndicator={true}
+    vertical
+    style={styleForm.scroll}
+    scrollEventThrottle={theme.scroll.desplazamiento}
+    >
+    <View >
+     {/*Mensaje de volver*/}
+    <Portal>
+      <Dialog visible={visibleBack} onDismiss={() => setVisibleBack(false)}>
+        <Dialog.Icon icon={theme.icons.volverAlert} />
+        <Dialog.Title style={styleForm.title}>{alerts.regresar}</Dialog.Title>
+        <Dialog.Actions style={styleForm.dialogActions}>
+        <Icon.Button name={theme.icons.close} backgroundColor={theme.colors.transparente} color={theme.colors.edit} onPress={() => setVisibleBack(false)}>{button_text.cancel}</Icon.Button>
+              <Icon.Button name={theme.icons.volver} onPress={() => 
+                navigate(`${symbols.barra}${pagina.pagina_ingreso}`, { replace: true })}>
+                  {button_text.volver}
+                  </Icon.Button>
+            </Dialog.Actions>
+      </Dialog>
+    </Portal>
+
+       <View style={styleForm.loadingContainer}>
+        <Text style={styleForm.loadingText}>{`${button_text.formulario}${atributos.gasto}`}</Text>
+      </View>
       {loading ? (
-        <View style={styles.loadingContainer}>
+        <View style={styleForm.loadingContainer}>
           <ActivityIndicator animating={true} color={theme.colors.primary} size={theme.icons.big} />
-          <Text style={styles.loadingText}>{alerts.cargando}</Text>
+          <Text style={styleForm.loadingText}>{alerts.cargando}</Text>
         </View>
-      ) : (<View>
-      <View >
-          <View style={styles.rowContainer}>
-      <Text style={styles.text}>{`${atributos.fecha}${symbols.colon}`}</Text>
-        <Text style={styles.dateText}>{selectedDate.format('LL')}</Text>
-      <View style={styles.buttonContainer}>
-  <Icon.Button name={theme.icons.calendar} title="" onPress={showDatePicker}>{`${button_text.select}`}</Icon.Button>
+      ) : (
+      <>
+      <View style={styleForm.backgroundContainer}>
+       <View style={styleForm.container}> 
+
+          <View style={styleForm.rowContainer}>
+      <Text style={styleForm.text}>{`${atributos.fecha}${symbols.colon}`}</Text>
+        <Text style={[styleForm.dateText, { color: !deleteMode? theme.colors.black : theme.colors.gray }]}>{selectedDate.format('LL')}</Text>
+      <View style={styleForm.buttonContainer}>
+  <Icon.Button name={theme.icons.calendar} disabled={deleteMode} backgroundColor={!deleteMode ? theme.colors.blue : theme.colors.disabled} onPress={showDatePicker}>{`${button_text.select}`}</Icon.Button>
       </View>
       <DateTimePickerModal
-        isVisible={isDatePickerVisible}
+      enabled={!deleteMode}
+        isVisible={datePickerVisible}
         mode="date"
         onConfirm={handleConfirm}
         onCancel={hideDatePicker}
@@ -210,183 +223,166 @@ const AgregarIngreso = () => {
     </View>
     </View>
     <View >
-  <View style={styles.rowContainer}>
-    <Text style={styles.text}>{`${atributos.responsable}${symbols.colon}`}</Text>
-    {responsableIngresos && (
+  <View style={styleForm.rowContainer}>
+    <Text style={styleForm.text}>{`${atributos.responsable}${symbols.colon}`}</Text>
   <Picker
+  enabled={!deleteMode}
     selectedValue={responsable}
     onValueChange={(text) => setResponsable(text)}
-    style={styles.picker}
-  >
-    <Picker.Item label={`${button_text.select}`} value="" />
+    style={styleForm.picker}
+    mode={theme.picker.modo}
+    dropdownIconColor={deleteMode? theme.colors.disabled : theme.colors.textSecondary}
+    >
+    <Picker.Item label={`${button_text.select} ${atributos.responsable}`} value="" color={theme.colors.gray}/>
     {responsableIngresos.map((ri) => (
-      <Picker.Item key={ri.id} label={ri.nombre} value={ri.id} />
+      <Picker.Item key={ri.id} label={ri.nombre} value={ri.id} color={!deleteMode? theme.colors.black :theme.colors.gray}/>
     ))}
   </Picker>
-)}
   </View>
-</View>
 
-<View>
-  <View style={styles.rowContainer}>
-    <Text style={styles.text}>{`${atributos.tipo_importe}${symbols.colon}`}</Text>
-    {monedaIngresos && (
+  <View style={styleForm.rowContainer}>
+    <Text style={styleForm.text}>{`${atributos.tipo_importe}${symbols.colon}`}</Text>
   <Picker
+  enabled={!deleteMode}
     selectedValue={moneda}
-    onValueChange={(text) => setMoneda(text)}
-    style={styles.picker}
-  >
-    <Picker.Item label={`${button_text.select}`} value="" />
+    onValueChange={(text) => {
+      setMoneda(text);
+      if (text === monedaIngresos.find((mi) => mi.descripcion === atributos.ar).id) {
+        handleTipocambioChange('1');
+      }
+    }}
+    style={styleForm.picker}
+    mode={theme.picker.modo}
+    dropdownIconColor={deleteMode? theme.colors.disabled :theme.colors.textSecondary}
+   >
+    <Picker.Item label={`${button_text.select} ${atributos.tipo_importe}`} value='' color={theme.colors.gray}/>
     {monedaIngresos.map((ri) => (
-      <Picker.Item key={ri.id} label={ri.descripcion} value={ri.id} />
+      <Picker.Item key={ri.id} label={ri.descripcion} value={ri.id} color={!deleteMode? theme.colors.black :theme.colors.gray}/>
     ))}
   </Picker>
-)}
   </View>
-</View>
 
-
-<View>
-  <View style={styles.rowContainer}>
-    <Text style={styles.text}>{`${atributos.tipo_cambio}${symbols.colon}`}</Text>
+  <View style={styleForm.rowContainer}>
+    <Text style={styleForm.text}>{`${atributos.tipo_cambio}${symbols.colon}`}</Text>
     <TextInput
+    disabled={deleteMode || moneda===monedaIngresos.find((mi) => mi.descripcion === atributos.ar).id}
+    mode='outlined'
       value={tipocambio}
       onChangeText={handleTipocambioChange}
       placeholder={atributos.tipo_cambio}
       keyboardType="numeric"
-      style={{
-        width: 250,
-        padding: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: isFocused ? theme.colors.primary : theme.colors.notFocused,
-        paddingVertical: 8,
-      }}
-      onFocus={() => setIsFocused(true)}
-      onBlur={() => setIsFocused(false)}
-    />
+      style={styleForm.text_input}
+      outlineStyle={deleteMode? { borderColor: theme.colors.disabled } : { borderColor: theme.colors.primary }}
+      />
   </View>
-</View>
 
-<View>
-<View style={styles.rowContainer}>
-      <Text style={styles.text}>{`${atributos.importe}${symbols.colon}`}</Text>
+<View style={styleForm.rowContainer}>
+      <Text style={styleForm.text}>{`${atributos.importe}${symbols.colon}`}</Text>
       <TextInput
+       disabled={deleteMode}
+          mode='outlined'
         value={importe}
         onChangeText={(text) => setImporte(text)}
         placeholder={atributos.importe}
         keyboardType="numeric"
-        style={{
-          width: 250,
-          padding: 10,
-          borderBottomWidth: 1,
-          borderBottomColor: isFocused ? theme.colors.primary : theme.colors.notFocused,
-          paddingVertical: 8,
-        }}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-      />
+        style={styleForm.text_input}
+        outlineStyle={deleteMode? { borderColor: theme.colors.disabled } : { borderColor: theme.colors.primary }}
+    />
   </View>
-</View>
-<View >
-  <View style={styles.rowContainer}>
-      <Text style={styles.text}>{`${atributos.descripcion}${symbols.colon}`}</Text>
+
+  <View style={styleForm.rowContainer}>
+      <Text style={styleForm.text}>{`${atributos.descripcion}${symbols.colon}`}</Text>
       <TextInput
+      disabled={deleteMode}
+      mode='outlined'
         value={descripcion}
         onChangeText={(text) => setDescripcion(text)}
         placeholder={`${atributos.descripcion}${symbols.space}${button_text.opcional}`}
-        style={{
-          width: 250,
-          padding: 10,
-          borderBottomWidth: 1,
-          borderBottomColor: isFocused ? theme.colors.primary : theme.colors.notFocused,
-          paddingVertical: 8,
-        }}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-      />
+        style={styleForm.text_input}
+        outlineStyle={deleteMode? { borderColor: theme.colors.disabled } : { borderColor: theme.colors.primary }}
+        />
   </View>
-</View>
-<View>
-<View>
+  </View>
+ {/* Mensaje de faltan datos */}
+ <Portal>
+      <Dialog visible={visible} onDismiss={() => setVisible(false)}>
+        <Dialog.Icon icon={theme.icons.alerta}  />
+        <Dialog.Title style={styleForm.title}>{alerts.missing_data}</Dialog.Title>
+        <Dialog.Content>
+          <Text style={styleForm.dateText}>{`${message}`}</Text>
+        </Dialog.Content>
+        <Dialog.Actions>
+              <Icon.Button name={theme.icons.close} onPress={() => setVisible(false)}>{button_text.cancel}</Icon.Button>
+            </Dialog.Actions>
+      </Dialog>
+    </Portal>
+{/* Mensaje de todo OK */}
+    <Portal>
+      <Dialog visible={visibleOK} onDismiss={() => navigate(`${symbols.barra}${pagina.pagina_ingreso}`, { replace: true })}>
+        <Dialog.Icon icon={theme.icons.okAlert}  />
+        <Dialog.Title style={styleForm.title}>{alerts.guardado_exito}</Dialog.Title>
+        <Dialog.Actions>
+              <Icon.Button name={theme.icons.ok} onPress={() => navigate(`${symbols.barra}${pagina.pagina_ingreso}`, { replace: true })}>{button_text.ok}</Icon.Button>
+            </Dialog.Actions>
+      </Dialog>
+    </Portal>
+{/* Mensaje de borrado */}
+    <Portal>
+      <Dialog visible={visibleDelete} onDismiss={() => setvisibleDelete(false)}>
+        <Dialog.Icon icon={theme.icons.deleteAlert} />
+        <Dialog.Title style={styleForm.title}>{alerts.delete_question}</Dialog.Title>
+        <Dialog.Actions style={styleForm.dialogActions}>
+              <Icon.Button name={theme.icons.close} backgroundColor={theme.colors.transparente} color={theme.colors.edit} onPress={() => setvisibleDelete(false)}>{button_text.cancel}</Icon.Button>
+              <Icon.Button name={theme.icons.borrar} backgroundColor={theme.colors.delete} onPress={async () => {try {
+          const response = await fetch(`${pagina.pagina}${symbols.barra}${pagina.pagina_ingreso}${symbols.barra}${id}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+              })
+            setvisibleDelete(false)
+            setvisibleOKDelete(true)}
+              catch {(error)}}}>{button_text.delete}
+              </Icon.Button>
+            </Dialog.Actions>
+      </Dialog>
+    </Portal>
+    <Portal>
+    <Dialog visible={visibleOKDelete} onDismiss={() => setvisibleOKDelete(false)}>
+        <Dialog.Icon icon={theme.icons.deleteComplete} />
+        <Dialog.Title style={styleForm.title}>{alerts.delete_exito}</Dialog.Title>
+        <Dialog.Actions>
+              <Icon.Button name={theme.icons.ok} onPress={() => navigate(`${symbols.barra}${pagina.pagina_ingreso}`, { replace: true })}>{button_text.ok}</Icon.Button>
+            </Dialog.Actions>
+      </Dialog>
+      </Portal>
     </View>
-    </View>
-    <View style={styles.rowButton}>
-      <View style={styles.button}>
-      <Icon.Button backgroundColor={theme.colors.cancelar} name={theme.icons.close} title="" onPress={handleCancel}>{button_text.cancel}</Icon.Button>
+
+    <View style={styleForm.rowButton}>
+      <View style={styleForm.button}>
+      <Icon.Button backgroundColor={theme.colors.cancelar} name={theme.icons.close}  onPress={handleCancel}>{button_text.cancel}</Icon.Button>
       </View>
       {!deleteMode && (
-    <View style={styles.button}>
-      <Icon.Button backgroundColor={theme.colors.agregar} name={theme.icons.save} title="" onPress={handleSubmitForm} >{button_text.sumbit}</Icon.Button>
+    <View style={styleForm.button}>
+      <Icon.Button backgroundColor={theme.colors.agregar} name={theme.icons.save}  onPress={handleSubmitForm} >{button_text.sumbit}</Icon.Button>
+      
     </View>
        )}
       {deleteMode && (
-    <View style={styles.button}>
-      <Icon.Button backgroundColor={theme.colors.red} name={theme.icons.borrar} title="" onPress={handleDelete} >{button_text.delete}</Icon.Button>
+    <View style={styleForm.button}>
+      <Icon.Button backgroundColor={theme.colors.red} name={theme.icons.borrar}  onPress={handleDelete}>{button_text.delete}</Icon.Button>
     </View>
       )}
       </View>
-      </View>
+      </>
+
      )}
+     
     </View>
+    </ScrollView>
+    </>
   )
 }
 
-const styles = StyleSheet.create({
-  loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  loadingText: {
-    fontSize: theme.fontSizes.body,
-    fontWeight: theme.fontWeights.bold,
-    color: theme.colors.primary,
-  },
-  dateText: {
-    fontSize: theme.fontSizes.ingresar,
-    marginRight:80
-  },
-  buttonContainer: {
-    marginLeft: -60,
-  },
-  button: {
-    padding: 16,
-    backgroundColor: theme.colors.white,
-    alignItems: 'center',
-  },
-  text:{
-    padding: 10,
-    fontSize: theme.fontSizes.ingresar,
-    color: theme.colors.white,
-    backgroundColor: theme.colors.primary,
-    marginVertical: 2,
-    borderRadius:6,
-    overflow: 'hidden',
-    marginRight: 8,
-    marginLeft: 15
-  },
-  rowContainer: {
-    fontSize: theme.fontSizes.ingresar,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  picker: {
-    fontSize: theme.fontSizes.ingresar,
-    padding: 8,
-    height: 40,
-    width: screenWidth * 0.6,
-    borderColor: theme.colors.gray,
-    borderWidth: 1,
-    backgroundColor: theme.colors.picker
-  },
-  rowButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-    marginTop: 150
-  },
-})
 
 export default AgregarIngreso

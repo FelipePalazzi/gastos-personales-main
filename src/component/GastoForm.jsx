@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text,  StyleSheet, ScrollView,} from 'react-native'
+import { View, Text, ScrollView,BackHandler} from 'react-native'
 import useGastos from '../hooks/useGastos'
 import useTipoGasto from '../hooks/useTipoGasto'
 import useCategoriaGasto from '../hooks/useCategoriaGasto'
@@ -11,12 +11,10 @@ import DateTimePickerModal from "react-native-modal-datetime-picker"
 import Icon from 'react-native-vector-icons/FontAwesome'
 import theme from '../styles/theme'
 import { ActivityIndicator ,Dialog, Portal, TextInput,} from 'react-native-paper'
-import { Dimensions } from 'react-native'
 import moment from 'moment'
 import 'moment/locale/es'
 import { alerts,button_text, atributos, symbols,pagina } from '../constants'
-
-const screenWidth = Dimensions.get('window').width;
+import { styleForm } from '../styles/styles.js'
 
 const AgregarGasto = () => {
   const navigate = useNavigate()
@@ -35,12 +33,14 @@ const AgregarGasto = () => {
   const {categoriaGastos} = useCategoriaGasto()  
   const [datePickerVisible, setDatePickerVisible] = useState(false)
   const [selectedDate, setSelectedDate] = useState(moment())
+  const [isFocused, setIsFocused] = useState(false)
   const params = useParams()
   const id = params.id
   const [visible, setVisible] = useState(false);
   const [visibleOK, setvisibleOK] = useState(false);
   const [visibleDelete, setvisibleDelete] = useState(false);
   const [visibleOKDelete, setvisibleOKDelete] = useState(false);
+  const [visibleBack, setVisibleBack] = useState(false);
   const [message, setMessage] = useState([]);
 
   useEffect(() => {
@@ -196,125 +196,159 @@ const AgregarGasto = () => {
       setvisibleDelete(true);
     }
   }
-
+  useEffect(() => {
+    const backAction = () => {
+      setVisibleBack(true)
+      return true;
+    };
+    
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+  
+    return () => backHandler.remove();
+  }, []);
 
 
   return (
     <>
     <ScrollView  showsVerticalScrollIndicator={true}
     vertical
-    style={styles.scroll}
+    style={styleForm.scroll}
     scrollEventThrottle={theme.scroll.desplazamiento}
     >
     <View >
-       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>{`${button_text.formulario}${atributos.gasto}`}</Text>
+     {/*Mensaje de volver*/}
+    <Portal>
+      <Dialog visible={visibleBack} onDismiss={() => setVisibleBack(false)}>
+        <Dialog.Icon icon={theme.icons.volverAlert} />
+        <Dialog.Title style={styleForm.title}>{alerts.regresar}</Dialog.Title>
+        <Dialog.Actions style={styleForm.dialogActions}>
+        <Icon.Button name={theme.icons.close} backgroundColor={theme.colors.transparente} color={theme.colors.edit} onPress={() => setVisibleBack(false)}>{button_text.cancel}</Icon.Button>
+              <Icon.Button name={theme.icons.volver} onPress={() => 
+                navigate(`${symbols.barra}${pagina.pagina_gasto}`, { replace: true })}>
+                  {button_text.volver}
+                  </Icon.Button>
+            </Dialog.Actions>
+      </Dialog>
+    </Portal>
+
+       <View style={styleForm.loadingContainer}>
+        <Text style={styleForm.loadingText}>{`${button_text.formulario}${atributos.gasto}`}</Text>
       </View>
       {loading ? (
-        <View style={styles.loadingContainer}>
+        <View style={styleForm.loadingContainer}>
           <ActivityIndicator animating={true} color={theme.colors.primary} size={theme.icons.big} />
-          <Text style={styles.loadingText}>{alerts.cargando}</Text>
+          <Text style={styleForm.loadingText}>{alerts.cargando}</Text>
         </View>
       ) : (
         <>
-      <View style={styles.backgroundContainer}>
-       <View style={styles.container}> 
+      <View style={styleForm.backgroundContainer}>
+       <View style={styleForm.container}> 
 
-          <View style={styles.rowContainer}>
-      <Text style={styles.text}>{`${atributos.fecha}${symbols.colon}`}</Text>
-        <Text style={styles.dateText}>{selectedDate.format('LL')}</Text>
-      <View style={styles.buttonContainer}>
-  <Icon.Button name={theme.icons.calendar} title="" onPress={showDatePicker}>{`${button_text.select}`}</Icon.Button>
+          <View style={styleForm.rowContainer}>
+      <Text style={styleForm.text}>{`${atributos.fecha}${symbols.colon}`}</Text>
+        <Text style={[styleForm.dateText, { color: !deleteMode? theme.colors.black : theme.colors.gray }]}>{selectedDate.format('LL')}</Text>
+      <View style={styleForm.buttonContainer}>
+  <Icon.Button name={theme.icons.calendar} disabled={deleteMode} backgroundColor={!deleteMode ? theme.colors.blue : theme.colors.disabled} onPress={showDatePicker}>{`${button_text.select}`}</Icon.Button>
       </View>
       <DateTimePickerModal
+      enabled={!deleteMode}
         isVisible={datePickerVisible}
         mode="date"
         onConfirm={handleConfirm}
         onCancel={hideDatePicker}
       />
     </View>
-
-  <View style={styles.rowContainer}>
-    <Text style={styles.text}>{`${atributos.tipo_gasto}${symbols.colon}`}</Text>
+    </View>
+    <View >
+  <View style={styleForm.rowContainer}>
+    <Text style={styleForm.text}>{`${atributos.tipo_gasto}${symbols.colon}`}</Text>
     <Picker
+    enabled={!deleteMode}
         selectedValue={tipogasto}
         onValueChange={handleTipogastoChange}
-        style={styles.picker}
-        mode='dropdown'
-        dropdownIconColor={theme.colors.textSecondary}
+        style={styleForm.picker}
+        mode={theme.picker.modo}
+        dropdownIconColor={deleteMode? theme.colors.disabled : theme.colors.textSecondary}
       >
         <Picker.Item label={`${button_text.select} ${atributos.tipo_gasto}`} value="" color={theme.colors.gray}/>
         {tipogastos.map((tg) => (
-          <Picker.Item key={tg.id} label={tg.descripcion} value={tg.id} />
+          <Picker.Item key={tg.id} label={tg.descripcion} value={tg.id} color={!deleteMode? theme.colors.black :theme.colors.gray}/>
         ))}
       </Picker>
   </View>
 
-<View style={styles.rowContainer}>
-    <Text style={styles.text}>{`${atributos.responsable}${symbols.colon}`}</Text>
+<View style={styleForm.rowContainer}>
+    <Text style={styleForm.text}>{`${atributos.responsable}${symbols.colon}`}</Text>
     <Picker
+    enabled={!deleteMode}
         selectedValue={responsable}
         onValueChange={(text) => setResponsable(text)}
-        style={styles.picker}
-        mode='dropdown'
-        dropdownIconColor={theme.colors.textSecondary}
+        style={styleForm.picker}
+        mode={theme.picker.modo}
+        dropdownIconColor={deleteMode? theme.colors.disabled :theme.colors.textSecondary}
       >
         <Picker.Item label={`${button_text.select} ${atributos.responsable}`} value='' color={theme.colors.gray}/>
         {responsableIngresos.map((r) => (
-          <Picker.Item key={r.id} label={r.nombre} value={r.id} />
+          <Picker.Item key={r.id} label={r.nombre} value={r.id} color={!deleteMode? theme.colors.black :theme.colors.gray}/>
         ))}
       </Picker>
   </View>
 
-  <View style={styles.rowContainer}>
-    <Text style={styles.text}>{`${atributos.tipo_cambio}${symbols.colon}`}</Text>
+  <View style={styleForm.rowContainer}>
+    <Text style={styleForm.text}>{`${atributos.tipo_cambio}${symbols.colon}`}</Text>
     <TextInput
+    disabled={deleteMode}
     mode='outlined'
       value={tipocambio}
       onChangeText={handletipoCambioChange}
       placeholder={atributos.tipo_cambio}
       keyboardType="numeric"
-      style={styles.text_input}
-      outlineStyle={{borderColor:theme.colors.primary}}
+      style={styleForm.text_input}
+      outlineStyle={deleteMode? { borderColor: theme.colors.disabled } : { borderColor: theme.colors.primary }}
     />
   </View>
 
 
 
-  <View style={styles.rowContainer}>
-    <Text style={styles.text}>{`${atributos.total_arg}${symbols.colon}`}</Text>
+  <View style={styleForm.rowContainer}>
+    <Text style={styleForm.text}>{`${atributos.total_arg}${symbols.colon}`}</Text>
     <TextInput
+    disabled={deleteMode}
     mode='outlined'
       value={totalar}
       onChangeText={handleTotalarChange}
       placeholder={atributos.total_arg}
       keyboardType="numeric"
-      style={styles.text_input}
-      outlineStyle={{borderColor:theme.colors.primary}}
+      style={styleForm.text_input}
+      outlineStyle={deleteMode? { borderColor: theme.colors.disabled } : { borderColor: theme.colors.primary }}
     />
   </View>
 
 
-  <View style={styles.rowContainer}>
-    <Text style={styles.text}>{`${atributos.total_uyu}${symbols.colon}`}</Text>
+  <View style={styleForm.rowContainer}>
+    <Text style={styleForm.text}>{`${atributos.total_uyu}${symbols.colon}`}</Text>
    {totalar? 
-  (tipocambio?  <TextInput style={styles.text_input} mode='outlined' disabled>{total}</TextInput> : <TextInput style={styles.text_input} mode='outlined' disabled >{`${button_text.ingresar}${symbols.space}${atributos.tipo_cambio}`}</TextInput>) 
+  (tipocambio?  <TextInput style={styleForm.text_input} mode='outlined' disabled>{total}</TextInput> : <TextInput style={styleForm.text_input} mode='outlined' disabled >{`${button_text.ingresar}${symbols.space}${atributos.tipo_cambio}`}</TextInput>) 
   : 
-  (tipocambio? <TextInput style={styles.text_input} mode='outlined' disabled>{`${button_text.ingresar}${symbols.space}${atributos.total_arg}`}</TextInput> 
-  : <TextInput style={styles.text_input}  mode='outlined' disabled>{`${button_text.ingresar}${symbols.space}${atributos.total_arg}${symbols.and}${atributos.tipo_cambio}`}</TextInput>)
+  (tipocambio? <TextInput style={styleForm.text_input} mode='outlined' disabled>{`${button_text.ingresar}${symbols.space}${atributos.total_arg}`}</TextInput> 
+  : <TextInput style={styleForm.text_input}  mode='outlined' disabled>{`${button_text.ingresar}${symbols.space}${atributos.total_arg}${symbols.and}${atributos.tipo_cambio}`}</TextInput>)
 }
   </View>
 
 
-  <View style={styles.rowContainer}>
-      <Text style={styles.text}>{`${atributos.descripcion}${symbols.colon}`}</Text>
+  <View style={styleForm.rowContainer}>
+      <Text style={styleForm.text}>{`${atributos.descripcion}${symbols.colon}`}</Text>
       <TextInput
+      disabled={deleteMode}
       mode='outlined'
         value={descripcion}
         onChangeText={(text) => setDescripcion(text)}
         placeholder={`${atributos.descripcion}${symbols.space}${button_text.opcional}`}
-        style={styles.text_input}
-        outlineStyle={{borderColor:theme.colors.primary}}
+        style={styleForm.text_input}
+        outlineStyle={deleteMode? { borderColor: theme.colors.disabled } : { borderColor: theme.colors.primary }}
       />
   </View>
 
@@ -322,10 +356,10 @@ const AgregarGasto = () => {
 
 <View>
 
-      <View style={styles.rowContainer}>
-        <Text style={styles.text}>{`${atributos.categoria}${symbols.colon}`}</Text>
-          {categoria ? <TextInput style={styles.text_input} mode='outlined' disabled>{categoriaGastos.find((c) => c.id === categoria).descripcion}</TextInput> : 
-          <TextInput style={styles.text_input} mode='outlined' disabled>{`${button_text.select}${symbols.space}${atributos.tipo_gasto}`}</TextInput>}
+      <View style={styleForm.rowContainer}>
+        <Text style={styleForm.text}>{`${atributos.categoria}${symbols.colon}`}</Text>
+          {categoria ? <TextInput style={styleForm.text_input} mode='outlined' disabled>{categoriaGastos.find((c) => c.id === categoria).descripcion}</TextInput> : 
+          <TextInput style={styleForm.text_input} mode='outlined' disabled>{`${button_text.select}${symbols.space}${atributos.tipo_gasto}`}</TextInput>}
       </View>
     </View>
 
@@ -333,10 +367,10 @@ const AgregarGasto = () => {
 {/* Mensaje de faltan datos */}
     <Portal>
       <Dialog visible={visible} onDismiss={() => setVisible(false)}>
-        <Dialog.Icon icon="alert" />
-        <Dialog.Title style={styles.title}>{alerts.missing_data}</Dialog.Title>
+        <Dialog.Icon icon={theme.icons.alerta} />
+        <Dialog.Title style={styleForm.title}>{alerts.missing_data}</Dialog.Title>
         <Dialog.Content>
-          <Text variant="bodyMedium">{`${message}`}</Text>
+          <Text style={styleForm.dateText}>{`${message}`}</Text>
         </Dialog.Content>
         <Dialog.Actions>
               <Icon.Button name={theme.icons.close} onPress={() => setVisible(false)}>{button_text.cancel}</Icon.Button>
@@ -346,21 +380,21 @@ const AgregarGasto = () => {
 {/* Mensaje de todo OK */}
     <Portal>
       <Dialog visible={visibleOK} onDismiss={() => setvisibleOK(false)}>
-        <Dialog.Icon icon="emoticon-cool-outline" />
-        <Dialog.Title style={styles.title}>{alerts.guardado_exito}</Dialog.Title>
+        <Dialog.Icon icon={theme.icons.okAlert} />
+        <Dialog.Title style={styleForm.title}>{alerts.guardado_exito}</Dialog.Title>
         <Dialog.Actions>
-              <Icon.Button name="angellist" onPress={() => navigate(`${symbols.barra}${pagina.pagina_gasto}`, { replace: true })}>{button_text.ok}</Icon.Button>
+              <Icon.Button name={theme.icons.ok} onPress={() => navigate(`${symbols.barra}${pagina.pagina_gasto}`, { replace: true })}>{button_text.ok}</Icon.Button>
             </Dialog.Actions>
       </Dialog>
     </Portal>
 {/* Mensaje de borrado */}
     <Portal>
       <Dialog visible={visibleDelete} onDismiss={() => setvisibleDelete(false)}>
-        <Dialog.Icon icon="delete-alert" />
-        <Dialog.Title style={styles.title}>{alerts.delete_question}</Dialog.Title>
-        <Dialog.Actions style={{justifyContent:'center', justifyContent:'space-between'}}>
-              <Icon.Button name={theme.icons.close} backgroundColor="transparent" color={theme.colors.edit} onPress={() => setvisibleDelete(false)}>{button_text.cancel}</Icon.Button>
-              <Icon.Button name="trash" backgroundColor={theme.colors.delete} onPress={async () => {try {
+        <Dialog.Icon icon={theme.icons.deleteAlert} />
+        <Dialog.Title style={styleForm.title}>{alerts.delete_question}</Dialog.Title>
+        <Dialog.Actions style={styleForm.dialogActions}>
+              <Icon.Button name={theme.icons.close} backgroundColor={theme.colors.transparente} color={theme.colors.edit} onPress={() => setvisibleDelete(false)}>{button_text.cancel}</Icon.Button>
+              <Icon.Button name={theme.icons.borrar} backgroundColor={theme.colors.delete} onPress={async () => {try {
           const response = await fetch(`${pagina.pagina}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${id}`, {
             method: 'DELETE',
             headers: {
@@ -376,28 +410,28 @@ const AgregarGasto = () => {
     </Portal>
     <Portal>
     <Dialog visible={visibleOKDelete} onDismiss={() => setvisibleOKDelete(false)}>
-        <Dialog.Icon icon="delete-empty" />
-        <Dialog.Title style={styles.title}>{alerts.delete_exito}</Dialog.Title>
+        <Dialog.Icon icon={theme.icons.deleteComplete} />
+        <Dialog.Title style={styleForm.title}>{alerts.delete_exito}</Dialog.Title>
         <Dialog.Actions>
-              <Icon.Button name="angellist" onPress={() => navigate(`${symbols.barra}${pagina.pagina_gasto}`, { replace: true })}>{button_text.ok}</Icon.Button>
+              <Icon.Button name={theme.icons.ok} onPress={() => navigate(`${symbols.barra}${pagina.pagina_gasto}`, { replace: true })}>{button_text.ok}</Icon.Button>
             </Dialog.Actions>
       </Dialog>
       </Portal>
     </View>
 
-    <View style={styles.rowButton}>
-      <View style={styles.button}>
-      <Icon.Button backgroundColor={theme.colors.cancelar} name={theme.icons.close} title="" onPress={handleCancel}>{button_text.cancel}</Icon.Button>
+    <View style={styleForm.rowButton}>
+      <View style={styleForm.button}>
+      <Icon.Button backgroundColor={theme.colors.cancelar} name={theme.icons.close}  onPress={handleCancel}>{button_text.cancel}</Icon.Button>
       </View>
       {!deleteMode && (
-    <View style={styles.button}>
-      <Icon.Button backgroundColor={theme.colors.agregar} name={theme.icons.save} title="" onPress={handleSubmitForm} >{button_text.sumbit}</Icon.Button>
+    <View style={styleForm.button}>
+      <Icon.Button backgroundColor={theme.colors.agregar} name={theme.icons.save}  onPress={handleSubmitForm} >{button_text.sumbit}</Icon.Button>
       
     </View>
        )}
       {deleteMode && (
-    <View style={styles.button}>
-      <Icon.Button backgroundColor={theme.colors.red} name={theme.icons.borrar} title="" onPress={handleDelete}>{button_text.delete}</Icon.Button>
+    <View style={styleForm.button}>
+      <Icon.Button backgroundColor={theme.colors.red} name={theme.icons.borrar}  onPress={handleDelete}>{button_text.delete}</Icon.Button>
     </View>
       )}
       </View>
@@ -410,86 +444,5 @@ const AgregarGasto = () => {
     </>
   )
 }
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  loadingText: {
-    fontSize: theme.fontSizes.body,
-    fontWeight: theme.fontWeights.bold,
-    color: theme.colors.primary,
-  },
-  dateText: {
-    fontSize: theme.fontSizes.ingresar,
-    marginRight:80
-  },
-  buttonContainer: {
-    marginLeft: -60,
-  },
-  button: {
-    padding: 16,
-    alignItems: 'center',
-  },
-  text:{
-    padding: 10,
-    fontSize: theme.fontSizes.ingresar,
-    color: theme.colors.white,
-    backgroundColor: theme.colors.primary,
-    marginVertical: 2,
-    borderRadius:6,
-    overflow: 'hidden',
-    marginRight: 8,
-    marginLeft: 15
-  },
-  rowContainer: {
-    fontSize: theme.fontSizes.ingresar,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    marginEnd:20,
-    width:screenWidth*0.97,
-  },
-  picker: {
-    flex: 1,
-    fontSize: theme.fontSizes.ingresar,
-    height: 40,
-    marginEnd:16,
-    width: screenWidth * 0.6,
-    borderColor: theme.colors.gray,
-    borderWidth: 1,
-    backgroundColor: theme.colors.picker
-  },
-  rowButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-   title: {
-    textAlign: 'center',
-  },
-  text_input:{
-    flex: 1,
-    marginRight: 16, 
-    height: 40,
-    padding: 10,
-    paddingVertical: 8,
-    fontSize:13,
-  }, 
-  container: {
-    padding:10,
-    paddingHorizontal:10,
-    marginEnd:20,
-},
-backgroundContainer:{
-  backgroundColor: theme.colors.table,
-},
-scroll:{
-  flex:1,
-}
-})
 
 export default AgregarGasto

@@ -24,6 +24,11 @@ const theme= {
         card: '#8ADEE8',
         segmented: '#5AEEC9',
         gasto:'#993D64',
+        disabled:'#D5D5D5',
+        black:'#000000',
+        blue:'#252FFF',
+        rojo:'#DB2B2B',
+        transparente: 'transparent'
     },
     fontSizes: {
         body: 24,
@@ -51,7 +56,14 @@ const theme= {
         abajo: 'chevron-down',
         save: 'save',
         close: 'close',
-        calendar: 'calendar'
+        calendar: 'calendar',
+        volverAlert:'file-cancel',
+        volver:'arrow-left',
+        alerta:'alert',
+        okAlert:'emoticon-cool-outline',
+        ok:'angellist',
+        deleteAlert:'delete-alert',
+        deleteComplete:'delete-empty',
     },
     scroll:{
         desplazamiento: 16,
@@ -61,6 +73,9 @@ const theme= {
     },
     alerts:{
         cancelar: 'cancel',
+    },
+    picker:{
+        modo:'dropdown'
     }
 }
 export default theme

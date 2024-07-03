@@ -12,6 +12,8 @@ export const alerts = {
     delete_question: '¿Estás seguro de eliminar este gasto?',
     cargando: 'Cargando...',
     noData:'No hay datos registrado',
+    regresar:'Estas seguro de volver?',
+    cantidad:'Cant.',
   };
   export const symbols = {
     space: ' ',
@@ -20,6 +22,8 @@ export const alerts = {
     and:' y ',
     guion: '-',
     barra:'/',
+    de:'de ',
+    mil:'k',
   };
   export const button_text = {
     ok: 'OK',
@@ -32,6 +36,9 @@ export const alerts = {
     agregar:'Agregar',
     opcional: '(Opcional)',
     formulario:'Formulario ',
+    volver:'Volver ',
+    filtrar:'Filtrar',
+    ingreseAño:'Ingrese Año',
   };
   export const atributos = {
     gasto: 'Gasto',
@@ -51,8 +58,12 @@ export const alerts = {
     categoria: 'Categoria',
     importe:'Importe',
     tipo_importe:'Tipo de importe',
+    gastoResumen:'GASTO AR',
+    ingresoResumen:'INGRESO AR',
+
   }
   export const pagina = {
+    nombre:'Página',
     mensaje:'Gastos Personales',
     pagina: PAGINA_URL,
     pagina_gasto:'gasto',

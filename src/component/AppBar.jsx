@@ -10,7 +10,7 @@ const styles = StyleSheet.create ({
     container: {
         backgroundColor: theme.appBar.primary,
         flexDirection: 'row',
-        paddingTop: Constants.statusBarHeight + 10
+        paddingTop: Constants.statusBarHeight
     },
     scroll:{
         paddingBottom: 15
@@ -44,7 +44,7 @@ const AppBar = () => {
     return (
         <View style = {styles.container}>
             <ScrollView showsHorizontalScrollIndicator={false} horizontal style={styles.scroll}>
-                <AppBarTab to={`${symbols.barra}${pagina.pagina_resumen}`}>Resumen</AppBarTab>
+                <AppBarTab to={symbols.barra/*`${symbols.barra}${pagina.pagina_resumen}`*/}>Resumen</AppBarTab>
                 <AppBarTab to={`${symbols.barra}${pagina.pagina_ingreso}`}>Ingresos</AppBarTab>
                 <AppBarTab to={`${symbols.barra}${pagina.pagina_gasto}`}>Gastos</AppBarTab>
             </ScrollView>

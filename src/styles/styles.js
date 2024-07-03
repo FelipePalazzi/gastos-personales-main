@@ -79,7 +79,7 @@ const styleLista = StyleSheet.create({
       textAlign: 'center',
       fontWeight:theme.fontWeights.bold,
       fontSize:theme.fontSizes.body,
-      color: theme.colors.edit,
+      color: theme.colors.white,
       marginTop:15,
     },
     titleContainer:{
@@ -145,4 +145,91 @@ const styleLista = StyleSheet.create({
     }
 
   })
-  export {styleLista, styleResumen, screenWidth};
+
+  const styleForm = StyleSheet.create({
+    loadingContainer: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    loadingText: {
+      fontSize: theme.fontSizes.body,
+      fontWeight: theme.fontWeights.bold,
+      color: theme.colors.primary,
+    },
+    dateText: {
+      fontSize: theme.fontSizes.ingresar,
+      marginRight:80
+    },
+    buttonContainer: {
+      marginLeft: -60,
+    },
+    button: {
+      padding: 16,
+      alignItems: 'center',
+    },
+    text:{
+      padding: 10,
+      fontSize: theme.fontSizes.ingresar,
+      color: theme.colors.white,
+      backgroundColor: theme.colors.primary,
+      marginVertical: 2,
+      borderRadius:6,
+      overflow: 'hidden',
+      marginRight: 8,
+      marginLeft: 15
+    },
+    rowContainer: {
+      fontSize: theme.fontSizes.ingresar,
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      marginEnd:20,
+      width:screenWidth*0.97,
+    },
+    picker: {
+      flex: 1,
+      fontSize: theme.fontSizes.ingresar,
+      height: 40,
+      marginEnd:16,
+      width: screenWidth * 0.6,
+      borderColor: theme.colors.gray,
+      borderWidth: 1,
+      backgroundColor: theme.colors.picker
+    },
+    rowButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 16,
+    },
+     title: {
+      textAlign: 'center',
+    },
+    text_input:{
+      flex: 1,
+      marginRight: 16, 
+      height: 40,
+      padding: 10,
+      paddingVertical: 8,
+      fontSize:13,
+    }, 
+    container: {
+      padding:10,
+      paddingHorizontal:10,
+      marginEnd:20,
+  },
+  backgroundContainer:{
+    backgroundColor: theme.colors.table,
+  },
+  scroll:{
+    flex:1,
+  },
+  dialogActions:{
+    marginTop:20,
+    justifyContent:'center',
+   justifyContent:'space-between'
+  }
+  })
+
+  export {styleLista, styleResumen, screenWidth, styleForm};

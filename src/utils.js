@@ -2,101 +2,99 @@ import moment from 'moment'
 import theme from './styles/theme'
 
 export const filterData = (data, search, monedaProp, fechaProp, yearProp) => {
-    if (!search) {
-      return data;
-    } else {
-      const searchParts = search.split(' ');
-      const totalSearch = searchParts[1] && parseFloat(searchParts[1]) > 0? parseFloat(searchParts[1]) : null;
-      const monedaSearch = searchParts[0] && searchParts[1]? searchParts[0].toLowerCase() : null;
-      const fechaRegex = /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)(?:\s+(\d{4}))?$/i;
-      const añoRegex = /^(\d{4})?$/i;
-      const fechaMatch = search.match(fechaRegex);
-      const añoMatch = search.match(añoRegex);
+  if (!search) {
+    return data;
+  } else {
+    const searchParts = search.split(' ');
+    const totalSearch = searchParts[1] && parseFloat(searchParts[1]) > 0? parseFloat(searchParts[1]) : null;
+    const monedaSearch = searchParts[0] && searchParts[1]? searchParts[0].toLowerCase() : null;
+    const fechaRegex = /^(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)(?:\s+(\d{4}))?$/i;
+    const añoRegex = /^(\d{4})?$/i;
+    const fechaMatch = search.match(fechaRegex);
+    const añoMatch = search.match(añoRegex);
 
-      if (fechaMatch) {
-        const mes = fechaMatch[1].toLowerCase();
-        const año = fechaMatch[2]? parseInt(fechaMatch[2]) : null;
-        const mesNumerico = moment.utc().month(mes).format('M');
+    if (fechaMatch) {
+      const mes = fechaMatch[1].toLowerCase();
+      const año = fechaMatch[2]? parseInt(fechaMatch[2]) : null;
+      const mesNumerico = moment.utc().month(mes).format('M');
 
-      if (fechaProp) {
-        return data.filter((dato) => {
-          const fechaDato = moment.utc(dato[fechaProp]);
-          return (
-            (!año || fechaDato.year() === año) &&
-            (fechaDato.month() + 1) === parseInt(mesNumerico)
-          );
-        });
-      } else {
-        return data;
-      }
-    }
-  
-      if (añoMatch) {
-        const año = parseInt(añoMatch[1]);
-  
-      if (yearProp) {
-        return data.filter((dato) => {
-          const fechaDato = moment.utc(dato[yearProp]);
-          return fechaDato.year() === año;
-        });
-      } else {
-        return data
-      }
-    }
-
+    if (fechaProp) {
       return data.filter((dato) => {
-        if (monedaSearch && totalSearch) {
-          if (monedaProp) { 
-            return monedaProp.some((prop) => {
-              if (!(prop in dato)) return false
-              let valor = dato[prop];
-              let valoringreso = dato.importe;
-              if (monedaSearch === 'ar' && prop === 'totalar') {
-                return valor >= totalSearch;
-              } else if (monedaSearch === 'uy' && prop === 'total') {
-                return valor >= totalSearch;
-              } else if (monedaSearch === 'usd' && dato[prop]=='USD') {
-                return valoringreso >= totalSearch;
-              } else if (monedaSearch === 'uy' && dato[prop]=='UYU') {
-                return valoringreso >= totalSearch;
-              } else if (monedaSearch === 'ar') {
-                if (dato[prop] === 'UYU') {
-                  valoringreso = (dato.importe / dato.tipocambio).toFixed(2);
-                } else if (dato[prop] === 'USD') {
-                  valoringreso = (dato.importe * dato.tipocambio).toFixed(2);
-                } else if (dato[prop] === 'ARG') {
-                    valoringreso = dato.importe
-                } else {
-                  valoringreso = 0;
-                }
-                return valoringreso >= totalSearch;
-              }
-              return false;
-            });
-            
-
-        }
-          return (
-            (dato.responsable.toLowerCase().includes(search.toLocaleLowerCase()) ||
-            ('categoria' in dato && (
-              dato.tipogasto.toLowerCase().includes(search.toLocaleLowerCase()) ||
-              dato.categoria.toLowerCase().includes(search.toLocaleLowerCase())
-            )) ||
-            ('monedaingreso' in dato && (
-              dato.descripcion.toLowerCase().includes(search.toLocaleLowerCase()) ||
-              dato.fecha.toString().includes(search.toLocaleLowerCase())
-            ))
-          )
-          );
-        } else {
-          return data
-        }
+        const fechaDato = moment.utc(dato[fechaProp]);
+        return (
+          (!año || fechaDato.year() === año) &&
+          (fechaDato.month() + 1) === parseInt(mesNumerico)
+        );
       });
-      
-        }
-    
-  };
+    } else {
+      return data;
+    }
+  }
 
+    if (añoMatch) {
+      const año = parseInt(añoMatch[1]);
+
+    if (yearProp) {
+      return data.filter((dato) => {
+        const fechaDato = moment.utc(dato[yearProp]);
+        return fechaDato.year() === año;
+      });
+    } else {
+      return data
+    }
+  }
+
+    return data.filter((dato) => {
+      if (monedaSearch && totalSearch) {
+        if (monedaProp !== '') { 
+          return monedaProp.some((prop) => {
+            if (!(prop in dato)) return false
+            let valor = dato[prop];
+            let valoringreso = dato.importe;
+            if (monedaSearch === 'ar' && prop === 'totalar') {
+              return valor >= totalSearch;
+            } else if (monedaSearch === 'uy' && prop === 'total') {
+              return valor >= totalSearch;
+            } else if (monedaSearch === 'usd' && dato[prop]=='USD') {
+              return valoringreso >= totalSearch;
+            } else if (monedaSearch === 'uy' && dato[prop]=='UYU') {
+              return valoringreso >= totalSearch;
+            } else if (monedaSearch === 'ar') {
+              if (dato[prop] === 'UYU') {
+                valoringreso = (dato.importe / dato.tipocambio).toFixed(2);
+              } else if (dato[prop] === 'USD') {
+                valoringreso = (dato.importe * dato.tipocambio).toFixed(2);
+              } else if (dato[prop] === 'ARG') {
+                  valoringreso = dato.importe
+              } else {
+                valoringreso = 0;
+              }
+              return valoringreso >= totalSearch;
+            }
+            return false;
+          });
+          
+
+      }}else {
+        if (dato.responsable)
+       { return (
+          (dato.responsable.toLowerCase().includes(search.toLocaleLowerCase()) ||
+          ('categoria' in dato && (
+            dato.tipogasto.toLowerCase().includes(search.toLocaleLowerCase()) ||
+            dato.categoria.toLowerCase().includes(search.toLocaleLowerCase())
+          )) ||
+          ('monedaingreso' in dato && (
+            dato.descripcion.toLowerCase().includes(search.toLocaleLowerCase()) ||
+            dato.fecha.toString().includes(search.toLocaleLowerCase())
+          ))
+        )
+        );} else { return data }
+      }
+    });
+    
+      }
+  
+};
   export function sortData(data, orden, columna) {
     if (orden === 'no orden') {
       return data.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
@@ -132,17 +130,4 @@ export const filterData = (data, search, monedaProp, fechaProp, yearProp) => {
       }
     }
     return theme.icons.minus;
-  }
-  
-  export function handlePress(gastoId, index, setSelectedGasto, scrollViewRef) {
-    setSelectedGasto(gastoId);
-    const itemHeight = theme.fontSizes.cell;
-    const yOffset = index * itemHeight;
-    const newOffset = yOffset;
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollTo({
-        y: newOffset,
-        animated: true,
-      });
-    }
   }
