@@ -5,20 +5,45 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "PAGINA_URL": "${PAGINA_URL}",
+        "PORT": "${PORT}",
+        "DB_HOST": "${DB_HOST}",
+        "DB_USER": "${DB_USER}",
+        "DB_PASS": "${DB_PASS}",
+        "DB_NAME": "${DB_NAME}",
+        "DB_PORT": "${DB_PORT}"
+      }
     },
     "preview": {
-      "android":{
+      "android": {
         "buildType": "apk"
       },
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "PAGINA_URL": "${PAGINA_URL}",
+        "PORT": "${PORT}",
+        "DB_HOST": "${DB_HOST}",
+        "DB_USER": "${DB_USER}",
+        "DB_PASS": "${DB_PASS}",
+        "DB_NAME": "${DB_NAME}",
+        "DB_PORT": "${DB_PORT}"
+      }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "PAGINA_URL": "${PAGINA_URL}",
+        "PORT": "${PORT}",
+        "DB_HOST": "${DB_HOST}",
+        "DB_USER": "${DB_USER}",
+        "DB_PASS": "${DB_PASS}",
+        "DB_NAME": "${DB_NAME}",
+        "DB_PORT": "${DB_PORT}"
+      }
+    }
   },
   "submit": {
     "production": {}
-  },
-  "secrets": {
-    "config": "./config.js"
   }
 }

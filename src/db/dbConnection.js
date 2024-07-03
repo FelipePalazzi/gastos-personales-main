@@ -1,7 +1,12 @@
 import pkg from 'pg';
 const {Pool} = pkg;
-import { db } from "../../config.js";
-
+const db = {
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  port:process.env.DB_PORT,
+};
 const pool = new Pool({
     user: db.user,
     password: db.password,

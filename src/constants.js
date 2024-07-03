@@ -1,4 +1,4 @@
-import { PAGINA_URL } from '../config.js';
+const PAGINA_URL = process.env.PAGINA_URL;
 import { screenWidth } from './styles/styles.js';
 
 export const alerts = {
