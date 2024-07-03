@@ -25,6 +25,14 @@ const styleLista = StyleSheet.create({
       paddingHorizontal:1,
       borderBottomWidth: 1,
       backgroundColor: theme.colors.table
+
+  },
+  textTitleTable:{
+    color:theme.colors.textPrimary ,
+    fontWeight:theme.fontWeights.bold
+  },
+  textRowTable:{
+    color:theme.colors.textPrimary,
   },
   card: {
     elevation:2,

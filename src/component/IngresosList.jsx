@@ -141,6 +141,9 @@ return (
       elevation={theme.search.elevation}
       onChangeText={setSearch}
       value={search}
+      inputStyle={styleLista.textRowTable}
+      placeholderTextColor={theme.colors.textPrimary}
+      iconColor={theme.colors.textPrimary}
     />
     </View>
   <View style={styleLista.container}>
@@ -148,6 +151,7 @@ return (
         <DataTable.Header style={styleLista.headerRow}>
           <DataTable.Title
             onPress={() => handleSort('fecha')}
+            textStyle={styleLista.textTitleTable}
           >
             <Text >{atributos.fecha}</Text>
             <Feather name={getIcon('fecha')} size={theme.icons.ordenar} color={columna === 'fecha'? theme.colors.white : theme.colors.gray} />
@@ -155,6 +159,7 @@ return (
           <DataTable.Title
             onPress={() => handleSort('responsable')}
             style={{marginHorizontal:30,marginLeft:30}}
+            textStyle={styleLista.textTitleTable}
           >
             <Text>{atributos.responsable}</Text>
             <Feather name={getIcon('responsable')} size={theme.icons.ordenar} color={columna === 'responsable'? theme.colors.white : theme.colors.gray} />
@@ -162,6 +167,7 @@ return (
           <DataTable.Title
             onPress={() => handleSort('importe')}
             style={{marginLeft:20}}
+            textStyle={styleLista.textTitleTable}
           >
             <Text>{atributos.importe}</Text>
             <Feather name={getIcon('importe')} size={theme.icons.ordenar} color={columna === 'importe'? theme.colors.white : theme.colors.gray} />
@@ -176,9 +182,9 @@ return (
           sortedData.slice(page * pageSize, (page + 1) * pageSize).map((ingreso, index) => (
             <React.Fragment key={index}>
               <DataTable.Row style={[styleLista.row, expanded[ingreso.id] && { backgroundColor: theme.colors.tableSecondary }]} onPress={() => handlePressIngreso(ingreso.id, index)}> 
-                <DataTable.Cell style={{marginHorizontal:10,marginStart:30}}>{moment.utc(ingreso.fecha).format('DD/MM/YY')}</DataTable.Cell>
-                <DataTable.Cell >{ingreso.responsable}</DataTable.Cell>
-                <DataTable.Cell>{`${ingreso.moneda}${symbols.space}${ingreso.importe}`}</DataTable.Cell>   
+                <DataTable.Cell textStyle={styleLista.textRowTable} style={{marginHorizontal:10,marginStart:30}}>{moment.utc(ingreso.fecha).format('DD/MM/YY')}</DataTable.Cell>
+                <DataTable.Cell textStyle={styleLista.textRowTable}>{ingreso.responsable}</DataTable.Cell>
+                <DataTable.Cell textStyle={styleLista.textRowTable}>{`${ingreso.moneda}${symbols.space}${ingreso.importe}`}</DataTable.Cell>   
               </DataTable.Row>
               {expanded[ingreso.id] && (
                 <Card style={styleLista.card}>

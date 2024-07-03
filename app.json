@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "gastos-personales",
-    "slug": "gastos-personales",
-    "version": "1.0.0",
+    "name": "Gastos Felipe",
+    "slug": "Gastos Felipe",
+    "version": "0.9.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,7 +16,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "package": "Gastos Personales",
+        "package": "Gastos Felipe",
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },

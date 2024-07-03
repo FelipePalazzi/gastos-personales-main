@@ -137,6 +137,9 @@ const GastoList = () => {
         elevation={theme.search.elevation}
         onChangeText={setSearch}
         value={search}
+        inputStyle={styleLista.textRowTable}
+        placeholderTextColor={theme.colors.textPrimary}
+        iconColor={theme.colors.textPrimary}
       />
     </View>
     <View style={styleLista.container}>
@@ -144,6 +147,7 @@ const GastoList = () => {
         <DataTable.Header style={styleLista.headerRow}>
           <DataTable.Title
             onPress={() => handleSort('fecha')}
+            textStyle={styleLista.textTitleTable}
           >
             <Text style={styleLista.text}>{atributos.fecha}</Text>
             <Feather name={getIcon('fecha')} size={theme.icons.ordenar} color={columna === 'fecha'? theme.colors.white : theme.colors.gray} />
@@ -151,6 +155,7 @@ const GastoList = () => {
           <DataTable.Title
             onPress={() => handleSort('tipogasto')}
             style={{marginHorizontal:5,marginLeft:20}}
+            textStyle={styleLista.textTitleTable}
           >
             <Text style={styleLista.text}>{atributos.tipo}</Text>
             <Feather name={getIcon('tipogasto')} size={theme.icons.ordenar} color={columna === 'tipogasto'? theme.colors.white : theme.colors.gray} />
@@ -158,6 +163,7 @@ const GastoList = () => {
           <DataTable.Title
             onPress={() => handleSort('totalar')}
             style={{marginHorizontal:5,marginLeft:5}}
+            textStyle={styleLista.textTitleTable}
           >
             <Text style={styleLista.text}>{`${symbols.peso}${atributos.ar}`}</Text>
             <Feather name={getIcon('totalar')} size={theme.icons.ordenar} color={columna === 'totalar'? theme.colors.white : theme.colors.gray} />
@@ -165,6 +171,7 @@ const GastoList = () => {
           <DataTable.Title
             onPress={() => handleSort('total')}
             style={{marginLeft:5}}
+            textStyle={styleLista.textTitleTable}
           >
             <Text style={styleLista.text}>{`${symbols.peso}${atributos.uy}`}</Text>
             <Feather name={getIcon('total')} size={theme.icons.ordenar} color={columna === 'total'? theme.colors.white : theme.colors.gray} />
@@ -179,10 +186,10 @@ const GastoList = () => {
   sortedData.slice(page * pageSize, (page + 1) * pageSize).map((gasto, index) => (
     <React.Fragment key={index}>
       <DataTable.Row style={[styleLista.row, expanded[gasto.id] && { backgroundColor: theme.colors.tableSecondary }]} onPress={() => handlePressGasto(gasto.id, index)}>
-        <DataTable.Cell style={{marginHorizontal:10,marginStart:30}}>{moment.utc(gasto.fecha).format('DD/MM/YY')}</DataTable.Cell>
-        <DataTable.Cell>{gasto.tipogasto}</DataTable.Cell>
-        <DataTable.Cell>{`${gasto.totalar}`}</DataTable.Cell>
-        <DataTable.Cell>{`${gasto.total}`}</DataTable.Cell>
+        <DataTable.Cell textStyle={styleLista.textRowTable} style={{marginHorizontal:10,marginStart:30}}>{moment.utc(gasto.fecha).format('DD/MM/YY')}</DataTable.Cell>
+        <DataTable.Cell textStyle={styleLista.textRowTable}>{gasto.tipogasto}</DataTable.Cell>
+        <DataTable.Cell textStyle={styleLista.textRowTable}>{`${gasto.totalar}`}</DataTable.Cell>
+        <DataTable.Cell textStyle={styleLista.textRowTable}>{`${gasto.total}`}</DataTable.Cell>
       </DataTable.Row>
       {expanded[gasto.id] && (
         <Card style={styleLista.card}>

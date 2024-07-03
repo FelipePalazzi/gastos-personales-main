@@ -158,6 +158,9 @@ return (
       elevation={theme.search.elevation}
       onChangeText={setSearch}
       value={search}
+      inputStyle={styleLista.textRowTable}
+      placeholderTextColor={theme.colors.textPrimary}
+      iconColor={theme.colors.textPrimary}
     />
     {loading  &&(
         <View style={styleLista.loadingContainer}>
