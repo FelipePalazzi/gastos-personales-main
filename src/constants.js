@@ -1,4 +1,4 @@
-const PAGINA_URL = process.env.PAGINA_URL;
+import {PAGINA_URL} from "@env"
 import { screenWidth } from './styles/styles.js';
 
 export const alerts = {
