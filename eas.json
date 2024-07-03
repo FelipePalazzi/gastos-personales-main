@@ -17,5 +17,8 @@
   },
   "submit": {
     "production": {}
+  },
+  "secrets": {
+    "config": "./config.js"
   }
 }

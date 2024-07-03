@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Gastos Felipe",
-    "slug": "Gastos Felipe",
+    "name": "gastos-personales",
+    "slug": "gastos-personales",
     "version": "0.9.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
