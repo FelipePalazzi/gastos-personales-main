@@ -1,6 +1,6 @@
 import pkg from 'pg';
 const {Pool} = pkg;
-import  db  from "../../config.js";
+import  {db}  from "../../config.js";
 
 const pool = new Pool({
     user: db.user,

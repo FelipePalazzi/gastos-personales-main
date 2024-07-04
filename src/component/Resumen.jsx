@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, PanResponder, Dimensions} from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, PanResponder} from "react-native";
 import { useState, useEffect, useRef} from "react";
 import  {styleResumen, styleLista, screenWidth} from "../styles/styles.js";
 import { Searchbar, ActivityIndicator,SegmentedButtons, Card, Icon } from 'react-native-paper';
@@ -237,7 +237,7 @@ return (
           showVerticalLines
           animationDuration={lineChart.animacionDuration}
           xAxisTextNumberOfLines={lineChart.xAxisTextNumberOfLines}
-          width={lineChart.width}
+          width={screenWidth-95}
           height={lineChart.height}
           initialSpacing={lineChart.initialSpacing}
           spacing={lineChart.spacing}

@@ -1,6 +1,5 @@
-import  PAGINA_URL from '../config.js';
-import  Dimensions from 'react-native';
-const screenWidth = Dimensions.get('window').width;
+import  {PAGINA_URL} from '../config.js';
+
 
 export const alerts = {
     exito: 'Éxito',
@@ -80,7 +79,6 @@ export const alerts = {
   export const lineChart = {
     animacionDuration: 1500,
     xAxisTextNumberOfLines: 2,
-    width: screenWidth-95,
     height: 220,
     initialSpacing: 10,
     spacing:50,
