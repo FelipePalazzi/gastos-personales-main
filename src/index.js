@@ -10,9 +10,9 @@ import router6 from "./routes/responsableingreso.routes.js"
 import router7 from "./routes/resumen.routes.js"
 import cron from 'node-cron';
 import { pagina,symbols } from "./constants.js"
-import  {PORT}  from "../config.js"
-
-const port = PORT || 3000
+import dotenv from "dotenv";
+dotenv.config();
+const port = process.env.PORT || 3000
 
 
 const app = express()

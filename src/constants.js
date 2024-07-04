@@ -1,5 +1,5 @@
-import  {PAGINA_URL} from '../config.js';
-
+import dotenv from "dotenv";
+dotenv.config();
 
 export const alerts = {
     exito: 'Éxito',
@@ -65,7 +65,7 @@ export const alerts = {
   export const pagina = {
     nombre:'Página',
     mensaje:'Gastos Personales',
-    pagina: PAGINA_URL    ,
+    pagina: process.env.PAGINA_URL,
     pagina_gasto:'gasto',
     pagina_ingreso: 'ingreso',
     pagina_new:'new',
