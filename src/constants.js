@@ -1,5 +1,6 @@
-import {PAGINA_URL} from "@env"
-import { screenWidth } from './styles/styles.js';
+import  PAGINA_URL from '../config.js';
+import  Dimensions from 'react-native';
+const screenWidth = Dimensions.get('window').width;
 
 export const alerts = {
     exito: 'Éxito',
@@ -65,7 +66,7 @@ export const alerts = {
   export const pagina = {
     nombre:'Página',
     mensaje:'Gastos Personales',
-    pagina: PAGINA_URL,
+    pagina: PAGINA_URL    ,
     pagina_gasto:'gasto',
     pagina_ingreso: 'ingreso',
     pagina_new:'new',
