@@ -1,4 +1,3 @@
-import react from "react";
 import { View} from "react-native";
 import AppBar from "./AppBar.jsx"
 import {Routes, Route} from 'react-router-native'

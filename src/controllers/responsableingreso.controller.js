@@ -1,5 +1,4 @@
-import pool from "../db/dbConnection.js"
-
+const pool = require('../db/dbConnection.js');
 
 const responsableingresoController = {};
 
@@ -61,4 +60,4 @@ responsableingresoController.deleteresponsableIngreso = async (req, res, next) =
     }
   };
 
-  export default responsableingresoController
+  module.exports = responsableingresoController

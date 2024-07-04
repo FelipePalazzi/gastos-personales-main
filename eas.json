@@ -14,12 +14,12 @@
         "DB_PASS": "${DB_PASS}",
         "DB_NAME": "${DB_NAME}",
         "DB_PORT": "${DB_PORT}"
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "preview": {
-      "android": {
-        "buildType": "apk"
-      },
       "distribution": "internal",
       "env": {
         "PAGINA_URL": "${PAGINA_URL}",
@@ -29,6 +29,9 @@
         "DB_PASS": "${DB_PASS}",
         "DB_NAME": "${DB_NAME}",
         "DB_PORT": "${DB_PORT}"
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "production": {
@@ -40,6 +43,9 @@
         "DB_PASS": "${DB_PASS}",
         "DB_NAME": "${DB_NAME}",
         "DB_PORT": "${DB_PORT}"
+      },
+      "android": {
+        "buildType": "apk"
       }
     }
   },

@@ -1,4 +1,4 @@
-import pool from "../db/dbConnection.js"
+const pool = require('../db/dbConnection.js');
 
 const gastoController = {};
 
@@ -80,4 +80,4 @@ gastoController.deleteGasto = async (req, res, next) => {
   }
 };
 
-export default gastoController;
+module.exports = gastoController;

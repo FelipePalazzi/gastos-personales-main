@@ -1,4 +1,4 @@
-import pool from "../db/dbConnection.js"
+const pool = require('../db/dbConnection.js');
 
 const resumenController = {};
 
@@ -101,4 +101,4 @@ ORDER BY
 
 
 
-export default resumenController
+module.exports = resumenController

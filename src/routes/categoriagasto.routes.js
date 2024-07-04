@@ -1,8 +1,7 @@
-import { Router } from "express";
-import categoriagastoController from'../controllers/categoriagasto.controller.js'
-import {pagina,symbols } from '../constants.js'
-
-const router = Router();
+const express = require('express');
+const router = express.Router();
+const categoriagastoController = require ('../controllers/categoriagasto.controller.js');
+const { pagina, symbols } = require('../constants.js');
 
 router.get(`${symbols.barra}${pagina.pagina_categoria_gasto}`, categoriagastoController.getcategoriaGastos);
 
@@ -14,4 +13,4 @@ router.put(`${symbols.barra}${pagina.pagina_categoria_gasto}${symbols.barra}:id`
 
 router.delete(`${symbols.barra}${pagina.pagina_categoria_gasto}${symbols.barra}:id`, categoriagastoController.deletecategoriaGasto);
 
-export default router;
+module.exports = router;

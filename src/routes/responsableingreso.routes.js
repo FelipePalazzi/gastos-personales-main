@@ -1,7 +1,7 @@
-import { Router } from "express";
-import responsableingresoController from '../controllers/responsableingreso.controller.js'
-import {pagina,symbols } from '../constants.js'
-const router = Router();
+const express = require('express');
+const router = express.Router();
+const responsableingresoController = require ('../controllers/responsableingreso.controller.js');
+const { pagina, symbols } = require('../constants.js');
 
 router.get(`${symbols.barra}${pagina.pagina_responsable}`, responsableingresoController.getresponsableIngreso);
 
@@ -13,4 +13,4 @@ router.put(`${symbols.barra}${pagina.pagina_responsable}${symbols.barra}:id`, re
 
 router.delete(`${symbols.barra}${pagina.pagina_responsable}${symbols.barra}:id`, responsableingresoController.deleteresponsableIngreso);
 
-export default router;
+module.exports = router;

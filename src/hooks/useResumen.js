@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { pagina, symbols, alerts } from '../constants.js'
-
+import {PAGINA_URL} from '@env'
 
 const useResumen = () => {
   const [resumenData, setResumenData] = useState({});
@@ -8,7 +8,7 @@ const useResumen = () => {
 
   const fetchResumen = async (id) => {
     try {
-      const response = await globalThis.fetch(`${pagina.pagina}${symbols.barra}${pagina.pagina_resumen}${symbols.barra}${id}`);
+      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_resumen}${symbols.barra}${id}`);
       const json = await response.json();
       setResumenData((prevData) => ({...prevData, [id]: json }));
     } catch (error) {

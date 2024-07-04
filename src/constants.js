@@ -1,7 +1,4 @@
-import dotenv from "dotenv";
-dotenv.config();
-
-export const alerts = {
+const alerts = {
     exito: 'Éxito',
     missing_data: 'Faltan datos',
     completado_exito: 'Se completo con éxito',
@@ -15,7 +12,7 @@ export const alerts = {
     regresar:'Estas seguro de volver?',
     cantidad:'Cant.',
   };
-  export const symbols = {
+ const symbols = {
     space: ' ',
     colon:': ',
     peso:'$',
@@ -25,7 +22,7 @@ export const alerts = {
     de:'de ',
     mil:'k',
   };
-  export const button_text = {
+const button_text = {
     ok: 'OK',
     sumbit: 'Guardar',
     cancel: 'Cancelar',
@@ -40,7 +37,7 @@ export const alerts = {
     filtrar:'Filtrar',
     ingreseAño:'Ingrese Año',
   };
-  export const atributos = {
+const atributos = {
     gasto: 'Gasto',
     ingreso:'Ingreso',
     tipo: 'Tipo',
@@ -62,10 +59,9 @@ export const alerts = {
     ingresoResumen:'INGRESO AR',
 
   }
-  export const pagina = {
+const pagina = {
     nombre:'Página',
     mensaje:'Gastos Personales',
-    pagina: process.env.PAGINA_URL,
     pagina_gasto:'gasto',
     pagina_ingreso: 'ingreso',
     pagina_new:'new',
@@ -76,7 +72,7 @@ export const alerts = {
     pagina_tipo_gasto: 'tipogasto',
 
   }
-  export const lineChart = {
+const lineChart = {
     animacionDuration: 1500,
     xAxisTextNumberOfLines: 2,
     height: 220,
@@ -90,7 +86,7 @@ export const alerts = {
     xAxisThickness:0,
   }
   
-  export const pointerConfig={
+const pointerConfig={
     dataPointLabelShiftX: 10,
     dataPointLabelShiftY: 20,
     pointerStripHeight:150,
@@ -103,3 +99,13 @@ export const alerts = {
     pointerVanishDelay: 2000,
     autoAdjustPointerLabelPosition: false,
   }
+
+  module.exports = {
+    alerts,
+    symbols,
+    button_text,
+    atributos,
+    pagina,
+    lineChart,
+    pointerConfig
+  };

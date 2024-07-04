@@ -9,13 +9,14 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import { alerts, button_text, atributos, symbols, pagina } from '../constants';
 import { filterData, sortData,  getSortIcon } from '../utils';
 import {styleLista} from '../styles/styles.js';
+import {PAGINA_URL} from '@env'
 
 const useFetchGastos = () => {
   const [gastos, setGastos] = useState([]);
   const [loading, setLoading] = useState(true);
   const fetchGastos = async () => {
     try {
-      const response = await globalThis.fetch(`${pagina.pagina}${symbols.barra}${pagina.pagina_gasto}`);
+      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}`);
       const json = await response.json();
       setGastos(json);
       setLoading(false);

@@ -14,6 +14,7 @@ import moment from 'moment'
 import 'moment/locale/es'
 import { alerts,button_text, atributos, symbols,pagina } from '../constants'
 import { styleForm } from '../styles/styles.js'
+import {PAGINA_URL} from '@env'
 
 const AgregarIngreso = () => {
   const navigate = useNavigate()
@@ -51,7 +52,7 @@ const AgregarIngreso = () => {
   }, [id, responsableIngresos,monedaIngresos])
 
   const obtenerGasto = async (id) => {
-    const response = await fetch(`${pagina.pagina}${symbols.barra}${pagina.pagina_ingreso}${symbols.barra}${id}`)
+    const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_ingreso}${symbols.barra}${id}`)
     const ingreso = await response.json()
     const fechaMoment = moment.utc(ingreso[0].fecha)
     setSelectedDate(fechaMoment)
@@ -77,7 +78,7 @@ const AgregarIngreso = () => {
 
   const createIngreso = async (ingreso) => {
     try {
-      const response = await fetch(`${pagina.pagina}${symbols.barra}${pagina.pagina_ingreso}`, {
+      const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_ingreso}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -93,7 +94,7 @@ const AgregarIngreso = () => {
 
   const updateIngreso = async (ingreso) => {
     try {
-      await fetch(`${pagina.pagina}${symbols.barra}${pagina.pagina_ingreso}${symbols.barra}${ingreso.id}`, {
+      await fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_ingreso}${symbols.barra}${ingreso.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -334,7 +335,7 @@ useEffect(() => {
         <Dialog.Actions style={styleForm.dialogActions}>
               <Icon.Button name={theme.icons.close} backgroundColor={theme.colors.transparente} color={theme.colors.edit} onPress={() => setvisibleDelete(false)}>{button_text.cancel}</Icon.Button>
               <Icon.Button name={theme.icons.borrar} backgroundColor={theme.colors.delete} onPress={async () => {try {
-          const response = await fetch(`${pagina.pagina}${symbols.barra}${pagina.pagina_ingreso}${symbols.barra}${id}`, {
+          const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_ingreso}${symbols.barra}${id}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json'

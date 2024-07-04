@@ -1,5 +1,4 @@
-import pool from "../db/dbConnection.js"
-
+const pool = require('../db/dbConnection.js');
 
 const monedaingresoController = {};
 
@@ -61,4 +60,4 @@ monedaingresoController.deletemonedaIngreso = async (req, res, next) => {
     }
   };
 
-  export default monedaingresoController
+  module.exports = monedaingresoController

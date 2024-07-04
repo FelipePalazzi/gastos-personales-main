@@ -1,9 +1,7 @@
-import { Router } from "express";
-import {pagina,symbols } from '../constants.js'
-
-import gastoController from '../controllers/gasto.controller.js'
-
-const router = Router();
+const express = require('express');
+const router = express.Router();
+const gastoController = require ('../controllers/gasto.controller.js');
+const { pagina, symbols } = require('../constants.js');
 
 router.get(`${symbols.barra}${pagina.pagina_gasto}`, gastoController.getGastos);
 
@@ -15,4 +13,4 @@ router.put(`${symbols.barra}${pagina.pagina_gasto}${symbols.barra}:id`, gastoCon
 
 router.delete(`${symbols.barra}${pagina.pagina_gasto}${symbols.barra}:id`, gastoController.deleteGasto);
 
-export default router;
+module.exports = router;

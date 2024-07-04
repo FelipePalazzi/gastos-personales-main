@@ -9,6 +9,7 @@ import { DataTable,Searchbar, ActivityIndicator,Card } from 'react-native-paper'
 import  {filterData,  sortData, getSortIcon} from '../utils'
 import { alerts,button_text, atributos, symbols,pagina } from '../constants'
 import {styleLista} from '../styles/styles.js';
+import {PAGINA_URL} from '@env'
 
 const useFetchIngresos = () => {
   const [ingresos, setIngresos] = useState([])
@@ -16,7 +17,7 @@ const useFetchIngresos = () => {
 
   const fetchIngresos = async () => {
     try {
-      const response = await globalThis.fetch(`${pagina.pagina}${symbols.barra}${pagina.pagina_ingreso}`)
+      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_ingreso}`)
       const json = await response.json()
       setIngresos(json)
       setLoading(false)

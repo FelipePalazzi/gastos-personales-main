@@ -1,5 +1,4 @@
-import pool from "../db/dbConnection.js"
-
+const pool = require('../db/dbConnection.js');
 
 const categoriagastoController = {};
 
@@ -61,4 +60,4 @@ categoriagastoController.deletecategoriaGasto = async (req, res, next) => {
     }
   };
 
-  export default categoriagastoController;
+module.exports = categoriagastoController;

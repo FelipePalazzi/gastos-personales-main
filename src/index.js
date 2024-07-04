@@ -1,18 +1,18 @@
-import express from "express"
-import cors from "cors"
-import morgan from "morgan"
-import router from "./routes/gasto.routes.js"
-import router2 from "./routes/tipogasto.routes.js"
-import router3 from "./routes/categoriagasto.routes.js"
-import router4 from "./routes/ingreso.routes.js"
-import router5 from "./routes/monedaingreso.routes.js"
-import router6 from "./routes/responsableingreso.routes.js"
-import router7 from "./routes/resumen.routes.js"
-import cron from 'node-cron';
-import { pagina,symbols } from "./constants.js"
-import dotenv from "dotenv";
-dotenv.config();
+const express = require("express");
+const cors = require("cors");
+const morgan = require("morgan");
+const cron = require('node-cron');
+const router = require('./routes/gasto.routes.js');
+const router2 = require('./routes/tipogasto.routes.js');
+const router3 = require('./routes/categoriagasto.routes.js');
+const router4 = require('./routes/ingreso.routes.js');
+const router5 = require('./routes/monedaingreso.routes.js');
+const router6 = require('./routes/responsableingreso.routes.js');
+const router7 = require('./routes/resumen.routes.js');
+const { pagina, symbols } = require('./constants.js');
+require('dotenv').config();
 const port = process.env.PORT || 3000
+
 
 
 const app = express()
@@ -47,7 +47,7 @@ app.use((err, req, res, next) => {
 
 cron.schedule('*/12 * * * *', () => {
   console.log('Actualizando server');
-  fetch(`${pagina.pagina}${symbols.barra}`)
+  fetch(`${process.env.PAGINA_URL}${symbols.barra}`)
    .then(response => response.json())
    .then(data => console.log(data))
   .catch(error => console.error(error));

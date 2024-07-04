@@ -1,5 +1,4 @@
-import pool from "../db/dbConnection.js"
-
+const pool = require('../db/dbConnection.js');
 
 const ingresoController = {};
 
@@ -78,4 +77,4 @@ ingresoController.deleteIngreso = async (req, res, next) => {
   }
 };
 
-export default ingresoController
+module.exports = ingresoController

@@ -1,4 +1,4 @@
-import pool from "../db/dbConnection.js"
+const pool = require('../db/dbConnection.js');
 
 const tipogastoController = {};
 
@@ -60,4 +60,4 @@ tipogastoController.deletetipoGasto = async (req, res, next) => {
     }
   };
 
-  export default tipogastoController
+  module.exports = tipogastoController
