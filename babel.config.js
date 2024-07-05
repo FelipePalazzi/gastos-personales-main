@@ -30,6 +30,12 @@ module.exports = function(api) {
           'loose': true
         }
       ]
-    ]
+    ],
+    env: {
+      production: {
+        plugins: ['react-native-paper/babel'],
+      },
+    },
+    
   };
 };

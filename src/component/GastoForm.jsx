@@ -34,7 +34,6 @@ const AgregarGasto = () => {
   const {categoriaGastos} = useCategoriaGasto()  
   const [datePickerVisible, setDatePickerVisible] = useState(false)
   const [selectedDate, setSelectedDate] = useState(moment())
-  const [isFocused, setIsFocused] = useState(false)
   const params = useParams()
   const id = params.id
   const [visible, setVisible] = useState(false);

@@ -4,7 +4,7 @@ import {Routes, Route} from 'react-router-native'
 import  GastoList  from "./GastosList";
 import  IngresoList  from "./IngresosList";
 import AgregarGasto from "./GastoForm.jsx";
-import AgregarIngreso from './IngresoForm.jsx'
+import AgregarIngreso from "./IngresoForm.jsx";
 import Resumen from "./Resumen.jsx";
 import {pagina,symbols } from '../constants'
 //import StyledText from "./StyledText.jsx";
