@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { pagina, symbols, alerts } from '../constants.js'
-import {PAGINA_URL} from '@env'
+import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
+const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
 const useResumen = () => {
   const [resumenData, setResumenData] = useState({});

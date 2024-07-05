@@ -8,17 +8,44 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "PAGINA_URL": "public",
+        "PORT": "public",
+        "DB_HOST": "public",
+        "DB_USER": "public",
+        "DB_PASS": "public",
+        "DB_NAME": "public",
+        "DB_PORT": "public"
       }
     },
     "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "PAGINA_URL": "public",
+        "PORT": "public",
+        "DB_HOST": "public",
+        "DB_USER": "public",
+        "DB_PASS": "public",
+        "DB_NAME": "public",
+        "DB_PORT": "public"
       }
     },
     "production": {
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "PAGINA_URL": "public",
+        "PORT": "public",
+        "DB_HOST": "public",
+        "DB_USER": "public",
+        "DB_PASS": "public",
+        "DB_NAME": "public",
+        "DB_PORT": "public"
       }
     }
   },

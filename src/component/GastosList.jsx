@@ -9,7 +9,8 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import { alerts, button_text, atributos, symbols, pagina } from '../constants';
 import { filterData, sortData,  getSortIcon } from '../utils';
 import {styleLista} from '../styles/styles.js';
-import {PAGINA_URL} from '@env'
+import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
+const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
 const useFetchGastos = () => {
   const [gastos, setGastos] = useState([]);

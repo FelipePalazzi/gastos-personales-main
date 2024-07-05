@@ -14,7 +14,8 @@ import moment from 'moment'
 import 'moment/locale/es'
 import { alerts,button_text, atributos, symbols,pagina } from '../constants'
 import { styleForm } from '../styles/styles.js'
-import {PAGINA_URL} from '@env'
+import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
+const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
 const AgregarIngreso = () => {
   const navigate = useNavigate()

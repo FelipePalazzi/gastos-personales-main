@@ -9,7 +9,8 @@ import { DataTable,Searchbar, ActivityIndicator,Card } from 'react-native-paper'
 import  {filterData,  sortData, getSortIcon} from '../utils'
 import { alerts,button_text, atributos, symbols,pagina } from '../constants'
 import {styleLista} from '../styles/styles.js';
-import {PAGINA_URL} from '@env'
+import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
+const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
 const useFetchIngresos = () => {
   const [ingresos, setIngresos] = useState([])
