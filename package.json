@@ -2,6 +2,7 @@
   "name": "gastos-personales",
   "version": "0.9.0",
   "main": "expo/AppEntry.js",
+  "icon": "./assets/icon.png",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",

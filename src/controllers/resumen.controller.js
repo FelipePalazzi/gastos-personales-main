@@ -35,11 +35,11 @@ resumenController.getResumen1 = async (req, res, next) => {
     END AS "INGRESO UYU",
     CASE 
       WHEN SUM(gasto_usd) = 0 THEN '0'
-      ELSE TRIM(TRAILING '.' FROM TO_CHAR(SUM(gasto_usd), 'FM999999999.99'))
+      ELSE TRIM(TRAILING '.' FROM TO_CHAR(SUM(gasto_usd), 'FM999999990.99'))
     END AS "GASTO USD", 
     CASE 
       WHEN SUM(ingreso_usd) = 0 THEN '0'
-      ELSE TRIM(TRAILING '.' FROM TO_CHAR(SUM(ingreso_usd), 'FM999999999.99'))
+      ELSE TRIM(TRAILING '.' FROM TO_CHAR(SUM(ingreso_usd), 'FM999999990.99'))
     END AS "INGRESO USD"
   FROM (
     SELECT 
@@ -119,11 +119,11 @@ resumenController.getResumen2 = async (req, res, next) => {
     END AS "INGRESO UYU",
     CASE 
       WHEN SUM(gasto_usd) = 0 THEN '0'
-      ELSE TRIM(TRAILING '.' FROM TO_CHAR(SUM(gasto_usd), 'FM999999999.99'))
+      ELSE TRIM(TRAILING '.' FROM TO_CHAR(SUM(gasto_usd), 'FM999999990.99'))
     END AS "GASTO USD", 
     CASE 
       WHEN SUM(ingreso_usd) = 0 THEN '0'
-      ELSE TRIM(TRAILING '.' FROM TO_CHAR(SUM(ingreso_usd), 'FM999999999.99'))
+      ELSE TRIM(TRAILING '.' FROM TO_CHAR(SUM(ingreso_usd), 'FM999999990.99'))
     END AS "INGRESO USD"
   FROM (
     SELECT 

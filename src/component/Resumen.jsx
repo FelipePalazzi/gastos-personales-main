@@ -87,7 +87,7 @@ const [card, setCard] = useState(false)
         setAreaChartData(areaChartData);
         setAreaChartData2(areaChartData2);
     }
-  }, [loading, resumen, search, selectedValue]);
+  }, [loading, resumen, search, selectedValue, selectedMoneda]);
 
   const customDataPoint = () => {
     return (

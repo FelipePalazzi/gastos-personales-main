@@ -17,7 +17,7 @@
     "android": {
       "adaptiveIcon": {
         "package": "Gastos Felipe",
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.felipepalazzi.gastospersonales"
