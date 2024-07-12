@@ -3,7 +3,7 @@ import { useState, useEffect, useRef} from "react";
 import  {styleResumen, styleLista, screenWidth} from "../styles/styles.js";
 import { Searchbar, ActivityIndicator,SegmentedButtons, Card, Icon } from 'react-native-paper';
 import useResumen from "../hooks/useResumen";
-import { LineChart } from "react-native-gifted-charts";
+import { LineChart, BarChart } from "react-native-gifted-charts";
 import { filterData } from '../utils';
 import theme from "../styles/theme.js";
 import { lineChart, pointerConfig, alerts, atributos, symbols, button_text} from "../constants.js";
@@ -12,14 +12,16 @@ const Resumen = () => {
   const [search, setSearch] = useState('');
   const [areaChartData, setAreaChartData] = useState(null);
   const [areaChartData2, setAreaChartData2] = useState(null);
+  const [stackData, setStackData] = useState(null);
   const [maxValue, setMaxValue] = useState(0);
   const { loading, resumen } = useResumen();
   const [months0, setMonths0] = useState({});
 const [card, setCard] = useState(false)
+const [card2, setCard2] = useState(false)
   const [selectedValue, setSelectedValue] = useState('Dia');
   const [selectedMonth, setSelectedMonth] = useState('May');
   const [selectedMoneda, setSelectedMoneda] = useState('ARG');
-
+  
   const handleValueChange = (value) => {
     setSelectedValue(value);
     showOrHidePointer(0);
@@ -53,9 +55,9 @@ const [card, setCard] = useState(false)
   };
 
   useEffect(() => {
-    if (!loading && resumen && resumen[2]) {
+    if (!loading && resumen && resumen[2] && resumen[3]) {
 
-      const data = resumen[selectedValue === 'Dia'? 2 : 1];
+      const data = resumen[selectedValue === 'Dia'? 2 : selectedValue === 'Mes' ? 1 : 3];
 
       const filteredData = filterData(data, search,'','','year');
 
@@ -69,7 +71,13 @@ const [card, setCard] = useState(false)
       const maxGastoAr = Math.max(...filteredData.map(item => parseInt(item[`${atributos.gastoResumen} ${selectedMoneda}`])));
       const maxIngresoAr = Math.max(...filteredData.map(item => parseInt(item[`${atributos.ingresoResumen} ${selectedMoneda}`])));
       const maxValue = Math.max(maxGastoAr, maxIngresoAr);
-      setMaxValue(maxValue + 10000);
+      if (selectedMoneda === "ARG") {
+        setMaxValue(maxValue + 10000);
+      } else if (selectedMoneda === "UYU") {
+        setMaxValue(maxValue + 5000);  
+      } else if (selectedMoneda === "USD") {
+        setMaxValue(maxValue + 100);  
+      }
     
       const areaChartData = filteredData.map((item, index) => ({
         value: parseInt(item[`${atributos.gastoResumen} ${selectedMoneda}`] || 0),
@@ -84,10 +92,22 @@ const [card, setCard] = useState(false)
         label: selectedValue === 'Dia' ? `${search.length!== 4? `${item2.day} ${months[item2.month]}\n${item2.year}` : `${item2.day} ${months[item2.month]}`}` : `${months[item2.month]}\n${item2.year}`,
         customDataPoint: customDataPoint,
       }));
+      const stackData = filteredData.map((item, index) => ({
+        value: parseInt(item[`${atributos.gastoResumen} ${selectedMoneda}`] || 0),
+        date: months[item.month],
+        label: (item[`${atributos.responsable}`]),
+        labelTextStyle: { fontSize: 13,margin:-8},
+        customDataPoint: customDataPoint,
+      },{
+        value: parseInt(item[`${atributos.ingresoResumen} ${selectedMoneda}`] || 0),
+      date: months[item.month],
+    }));
         setAreaChartData(areaChartData);
         setAreaChartData2(areaChartData2);
+        setStackData(stackData);
     }
   }, [loading, resumen, search, selectedValue, selectedMoneda]);
+
 
   const customDataPoint = () => {
     return (
@@ -110,9 +130,17 @@ const showOrHidePointer = (ind) => {
 };
 
 const formatYLabel = (value) => {
-  if (value > 1000) {
+  if (value > 1000 && selectedMoneda === 'ARG') {
     return `${symbols.peso}${(value / 1000).toFixed(0)}${symbols.mil}`;
-  } else {
+  } else if (selectedMoneda==='ARG'){
+    return `${symbols.peso}${value}`;
+  } else if (value > 1000 && selectedMoneda === 'UYU') {
+    return `${symbols.peso}${(value / 1000).toFixed(0)}${symbols.mil}`;
+  } else if (selectedMoneda==='UYU'){
+    return `${symbols.peso}${value}`;
+  } else if (value > 1000 && selectedMoneda === 'USD') {
+    return `${symbols.peso}${(value / 1000).toFixed(1)}${symbols.mil}`;
+  } else if (selectedMoneda==='USD'){
     return `${symbols.peso}${value}`;
   }
 };
@@ -177,6 +205,8 @@ return (
   <View>
     {((search.length >= 0 && search.length < 4)   || (search.length === 4 && search.match(/^\d{4}$/) && (areaChartData.some(item => item.value === 0) || areaChartData2.some(item2 => item2.value === 0)))) ? (
       <>
+      <View style={styleResumen.monedaButton}>
+        <Text style={styleResumen.textPointer}>Seleccione tipo de moneda</Text>
         <SegmentedButtons
           style={styleResumen.button}
           theme={{ colors: { secondaryContainer: theme.colors.segmented } }}
@@ -192,6 +222,7 @@ return (
         }
           ]}
         />
+        </View>
       <Card style={styleResumen.titleContainer} >
 
 <TouchableOpacity onPress={() => setCard(!card)}>
@@ -235,6 +266,7 @@ return (
      {...panResponder.panHandlers}
      style={{}}
  >
+  <Text> ${selectedMoneda}</Text>
         <LineChart
           onScroll={(event) => {
             const x = event.nativeEvent.contentOffset.x+10;
@@ -304,13 +336,13 @@ return (
                         {atributos.gasto}
                       </Text>
                       <Text style={styleResumen.textPointer}>
-                        {symbols.peso + items[0].value}
+                        {selectedMoneda + symbols.peso + items[0].value}
                       </Text>
                       <Text style={styleResumen.titlePointer}>
                         {atributos.ingreso}
                       </Text>
                       <Text style={styleResumen.textPointer}>
-                        {symbols.peso + items[1].value}
+                        {selectedMoneda + symbols.peso + items[1].value}
                       </Text>
                     </View>
                   </View>
@@ -329,6 +361,135 @@ return (
       <Text style={[styleResumen.title, {marginBottom:15},{marginHorizontal:20}, {color: theme.colors.white}]}>{`${alerts.noData}${' para el año '}${search}`}</Text>
       </View>
     )}
+  </View>
+    )}
+
+
+{stackData && (
+  <View>
+    {((search.length >= 0 && search.length < 4)   || (search.length === 4 && search.match(/^\d{4}$/) && (stackData.some(item => item.value === 0)))) ? (
+      <>
+      <View style={styleResumen.monedaButton}></View>
+      <Card style={styleResumen.titleContainer} >
+
+<TouchableOpacity onPress={() => setCard2(!card2)}>
+    <Card.Title
+      title={`${atributos.ingreso}${symbols.and}${atributos.gasto} por ${atributos.responsable} ${search.length === 4 && search.match(/^\d{4}$/)? search : ''}`}
+      titleStyle={styleResumen.title}
+      right={(props) => <Icon source={card2? theme.icons.arriba : theme.icons.abajo} size={theme.fontSizes.body} color={theme.colors.white} />}
+      rightStyle={styleResumen.rightCardTitle}
+    />
+  </TouchableOpacity>
+
+      {card2 && (  <Card.Content style={styleResumen.container}>
+        <View style={styleResumen.Containerbutton}>
+          {search.length === 4 ? (
+            <SegmentedButtons
+              style={styleResumen.button}
+              theme={{ colors: { secondaryContainer: theme.colors.segmented } }}
+              value={selectedMonth}
+              onValueChange={(month) => showOrHidePointer(months2.indexOf(month))}
+              buttons={months2.map((item, index) => ({
+                value: item,
+                label: item,
+              }))}
+            />
+          ) : null}
+        </View>
+        <View
+     {...panResponder.panHandlers}
+     style={{}}
+ >
+  <Text> ${selectedMoneda}</Text>
+        <BarChart
+          onScroll={(event) => {
+            const x = event.nativeEvent.contentOffset.x+10;
+            const graphWidth = lineChart.width;
+            const monthWidth = graphWidth / (months2.length*0.2);
+            const visibleMonthIndex = Math.floor(x / monthWidth);
+            const visibleMonth = months2[visibleMonthIndex];
+            setSelectedMonth(visibleMonth);
+          }}
+
+          formatYLabel={formatYLabel}
+          scrollRef={ref}
+          data={stackData}
+          maxValue={maxValue}
+          isAnimated
+          areaChart
+          curved
+          rotateLabel
+          showVerticalLines
+          animationDuration={lineChart.animacionDuration}
+          xAxisTextNumberOfLines={lineChart.xAxisTextNumberOfLines}
+          width={screenWidth-95}
+          height={lineChart.height}
+          initialSpacing={lineChart.initialSpacing}
+          spacing={lineChart.spacing}
+          thickness={lineChart.thickness}
+          startOpacity={lineChart.startOpacity}
+          endOpacity={lineChart.endOpacity}
+          noOfSections={lineChart.noOfSections}
+          yAxisThickness={lineChart.yAxisThickness}
+          xAxisThickness={lineChart.xAxisThickness}
+          verticalLinesColor={theme.colors.primary}
+          color1={theme.colors.gasto}
+          color2={theme.colors.agregar}
+          startFillColor1={theme.colors.gasto}
+          startFillColor2={theme.colors.agregar}
+          endFillColor1={theme.colors.white}
+          endFillColor2={theme.colors.white}
+          rulesColor={theme.colors.primary}
+          yAxisTextStyle={styleResumen.ejeYstyle}
+          focusEnabled={true}
+          pointerConfig={{
+            hidePointer1: true,
+            hidePointer2: true,
+            pointerStripHeight: pointerConfig.pointerStripHeight,
+            strokeDashArray: pointerConfig.strokeDashArray,
+            pointerStripColor: theme.colors.edit,
+            pointerStripWidth: pointerConfig.pointerStripWidth,
+            pointerColor: theme.colors.gray,
+            radius: pointerConfig.radius,
+            pointerLabelWidth: pointerConfig.pointerLabelWidth,
+            pointerLabelHeight: pointerConfig.pointerLabelHeight,
+            activatePointersOnLongPress: true,
+            autoAdjustPointerLabelPosition: false,
+            shiftPointerLabelX: touchPosition.x < deviceWidth / 4 ? 40 : touchPosition.x > deviceWidth * 0.6 ? -40  : 0 ,
+            pointerLabelComponent: items => {
+              return (
+                  <View style={styleResumen.pointer}>
+                    <View style={styleResumen.fechaContainerPointer}> 
+                    <Text style={styleResumen.fechaPointer}>
+                      {items[0].date}
+                    </Text>
+                    </View>
+                    <View style={styleResumen.containerPointer}>
+                      <Text style={styleResumen.titlePointer}>
+                        {atributos.gasto}
+                      </Text>
+                      <Text style={styleResumen.textPointer}>
+                        {selectedMoneda + symbols.peso + items[0].value}
+                      </Text>
+                      <Text style={styleResumen.titlePointer}>
+                        {atributos.ingreso}
+                      </Text>
+                      <Text style={styleResumen.textPointer}>
+                        {selectedMoneda + symbols.peso + items[1].value}
+                      </Text>
+                    </View>
+                  </View>
+     
+              );
+           },
+          }}
+        />
+</View>
+</Card.Content>
+)}
+  </Card>
+      </>
+    ) : (<></>)}
   </View>
     )}
   </View>

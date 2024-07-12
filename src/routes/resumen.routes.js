@@ -7,4 +7,6 @@ router.get(`${symbols.barra}${pagina.pagina_resumen}${symbols.barra}1`, resumenC
 
 router.get(`${symbols.barra}${pagina.pagina_resumen}${symbols.barra}2`, resumenController.getResumen2);
 
+router.get(`${symbols.barra}${pagina.pagina_resumen}${symbols.barra}3`, resumenController.getResumen3);
+
 module.exports = router;

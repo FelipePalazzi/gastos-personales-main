@@ -113,7 +113,7 @@ const styleLista = StyleSheet.create({
       justifyContent:'center',
       top: 20,
       height: 90,
-      width: 100,
+      width: 120,
       marginTop: -30,
       marginLeft: -40,
       
@@ -150,6 +150,10 @@ const styleLista = StyleSheet.create({
     },
     rightCardTitle:{
       marginEnd:15,
+    },
+    monedaButton:{
+      alignContent: 'center',
+      marginBottom:10,
     }
 
   })
