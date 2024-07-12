@@ -55,8 +55,8 @@ const atributos = {
     categoria: 'Categoria',
     importe:'Importe',
     tipo_importe:'Tipo de importe',
-    gastoResumen:'GASTO AR',
-    ingresoResumen:'INGRESO AR',
+    gastoResumen:'GASTO',
+    ingresoResumen:'INGRESO',
 
   }
 const pagina = {

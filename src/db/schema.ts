@@ -52,3 +52,8 @@ export const ingreso=pgTable('ingreso', {
     descripcion: varchar('descripcion').default('')
 })
 
+{/*CREATE TABLE tipo_cambio_usd_uyu (
+    id SERIAL PRIMARY KEY,
+    fecha DATE NOT NULL,
+    tipo_cambio DECIMAL(10, 2) NOT NULL
+); */}

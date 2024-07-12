@@ -18,9 +18,14 @@ const Resumen = () => {
 const [card, setCard] = useState(false)
   const [selectedValue, setSelectedValue] = useState('Dia');
   const [selectedMonth, setSelectedMonth] = useState('May');
+  const [selectedMoneda, setSelectedMoneda] = useState('ARG');
 
   const handleValueChange = (value) => {
     setSelectedValue(value);
+    showOrHidePointer(0);
+  };
+  const handleMonedaChange = (value) => {
+    setSelectedMoneda(value);
     showOrHidePointer(0);
   };
 
@@ -61,20 +66,20 @@ const [card, setCard] = useState(false)
         }
       });
       setMonths0(monthsObj);
-      const maxGastoAr = Math.max(...filteredData.map(item => parseInt(item[atributos.gastoResumen])));
-      const maxIngresoAr = Math.max(...filteredData.map(item => parseInt(item[atributos.ingresoResumen])));
+      const maxGastoAr = Math.max(...filteredData.map(item => parseInt(item[`${atributos.gastoResumen} ${selectedMoneda}`])));
+      const maxIngresoAr = Math.max(...filteredData.map(item => parseInt(item[`${atributos.ingresoResumen} ${selectedMoneda}`])));
       const maxValue = Math.max(maxGastoAr, maxIngresoAr);
       setMaxValue(maxValue + 10000);
     
       const areaChartData = filteredData.map((item, index) => ({
-        value: parseInt(item[atributos.gastoResumen] || 0),
+        value: parseInt(item[`${atributos.gastoResumen} ${selectedMoneda}`] || 0),
         date: selectedValue === 'Dia' ? `${item.day} ${months[item.month]}` : months[item.month],
         label: selectedValue === 'Dia' ? `${search.length!== 4? `${item.day} ${months[item.month]}\n${item.year}` : `${item.day} ${months[item.month]}`}` : `${months[item.month]}\n${item.year}`,
         labelTextStyle: { fontSize: 13,margin:-8},
         customDataPoint: customDataPoint,
       }));
       const areaChartData2 = filteredData.map((item2, index) => ({
-        value: parseInt(item2[atributos.ingresoResumen] || 0),
+        value: parseInt(item2[`${atributos.ingresoResumen} ${selectedMoneda}`] || 0),
         date: selectedValue === 'Dia' ? `${item2.day} ${months[item2.month]}` : months[item2.month],
         label: selectedValue === 'Dia' ? `${search.length!== 4? `${item2.day} ${months[item2.month]}\n${item2.year}` : `${item2.day} ${months[item2.month]}`}` : `${months[item2.month]}\n${item2.year}`,
         customDataPoint: customDataPoint,
@@ -172,6 +177,21 @@ return (
   <View>
     {((search.length >= 0 && search.length < 4)   || (search.length === 4 && search.match(/^\d{4}$/) && (areaChartData.some(item => item.value === 0) || areaChartData2.some(item2 => item2.value === 0)))) ? (
       <>
+        <SegmentedButtons
+          style={styleResumen.button}
+          theme={{ colors: { secondaryContainer: theme.colors.segmented } }}
+          value={selectedMoneda}
+          onValueChange={handleMonedaChange}
+          buttons={[
+            {
+              value: 'ARG', label: 'ARG',
+            },
+            { value: 'UYU', label: 'UYU' ,
+          },
+          { value: 'USD', label: 'USD' ,
+        }
+          ]}
+        />
       <Card style={styleResumen.titleContainer} >
 
 <TouchableOpacity onPress={() => setCard(!card)}>
