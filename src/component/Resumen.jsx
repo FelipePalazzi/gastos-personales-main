@@ -14,14 +14,22 @@ const Resumen = () => {
   const [areaChartData2, setAreaChartData2] = useState(null);
   const [stackData, setStackData] = useState(null);
   const [maxValue, setMaxValue] = useState(0);
+  const [maxFilteredValue, setMaxFilteredValue] = useState(0);
   const { loading, resumen } = useResumen();
   const [months0, setMonths0] = useState({});
-const [card, setCard] = useState(false)
-const [card2, setCard2] = useState(false)
-  const [selectedValue, setSelectedValue] = useState('Dia');
+  const [card, setCard] = useState(false)
+  const [card2, setCard2] = useState(false)
+  const [selectedValue, setSelectedValue] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('May');
   const [selectedMoneda, setSelectedMoneda] = useState('ARG');
-  
+  const [selectedYear, setSelectedYear] = useState(2024);
+  const [selectedMonth2, setSelectedMonth2] = useState('4');
+  const [uniqueYears, setUniqueYears] = useState([]);
+  const [uniqueMonths, setUniqueMonths] = useState([]);  
+  const [filteredStackData, setFilteredStackData] = useState([]);
+  const [tempFilteredStackData, setTempFilteredStackData] = useState([]);
+  const [monthsWithData, setMonthsWithData] = useState([]);
+
   const handleValueChange = (value) => {
     setSelectedValue(value);
     showOrHidePointer(0);
@@ -53,6 +61,12 @@ const [card2, setCard2] = useState(false)
     '11': 'Nov',
     '12': 'Dic',
   };
+  useEffect(() => {
+    const defaultYear = uniqueYears[0];
+    const defaultMonth = uniqueMonths[0];
+    setSelectedYear(defaultYear);
+    setSelectedMonth2(defaultMonth);
+  }, []);
 
   useEffect(() => {
     if (!loading && resumen && resumen[2] && resumen[3]) {
@@ -60,6 +74,11 @@ const [card2, setCard2] = useState(false)
       const data = resumen[selectedValue === 'Dia'? 2 : selectedValue === 'Mes' ? 1 : 3];
 
       const filteredData = filterData(data, search,'','','year');
+  
+      const uniqueYears = [...new Set(filteredData.map(item => item.year))];
+      const uniqueMonths = [...new Set(filteredData.map(item => item.month))];
+      setUniqueYears(uniqueYears);
+      setUniqueMonths(uniqueMonths);
 
       const monthsObj = {};
       filteredData.forEach(item => {
@@ -68,16 +87,10 @@ const [card2, setCard2] = useState(false)
         }
       });
       setMonths0(monthsObj);
+
       const maxGastoAr = Math.max(...filteredData.map(item => parseInt(item[`${atributos.gastoResumen} ${selectedMoneda}`])));
       const maxIngresoAr = Math.max(...filteredData.map(item => parseInt(item[`${atributos.ingresoResumen} ${selectedMoneda}`])));
-      const maxValue = Math.max(maxGastoAr, maxIngresoAr);
-      if (selectedMoneda === "ARG") {
-        setMaxValue(maxValue + 10000);
-      } else if (selectedMoneda === "UYU") {
-        setMaxValue(maxValue + 5000);  
-      } else if (selectedMoneda === "USD") {
-        setMaxValue(maxValue + 100);  
-      }
+      const maxValue = Math.max(maxGastoAr, maxIngresoAr);     
     
       const areaChartData = filteredData.map((item, index) => ({
         value: parseInt(item[`${atributos.gastoResumen} ${selectedMoneda}`] || 0),
@@ -92,23 +105,61 @@ const [card2, setCard2] = useState(false)
         label: selectedValue === 'Dia' ? `${search.length!== 4? `${item2.day} ${months[item2.month]}\n${item2.year}` : `${item2.day} ${months[item2.month]}`}` : `${months[item2.month]}\n${item2.year}`,
         customDataPoint: customDataPoint,
       }));
-      const stackData = filteredData.map((item, index) => ({
-        value: parseInt(item[`${atributos.gastoResumen} ${selectedMoneda}`] || 0),
-        date: months[item.month],
-        label: (item[`${atributos.responsable}`]),
-        labelTextStyle: { fontSize: 13,margin:-8},
-        customDataPoint: customDataPoint,
-      },{
-        value: parseInt(item[`${atributos.ingresoResumen} ${selectedMoneda}`] || 0),
-      date: months[item.month],
-    }));
+      const stackData = filteredData.flatMap((item3, index) => [
+        {
+          value: parseInt(item3[`${atributos.gastoResumen} ${selectedMoneda}`] || 0),
+          year: item3.year,
+          month: months[item3.month],
+          frontColor: '#006DFF',
+          gradientColor: '#009FFF',
+          spacing: 10,
+          labelWidth: 50,
+          label: item3.nombre,
+        },
+        {
+          value: parseInt(item3[`${atributos.ingresoResumen} ${selectedMoneda}`] || 0),
+          year: item3.year,
+          month: months[item3.month],
+          frontColor: '#33CC33',
+          gradientColor: '#66FF66',
+          spacing:8,
+        },
+      ]);
+        setStackData(stackData)
         setAreaChartData(areaChartData);
         setAreaChartData2(areaChartData2);
-        setStackData(stackData);
-    }
-  }, [loading, resumen, search, selectedValue, selectedMoneda]);
 
+        if (selectedMoneda === "ARG") {
+          setMaxValue(maxValue + 10000);
+          setMaxFilteredValue(maxFilteredValue + 10000);
+        } else if (selectedMoneda === "UYU") {
+          setMaxValue(maxValue + 5000);
+          setMaxFilteredValue(maxFilteredValue + 5000);
+        } else if (selectedMoneda === "USD") {
+          setMaxValue(maxValue + 100);
+          setMaxFilteredValue(maxFilteredValue + 100);
+        }
+      }
 
+    }, [loading, resumen, search, selectedValue, selectedMoneda]);
+
+    useEffect(() => {
+      if (!loading && resumen && resumen[2] && resumen[3] && stackData) {
+        const filteredData = stackData.filter(item => item.year === selectedYear && item.month === months[selectedMonth2]);
+        setTempFilteredStackData(filteredData);
+        if (filteredData.length > 0) {
+          const maxFilteredValue = Math.max(...filteredData.map(item => item.value));
+          setMaxFilteredValue(maxFilteredValue);
+        }
+        const availableMonths = [...new Set(stackData.filter(item => item.year === selectedYear).map(item => item.month))];
+        setMonthsWithData(availableMonths);
+      }
+    }, [selectedYear, selectedMonth2, stackData]);
+  
+    useEffect(() => {
+      setFilteredStackData(tempFilteredStackData);
+    }, [tempFilteredStackData]);
+    
   const customDataPoint = () => {
     return (
         <View style={styleResumen.datapoint}/>
@@ -381,110 +432,47 @@ return (
     />
   </TouchableOpacity>
 
-      {card2 && (  <Card.Content style={styleResumen.container}>
+      {card2 && (  
+      <Card.Content style={styleResumen.container}>
         <View style={styleResumen.Containerbutton}>
-          {search.length === 4 ? (
-            <SegmentedButtons
+        <SegmentedButtons
+          style={styleResumen.button}
+          theme={{ colors: { secondaryContainer: theme.colors.segmented } }}
+          value={selectedYear}
+          onValueChange={(year) => setSelectedYear(year)}
+          buttons={uniqueYears.filter(year => stackData.some(item => item.year === year)).map((year) => ({
+            value: year,
+            label: year,
+          }))}
+        />
+          </View>
+          <View style={styleResumen.Containerbutton}>
+          <SegmentedButtons
               style={styleResumen.button}
               theme={{ colors: { secondaryContainer: theme.colors.segmented } }}
-              value={selectedMonth}
-              onValueChange={(month) => showOrHidePointer(months2.indexOf(month))}
-              buttons={months2.map((item, index) => ({
-                value: item,
-                label: item,
-              }))}
+              value={selectedMonth2}
+              onValueChange={(month) => setSelectedMonth2(month)}
+              buttons={monthsWithData.map(month => ({ value: Object.keys(months).find(key => months[key] === month), label: month }))}
             />
-          ) : null}
         </View>
-        <View
-     {...panResponder.panHandlers}
-     style={{}}
- >
+        <View>
   <Text> ${selectedMoneda}</Text>
-        <BarChart
-          onScroll={(event) => {
-            const x = event.nativeEvent.contentOffset.x+10;
-            const graphWidth = lineChart.width;
-            const monthWidth = graphWidth / (months2.length*0.2);
-            const visibleMonthIndex = Math.floor(x / monthWidth);
-            const visibleMonth = months2[visibleMonthIndex];
-            setSelectedMonth(visibleMonth);
-          }}
-
-          formatYLabel={formatYLabel}
-          scrollRef={ref}
-          data={stackData}
-          maxValue={maxValue}
-          isAnimated
-          areaChart
-          curved
-          rotateLabel
-          showVerticalLines
-          animationDuration={lineChart.animacionDuration}
-          xAxisTextNumberOfLines={lineChart.xAxisTextNumberOfLines}
-          width={screenWidth-95}
-          height={lineChart.height}
-          initialSpacing={lineChart.initialSpacing}
-          spacing={lineChart.spacing}
-          thickness={lineChart.thickness}
-          startOpacity={lineChart.startOpacity}
-          endOpacity={lineChart.endOpacity}
-          noOfSections={lineChart.noOfSections}
-          yAxisThickness={lineChart.yAxisThickness}
-          xAxisThickness={lineChart.xAxisThickness}
-          verticalLinesColor={theme.colors.primary}
-          color1={theme.colors.gasto}
-          color2={theme.colors.agregar}
-          startFillColor1={theme.colors.gasto}
-          startFillColor2={theme.colors.agregar}
-          endFillColor1={theme.colors.white}
-          endFillColor2={theme.colors.white}
-          rulesColor={theme.colors.primary}
-          yAxisTextStyle={styleResumen.ejeYstyle}
-          focusEnabled={true}
-          pointerConfig={{
-            hidePointer1: true,
-            hidePointer2: true,
-            pointerStripHeight: pointerConfig.pointerStripHeight,
-            strokeDashArray: pointerConfig.strokeDashArray,
-            pointerStripColor: theme.colors.edit,
-            pointerStripWidth: pointerConfig.pointerStripWidth,
-            pointerColor: theme.colors.gray,
-            radius: pointerConfig.radius,
-            pointerLabelWidth: pointerConfig.pointerLabelWidth,
-            pointerLabelHeight: pointerConfig.pointerLabelHeight,
-            activatePointersOnLongPress: true,
-            autoAdjustPointerLabelPosition: false,
-            shiftPointerLabelX: touchPosition.x < deviceWidth / 4 ? 40 : touchPosition.x > deviceWidth * 0.6 ? -40  : 0 ,
-            pointerLabelComponent: items => {
-              return (
-                  <View style={styleResumen.pointer}>
-                    <View style={styleResumen.fechaContainerPointer}> 
-                    <Text style={styleResumen.fechaPointer}>
-                      {items[0].date}
-                    </Text>
-                    </View>
-                    <View style={styleResumen.containerPointer}>
-                      <Text style={styleResumen.titlePointer}>
-                        {atributos.gasto}
-                      </Text>
-                      <Text style={styleResumen.textPointer}>
-                        {selectedMoneda + symbols.peso + items[0].value}
-                      </Text>
-                      <Text style={styleResumen.titlePointer}>
-                        {atributos.ingreso}
-                      </Text>
-                      <Text style={styleResumen.textPointer}>
-                        {selectedMoneda + symbols.peso + items[1].value}
-                      </Text>
-                    </View>
-                  </View>
-     
-              );
-           },
-          }}
-        />
-</View>
+                 {stackData && (
+                  <BarChart
+                  key={filteredStackData.map(item => item.id).join(',')}
+                  data={filteredStackData}
+                    width={screenWidth - 40}
+                    barWidth={25}
+                    spacing={30}
+                    hideRules
+                    yAxisThickness={0}
+                    xAxisThickness={0}
+                    barBorderRadius={4}
+                    maxValue={maxFilteredValue}
+                    initialSpacing={20}
+                  />
+                )}
+  </View>
 </Card.Content>
 )}
   </Card>
