@@ -5,7 +5,7 @@ import { months, monedaMaxValues } from '../../constants.js';
 import { filterData, formatYLabel} from '../../utils.js';
 import { BarChart } from 'react-native-gifted-charts';
 import theme from '../../styles/theme.js';
-import { atributos, symbols} from '../../constants.js';
+import { atributos, barChart} from '../../constants.js';
 import { SegmentedButtons, Card, Icon } from 'react-native-paper';
 
 const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
@@ -50,8 +50,7 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
           value: parseInt(item3[`${atributos.gastoResumen} ${selectedMoneda}`] || 0),
           year: item3.year,
           month: months[item3.month],
-          frontColor: '#006DFF',
-          gradientColor: '#009FFF',
+          frontColor: theme.colors.gasto,
           spacing: 10,
           labelWidth: 50,
           label: item3.nombre,
@@ -60,14 +59,12 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
           value: parseInt(item3[`${atributos.ingresoResumen} ${selectedMoneda}`] || 0),
           year: item3.year,
           month: months[item3.month],
-          frontColor: '#33CC33',
-          gradientColor: '#66FF66',
+          frontColor: theme.colors.agregar,
           spacing:8,
         },
       ]);
 
         setStackData(stackData)
-        setMaxFilteredValue(maxFilteredValue + monedaMaxValues[selectedMoneda]);
 
   }, [resumen, search, selectedMoneda]);
 
@@ -81,7 +78,7 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
       setTempFilteredStackData(filteredData);
       if (filteredData.length > 0) {
         const maxFilteredValue = Math.max(...filteredData.map(item => item.value));
-        setMaxFilteredValue(maxFilteredValue);
+        setMaxFilteredValue(maxFilteredValue * monedaMaxValues[selectedMoneda]);
       }
       const availableMonths = [...new Set(stackData.filter(item => item.year === selectedYearRef).map(item => item.month))];
       setMonthsWithData(availableMonths);
@@ -103,7 +100,7 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
   }, [selectedYear, resumen, stackData]);
 
   return (
-    <View>
+    <View style={styleResumen.viewContainer}>
     {stackData && (
         <View>
           {((search.length >= 0 && search.length < 4)   || (search.length === 4 && search.match(/^\d{4}$/) && (stackData.some(item => item.value === 0)))) ? (
@@ -131,8 +128,7 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
                   label: year,
                 }))}
               />
-              ) : 
-              <Text>Año: {search}</Text>}
+              ) : <></>}
                 </View>
                 <View style={styleResumen.Containerbutton}>
                 <SegmentedButtons
@@ -150,15 +146,33 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
                 key={filteredStackData.map(item => item.id).join(',')}
                 data={filteredStackData}
                 width={screenWidth - 40}
-                barWidth={25}
+                barWidth={barChart.barWidth}
+                isAnimated
                 formatYLabel={(value) => formatYLabel(value, selectedMoneda)}
-                spacing={30}
+                spacing={barChart.spacing}
+                initialSpacing={barChart.initialSpacing}
                 hideRules
-                yAxisThickness={0}
-                xAxisThickness={0}
-                barBorderRadius={4}
+                yAxisThickness={barChart.ejesThickness}
+                xAxisThickness={barChart.ejesThickness}
+                barBorderRadius={barChart.barBorderRadius}
                 maxValue={maxFilteredValue}
-                initialSpacing={20}
+                autoShiftLabels
+                renderTooltip={(item, index) => {
+                    return (
+                      <View
+                        style={{
+                          marginBottom: 1,
+                          marginLeft: -6,
+                          backgroundColor: theme.colors.primary,
+                          paddingHorizontal: 6,
+                          paddingVertical: 4,
+                          borderRadius: 4,
+                        }}>
+                        <Text>{item.label && atributos.gasto || atributos.ingreso}</Text>
+                        <Text>{selectedMoneda}${item.value}</Text>
+                      </View>
+                    );
+                  }}
                 />
             )}
         </View>

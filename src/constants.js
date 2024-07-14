@@ -87,9 +87,9 @@ const pagina = {
     '12': 'Dic',
   };
   const monedaMaxValues = {
-    ARG: 10000,
-    UYU: 5000,
-    USD: 100 
+    ARG: 1.2,
+    UYU: 1.2,
+    USD: 1.2
   };
 const lineChart = {
     animacionDuration: 1500,
@@ -101,8 +101,7 @@ const lineChart = {
     startOpacity: 0.9,
     endOpacity:0.2,
     noOfSections: 5,
-    yAxisThickness:0,
-    xAxisThickness:0,
+    ejesThickness:0,
   }
   
 const pointerConfig={
@@ -118,7 +117,13 @@ const pointerConfig={
     pointerVanishDelay: 2000,
     autoAdjustPointerLabelPosition: false,
   }
-
+const barChart={
+  barWidth:25,
+  spacing:30,
+  initialSpacing:20,
+  ejesThickness:0,
+  barBorderRadius:4,
+}
   module.exports = {
     alerts,
     symbols,
@@ -128,5 +133,6 @@ const pointerConfig={
     months,
     monedaMaxValues,
     lineChart,
-    pointerConfig
+    pointerConfig,
+    barChart
   };

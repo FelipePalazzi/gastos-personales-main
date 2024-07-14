@@ -37,7 +37,7 @@ const IngrGastDiaMes = ({ resumen, search, selectedMoneda }) => {
       const maxGastoAr = Math.max(...filteredData.map(item => parseInt(item[`${atributos.gastoResumen} ${selectedMoneda}`])));
       const maxIngresoAr = Math.max(...filteredData.map(item => parseInt(item[`${atributos.ingresoResumen} ${selectedMoneda}`])));
       const maxValue = Math.max(maxGastoAr, maxIngresoAr);     
-      setMaxValue(maxValue + monedaMaxValues[selectedMoneda]);
+      setMaxValue(maxValue * monedaMaxValues[selectedMoneda]);
 
       const areaChartData = filteredData.map((item, index) => ({
         value: parseInt(item[`${atributos.gastoResumen} ${selectedMoneda}`] || 0),
@@ -106,7 +106,7 @@ const panResponder = useRef(
  ).current;
 
   return (
-    <View>
+    <View style={[styleResumen.viewContainer, {marginTop:10}]}>
     {areaChartData && areaChartData2 && (
         <View>
           {((search.length >= 0 && search.length < 4)   || (search.length === 4 && search.match(/^\d{4}$/) && (areaChartData.some(item => item.value === 0) || areaChartData2.some(item2 => item2.value === 0)))) ? (
@@ -183,8 +183,8 @@ const panResponder = useRef(
                 startOpacity={lineChart.startOpacity}
                 endOpacity={lineChart.endOpacity}
                 noOfSections={lineChart.noOfSections}
-                yAxisThickness={lineChart.yAxisThickness}
-                xAxisThickness={lineChart.xAxisThickness}
+                yAxisThickness={lineChart.ejesThickness}
+                xAxisThickness={lineChart.ejesThickness}
                 verticalLinesColor={theme.colors.primary}
                 color1={theme.colors.gasto}
                 color2={theme.colors.agregar}

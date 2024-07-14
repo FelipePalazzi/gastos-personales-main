@@ -65,6 +65,9 @@ const styleLista = StyleSheet.create({
   }
   });
   const styleResumen = StyleSheet.create({
+    viewContainer:{
+      marginBottom:15
+    },
     datapoint: {
       width: 8,
       height: 8,
