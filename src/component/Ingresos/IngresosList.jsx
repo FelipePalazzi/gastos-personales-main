@@ -1,14 +1,14 @@
 import React, { useState,useCallback, useMemo, useEffect,useRef} from 'react'
 import { View, Text, ScrollView, RefreshControl, BackHandler} from 'react-native'
-import theme from '../styles/theme.js'
+import theme from '../../styles/theme.js'
 import moment from 'moment'
 import { Feather } from '@expo/vector-icons'
 import {useNavigate} from 'react-router-native'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { DataTable,Searchbar, ActivityIndicator,Card } from 'react-native-paper'
-import  {filterData,  sortData, getSortIcon} from '../utils'
-import { alerts,button_text, atributos, symbols,pagina } from '../constants'
-import {styleLista} from '../styles/styles.js';
+import  {filterData,  sortData, getSortIcon} from '../../utils.js'
+import { alerts,button_text, atributos, symbols,pagina } from '../../constants.js'
+import {styleLista} from '../../styles/styles.js';
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 

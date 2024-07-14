@@ -1,5 +1,6 @@
 import moment from 'moment'
 import theme from './styles/theme'
+import { symbols } from './constants';
 
 export const filterData = (data, search, monedaProp, fechaProp, yearProp) => {
   if (!search) {
@@ -131,3 +132,13 @@ export const filterData = (data, search, monedaProp, fechaProp, yearProp) => {
     }
     return theme.icons.minus;
   }
+
+  export const formatYLabel = (value, selectedMoneda) => {
+    const decimalPlaces = selectedMoneda === 'USD' ? 1 : 0;
+
+    if (value > 1000) {
+      return `${symbols.peso}${(value / 1000).toFixed(decimalPlaces)}${symbols.mil}`;
+    } else {
+      return `${symbols.peso}${value}`;
+    }
+  };

@@ -72,6 +72,25 @@ const pagina = {
     pagina_tipo_gasto: 'tipogasto',
 
   }
+  const months = {
+    '1': 'Ene',
+    '2': 'Feb',
+    '3': 'Mar',
+    '4': 'Abr',
+    '5': 'May',
+    '6': 'Jun',
+    '7': 'Jul',
+    '8': 'Ago',
+    '9': 'Sep',
+    '10': 'Oct',
+    '11': 'Nov',
+    '12': 'Dic',
+  };
+  const monedaMaxValues = {
+    ARG: 10000,
+    UYU: 5000,
+    USD: 100 
+  };
 const lineChart = {
     animacionDuration: 1500,
     xAxisTextNumberOfLines: 2,
@@ -106,6 +125,8 @@ const pointerConfig={
     button_text,
     atributos,
     pagina,
+    months,
+    monedaMaxValues,
     lineChart,
     pointerConfig
   };

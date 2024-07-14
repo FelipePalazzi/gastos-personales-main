@@ -220,11 +220,11 @@ resumenController.getResumen3 = async (req, res, next) => {
     CASE 
       WHEN SUM(gasto_ar) = 0 THEN '0'
       ELSE TRIM(TRAILING '.' FROM TO_CHAR(SUM(gasto_ar), 'FM999999990.99'))
-    END AS "GASTO AR", 
+    END AS "GASTO ARG", 
     CASE 
       WHEN SUM(ingreso_ar) = 0 THEN '0'
       ELSE TRIM(TRAILING '.' FROM TO_CHAR(SUM(ingreso_ar), 'FM999999990.99'))
-    END AS "INGRESO AR",
+    END AS "INGRESO ARG",
     CASE 
       WHEN SUM(gasto_uyu) = 0 THEN '0'
       ELSE TRIM(TRAILING '.' FROM TO_CHAR(SUM(gasto_uyu), 'FM999999990.99'))

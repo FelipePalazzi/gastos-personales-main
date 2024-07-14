@@ -1,11 +1,11 @@
 import { View} from "react-native";
 import AppBar from "./AppBar.jsx"
 import {Routes, Route} from 'react-router-native'
-import  GastoList  from "./GastosList";
-import  IngresoList  from "./IngresosList";
-import AgregarGasto from "./GastoForm.jsx";
-import AgregarIngreso from "./IngresoForm.jsx";
-import Resumen from "./Resumen.jsx";
+import  GastoList  from "./Gastos/GastosList.jsx";
+import  IngresoList  from "./Ingresos/IngresosList.jsx";
+import AgregarGasto from "./Gastos/GastoForm.jsx";
+import AgregarIngreso from "./Ingresos/IngresoForm.jsx";
+import Resumen from "./Resumen/Resumen.jsx";
 import {pagina,symbols } from '../constants'
 //import StyledText from "./StyledText.jsx";
 
