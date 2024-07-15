@@ -142,3 +142,14 @@ export const filterData = (data, search, monedaProp, fechaProp, yearProp) => {
       return `${symbols.peso}${value}`;
     }
   };
+
+  export function getColor(text) {
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+      hash = Math.imul(15, hash) + text.charCodeAt(i) | 0;
+    }
+    const r = (hash & 0xFF0000) >> 16;
+    const g = (hash & 0x00FF00) >> 8;
+    const b = hash & 0x0000FF;
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+  }

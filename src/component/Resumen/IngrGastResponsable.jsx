@@ -7,6 +7,7 @@ import { BarChart } from 'react-native-gifted-charts';
 import theme from '../../styles/theme.js';
 import { atributos, barChart} from '../../constants.js';
 import { SegmentedButtons, Card, Icon } from 'react-native-paper';
+import ResponsablesSection from './ResponsablesSection.jsx';
 
 const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
   const [stackData, setStackData] = useState(null);
@@ -20,7 +21,8 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
   const [tempFilteredStackData, setTempFilteredStackData] = useState([]);
   const [monthsWithData, setMonthsWithData] = useState([]);
   const [selectedYearRef, setSelectedYearRef] = useState(selectedYear);
-
+  const [impares, setImpares] = useState([]);
+  const [pares, setPares] = useState([]);
 
   useEffect(() => {
     const defaultYear = uniqueYears[0];
@@ -53,14 +55,17 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
           frontColor: theme.colors.gasto,
           spacing: 10,
           labelWidth: 50,
+          labelTextStyle: styleResumen.labels,
           label: item3.nombre,
         },
         {
           value: parseInt(item3[`${atributos.ingresoResumen} ${selectedMoneda}`] || 0),
           year: item3.year,
           month: months[item3.month],
-          frontColor: theme.colors.agregar,
+          frontColor: theme.colors.ingreso,
           spacing:8,
+          labelTextStyle: {color:theme.colors.transparente},
+          label: item3.nombre,
         },
       ]);
 
@@ -82,6 +87,11 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
       }
       const availableMonths = [...new Set(stackData.filter(item => item.year === selectedYearRef).map(item => item.month))];
       setMonthsWithData(availableMonths);
+
+      const impares = filteredData.filter((item, index) => index % 2 !== 0);
+      const pares = filteredData.filter((item, index) => index % 2 === 0);
+      setImpares(impares);
+      setPares(pares);
     }
   }, [resumen, selectedYearRef, selectedMonth2, stackData]);
 
@@ -120,7 +130,7 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
               {search.length !== 4 ? (
               <SegmentedButtons
                 style={styleResumen.button}
-                theme={{ colors: { secondaryContainer: theme.colors.segmented } }}
+                theme={{ colors: { secondaryContainer: theme.colors.segmented, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white  } }}
                 value={selectedYear}
                 onValueChange={(year) => setSelectedYear(year)}
                 buttons={uniqueYears.filter(year => stackData.some(item => item.year === year)).map((year) => ({
@@ -133,49 +143,52 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
                 <View style={styleResumen.Containerbutton}>
                 <SegmentedButtons
                     style={styleResumen.button}
-                    theme={{ colors: { secondaryContainer: theme.colors.segmented } }}
+                    theme={{ colors: { secondaryContainer: theme.colors.segmented, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white } }}
                     value={selectedMonth2}
                     onValueChange={(month) => setSelectedMonth2(month)}
                     buttons={monthsWithData.map(month => ({ value: Object.keys(months).find(key => months[key] === month), label: month }))}
                   />
               </View>
               <View>
-        <Text> ${selectedMoneda}</Text>
             {stackData && (
                 <BarChart
                 key={filteredStackData.map(item => item.id).join(',')}
                 data={filteredStackData}
-                width={screenWidth - 40}
+                width={screenWidth - 120}
+                height={screenWidth - 120}
                 barWidth={barChart.barWidth}
                 isAnimated
                 formatYLabel={(value) => formatYLabel(value, selectedMoneda)}
                 spacing={barChart.spacing}
+                noOfSections={barChart.noOfSections}
                 initialSpacing={barChart.initialSpacing}
-                hideRules
+                rulesColor= {theme.colors.pieBackground}
+                yAxisTextStyle= {{color:theme.colors.white}}
+                backgroundColor={theme.colors.pieInner}
                 yAxisThickness={barChart.ejesThickness}
                 xAxisThickness={barChart.ejesThickness}
                 barBorderRadius={barChart.barBorderRadius}
+                leftShiftForLastIndexTooltip={50}
                 maxValue={maxFilteredValue}
                 autoShiftLabels
+                hideOrigin
                 renderTooltip={(item, index) => {
                     return (
-                      <View
-                        style={{
-                          marginBottom: 1,
-                          marginLeft: -6,
-                          backgroundColor: theme.colors.primary,
-                          paddingHorizontal: 6,
-                          paddingVertical: 4,
-                          borderRadius: 4,
-                        }}>
-                        <Text>{item.label && atributos.gasto || atributos.ingreso}</Text>
-                        <Text>{selectedMoneda}${item.value}</Text>
+                      <View style={styleResumen.tooltipBarChart}>
+                        <Text style={styleResumen.textLegend}>{item.frontColor===theme.colors.gasto && atributos.gasto || atributos.ingreso}</Text>
+                        <Text style={styleResumen.pieCenterDescription}>{selectedMoneda}${item.value}</Text>
                       </View>
                     );
                   }}
                 />
             )}
         </View>
+        {stackData && (
+        <View>
+            <ResponsablesSection data={impares} selectedMoneda={selectedMoneda} title={atributos.gasto} selectedMonth={months[selectedMonth2]} selectedYear={selectedYear}/>
+            <ResponsablesSection data={pares} selectedMoneda={selectedMoneda} title={atributos.ingreso} selectedMonth={months[selectedMonth2]} selectedYear={selectedYear}/>
+        </View>
+        )}
       </Card.Content>
       )}
         </Card>

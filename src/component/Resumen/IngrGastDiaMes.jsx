@@ -43,7 +43,7 @@ const IngrGastDiaMes = ({ resumen, search, selectedMoneda }) => {
         value: parseInt(item[`${atributos.gastoResumen} ${selectedMoneda}`] || 0),
         date: selectedValue === 'Dia' ? `${item.day} ${months[item.month]}` : months[item.month],
         label: selectedValue === 'Dia' ? `${search.length!== 4? `${item.day} ${months[item.month]}\n${item.year}` : `${item.day} ${months[item.month]}`}` : `${months[item.month]}\n${item.year}`,
-        labelTextStyle: { fontSize: 13,margin:-8},
+        labelTextStyle: { fontSize: 13,margin:-8, color: theme.colors.white},
         customDataPoint: customDataPoint,
       }));
       const areaChartData2 = filteredData.map((item2, index) => ({
@@ -125,7 +125,7 @@ const panResponder = useRef(
       
               <SegmentedButtons
                 style={styleResumen.button}
-                theme={{ colors: { secondaryContainer: theme.colors.segmented } }}
+                theme={{ colors: { secondaryContainer: theme.colors.segmented, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white } }}
                 value={selectedValue}
                 onValueChange={handleValueChange}
                 buttons={[
@@ -139,7 +139,7 @@ const panResponder = useRef(
                 {search.length === 4 && selectedValue === 'Dia' ? (
                   <SegmentedButtons
                     style={styleResumen.button}
-                    theme={{ colors: { secondaryContainer: theme.colors.segmented } }}
+                    theme={{ colors: { secondaryContainer: theme.colors.segmented, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white  } }}
                     value={selectedMonth}
                     onValueChange={(month) => showOrHidePointer(months2.indexOf(month))}
                     buttons={months2.map((item, index) => ({
@@ -153,7 +153,6 @@ const panResponder = useRef(
            {...panResponder.panHandlers}
            style={{}}
        >
-        <Text> ${selectedMoneda}</Text>
               <LineChart
                 onScroll={(event) => {
                   const x = event.nativeEvent.contentOffset.x+10;
@@ -173,10 +172,12 @@ const panResponder = useRef(
                 curved
                 rotateLabel
                 showVerticalLines
+                adjustToWidth
+                hideOrigin
                 animationDuration={lineChart.animacionDuration}
                 xAxisTextNumberOfLines={lineChart.xAxisTextNumberOfLines}
                 width={screenWidth-95}
-                height={lineChart.height}
+                height={screenWidth - 150}
                 initialSpacing={lineChart.initialSpacing}
                 spacing={lineChart.spacing}
                 thickness={lineChart.thickness}
@@ -187,12 +188,13 @@ const panResponder = useRef(
                 xAxisThickness={lineChart.ejesThickness}
                 verticalLinesColor={theme.colors.primary}
                 color1={theme.colors.gasto}
-                color2={theme.colors.agregar}
+                color2={theme.colors.ingreso}
                 startFillColor1={theme.colors.gasto}
-                startFillColor2={theme.colors.agregar}
-                endFillColor1={theme.colors.white}
-                endFillColor2={theme.colors.white}
-                rulesColor={theme.colors.primary}
+                startFillColor2={theme.colors.ingreso}
+                endFillColor1={theme.colors.gasto}
+                endFillColor2={theme.colors.ingreso}
+                rulesColor={theme.colors.pieBackground}
+                backgroundColor={theme.colors.pieInner}
                 yAxisTextStyle={styleResumen.ejeYstyle}
                 focusEnabled={true}
                 pointerConfig={{

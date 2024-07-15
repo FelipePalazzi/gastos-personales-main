@@ -83,7 +83,7 @@ const styleLista = StyleSheet.create({
       paddingBottom:10,
       paddingHorizontal: 5,
       margin: 10,
-      backgroundColor: theme.colors.table,
+      backgroundColor: theme.colors.pieBackground,
       borderRadius: 7,
     },
     title: {
@@ -100,8 +100,9 @@ const styleLista = StyleSheet.create({
     },
     Containerbutton: {
       flexDirection: 'row',
-      marginLeft: screenWidth / 10,
       marginBottom:10,
+      flex:1,
+      paddingHorizontal: 5,
     },
     button:{
       paddingHorizontal: 10,
@@ -109,7 +110,7 @@ const styleLista = StyleSheet.create({
       borderRadius: 8,
     },
     ejeYstyle:{
-      color: theme.colors.textPrimary,
+      color: theme.colors.white,
     },
     pointer:{
       position:'absolute',
@@ -157,7 +158,69 @@ const styleLista = StyleSheet.create({
     monedaButton:{
       alignContent: 'center',
       marginBottom:10,
+    },
+    tooltipBarChart:{
+      marginBottom: 1,
+      marginLeft: -6,
+      backgroundColor: theme.colors.textSecondary,
+      paddingHorizontal: 6,
+      paddingVertical: 4,
+      borderRadius: 4,
+    },
+     renderDot:{
+      height: 10,
+      width: 10,
+      borderRadius: 5,
+      marginRight: 10,
+    },
+    containerLegend:{
+      flexDirection: 'row',
+      flexWrap: 'wrap' 
+    },
+    containerLegendText:{
+      flexDirection: 'row',
+      alignItems: 'center',
+      width: 120,
+      marginRight: 20,
+      marginVertical:10,
+    },
+    textLegend:{
+      color: theme.colors.white,
+    },
+    containerResponsableSection:{
+      backgroundColor: theme.colors.pieBackground,
+      flex: 1,
+      marginTop:10,
+    },
+    viewContainerResponsableSection:{
+      margin: 20,
+      padding: 10,
+      borderRadius: 20,
+      backgroundColor: theme.colors.pieInner,
+      alignItems:'center'
+    },
+    viewPieChart:{
+      padding: 20,
+    },
+    viewCentrado:{ 
+      justifyContent: 'center',
+      alignItems: 'center' ,
+    },
+    pieCenter:{
+      fontSize: theme.fontSizes.body,
+      color: theme.colors.white,
+      fontWeight: theme.fontWeights.bold,
+    },
+    pieCenterDescription:{
+      fontSize: theme.fontSizes.pointer,
+      color: theme.colors.white,
+    },
+    labels:{
+      fontSize: theme.fontSizes.pointer,
+      color: theme.colors.white,
+      fontWeight: theme.fontWeights.bold, 
     }
+
 
   })
 

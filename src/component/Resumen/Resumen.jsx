@@ -8,6 +8,7 @@ import IngrGastResponsable from './IngrGastResponsable.jsx';
 import theme from '../../styles/theme.js';
 import { alerts, button_text } from '../../constants.js';
 import { Searchbar, ActivityIndicator} from 'react-native-paper';
+import ResponsablesSection from './ResponsablesSection.jsx';
 
 const Resumen = () => {
   const [search, setSearch] = useState('');

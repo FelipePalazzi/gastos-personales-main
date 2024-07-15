@@ -94,7 +94,6 @@ const pagina = {
 const lineChart = {
     animacionDuration: 1500,
     xAxisTextNumberOfLines: 2,
-    height: 220,
     initialSpacing: 10,
     spacing:50,
     thickness:2,
@@ -120,10 +119,17 @@ const pointerConfig={
 const barChart={
   barWidth:25,
   spacing:30,
-  initialSpacing:20,
+  initialSpacing:8,
   ejesThickness:0,
   barBorderRadius:4,
+  noOfSections:6,
 }
+
+const pieChart={
+  radius:90,
+  innerRadius:60,
+}
+
   module.exports = {
     alerts,
     symbols,
@@ -134,5 +140,6 @@ const barChart={
     monedaMaxValues,
     lineChart,
     pointerConfig,
-    barChart
+    barChart,
+    pieChart,
   };

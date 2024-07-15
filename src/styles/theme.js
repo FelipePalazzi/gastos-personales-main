@@ -23,11 +23,14 @@ const theme= {
         notFocused: '#B5C7C4',
         card: '#8ADEE8',
         segmented: '#5AEEC9',
-        gasto:'#993D64',
+        gasto:'#EC407A',
+        ingreso: '#26C6DA',
         disabled:'#D5D5D5',
         black:'#000000',
         blue:'#252FFF',
         rojo:'#DB2B2B',
+        pieInner:'#232B5D',
+        pieBackground: '#34448B',
         transparente: 'transparent'
     },
     fontSizes: {
