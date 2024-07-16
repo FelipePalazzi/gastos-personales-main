@@ -1,6 +1,7 @@
 import moment from 'moment'
 import theme from './styles/theme'
-import { symbols } from './constants';
+import { symbols, predefinedColors } from './constants';
+import chroma from 'chroma-js';
 
 export const filterData = (data, search, monedaProp, fechaProp, yearProp) => {
   if (!search) {
@@ -144,12 +145,15 @@ export const filterData = (data, search, monedaProp, fechaProp, yearProp) => {
   };
 
   export function getColor(text) {
+    if (predefinedColors[text]) {
+      return predefinedColors[text];
+    }
+  
     let hash = 0;
     for (let i = 0; i < text.length; i++) {
-      hash = Math.imul(15, hash) + text.charCodeAt(i) | 0;
+      hash = Math.imul(31, hash) + text.charCodeAt(i) | 0;
     }
-    const r = (hash & 0xFF0000) >> 16;
-    const g = (hash & 0x00FF00) >> 8;
-    const b = hash & 0x0000FF;
-    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+    const hue = (hash % 360);  // Tono
+    const color = chroma.hsv(hue, 1, 1).hex();  // Saturación y valor
+    return color;
   }

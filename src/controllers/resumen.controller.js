@@ -299,5 +299,60 @@ resumenController.getResumen3 = async (req, res, next) => {
   }
 };
 
+resumenController.getResumen4 = async (req, res, next) => {
+  try {
+    const result = await pool.query(`WITH tipo_cambio_mensual AS (
+      SELECT 
+          EXTRACT(YEAR FROM fecha) AS YEAR, 
+          EXTRACT(MONTH FROM fecha) AS MONTH, 
+          AVG(tipo_cambio) AS avg_tipo_cambio
+      FROM 
+          tipo_cambio_usd_uyu
+      GROUP BY 
+          YEAR, MONTH
+    )
+    SELECT 
+    YEAR, 
+    MONTH, 
+    nombre,
+    tipogasto,
+    CASE 
+      WHEN SUM(gasto_ar) = 0 THEN '0'
+      ELSE TRIM(TRAILING '.' FROM TO_CHAR(SUM(gasto_ar), 'FM999999990.99'))
+    END AS "GASTO ARG", 
+    CASE 
+      WHEN SUM(gasto_uyu) = 0 THEN '0'
+      ELSE TRIM(TRAILING '.' FROM TO_CHAR(SUM(gasto_uyu), 'FM999999990.99'))
+    END AS "GASTO UYU", 
+    CASE 
+      WHEN SUM(gasto_usd) = 0 THEN '0'
+      ELSE TRIM(TRAILING '.' FROM TO_CHAR(SUM(gasto_usd), 'FM999999990.99'))
+    END AS "GASTO USD"
+    FROM (
+    SELECT 
+      EXTRACT(YEAR FROM g.fecha) AS YEAR, 
+      EXTRACT(MONTH FROM g.fecha) AS MONTH, 
+      r.nombre,
+      tg.descripcion AS tipogasto,
+      SUM(g.totalar) AS gasto_ar, 
+      SUM(g.total) AS gasto_uyu,
+      SUM(g.total / COALESCE((SELECT avg_tipo_cambio FROM tipo_cambio_mensual WHERE YEAR = EXTRACT(YEAR FROM g.fecha) AND MONTH = EXTRACT(MONTH FROM g.fecha)), 40)) AS gasto_usd
+    FROM 
+      gasto g
+      JOIN responsable r ON r.id = g.responsable
+      JOIN tipogasto tg ON tg.id = g.tipogasto
+    GROUP BY 
+      YEAR, MONTH, r.nombre, tg.descripcion
+    ) AS subquery
+    GROUP BY 
+    YEAR, MONTH, nombre, tipogasto
+    ORDER BY 
+    YEAR, MONTH, nombre, tipogasto;`);
+    res.status(200).json(result.rows);
+  } catch (err) {
+    next(err);
+  }
+};
+
 
 module.exports = resumenController

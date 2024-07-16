@@ -18,7 +18,7 @@ const useResumen = () => {
   };
 
   useEffect(() => {
-    Promise.all([fetchResumen('1'), fetchResumen('2'),fetchResumen('3')]).then(() => {
+    Promise.all([fetchResumen('1'), fetchResumen('2'),fetchResumen('3'), fetchResumen('4')]).then(() => {
       setLoading(false);
     });
   }, []);

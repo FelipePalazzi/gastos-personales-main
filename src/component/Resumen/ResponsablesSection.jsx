@@ -79,6 +79,7 @@ return (
             data={pieData}
             donut
             showGradient
+            gradientCenterColor ={theme.colors.cell}
             sectionAutoFocus
             focusOnPress
             toggleFocusOnPress={false}

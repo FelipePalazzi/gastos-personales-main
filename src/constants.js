@@ -1,3 +1,10 @@
+const predefinedColors = {
+  'Felipe': '#009688',
+  'Fernanda': '#EC407A',
+  'Gaston':'#26C6DA',
+  'Raquel':'#7E57C2',
+};
+
 const alerts = {
     exito: 'Éxito',
     missing_data: 'Faltan datos',
@@ -131,6 +138,7 @@ const pieChart={
 }
 
   module.exports = {
+    predefinedColors,
     alerts,
     symbols,
     button_text,
