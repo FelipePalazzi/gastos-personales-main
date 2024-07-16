@@ -185,8 +185,8 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
         </View>
         {stackData && (
         <View>
-            <ResponsablesSection data={impares} selectedMoneda={selectedMoneda} title={atributos.gasto} selectedMonth={months[selectedMonth2]} selectedYear={selectedYear}/>
-            <ResponsablesSection data={pares} selectedMoneda={selectedMoneda} title={atributos.ingreso} selectedMonth={months[selectedMonth2]} selectedYear={selectedYear}/>
+            <ResponsablesSection data={pares} selectedMoneda={selectedMoneda} title={atributos.gasto} selectedMonth={months[selectedMonth2]} selectedYear={selectedYear}/>
+            <ResponsablesSection data={impares} selectedMoneda={selectedMoneda} title={atributos.ingreso} selectedMonth={months[selectedMonth2]} selectedYear={selectedYear}/>
         </View>
         )}
       </Card.Content>

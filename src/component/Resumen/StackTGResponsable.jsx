@@ -1,8 +1,8 @@
 import React, { useState, useEffect} from 'react';
 import { View, Text, TouchableOpacity} from 'react-native';
 import { styleResumen, screenWidth } from '../../styles/styles.js';
-import { months, monedaMaxValues } from '../../constants.js';
-import { filterData, formatYLabel} from '../../utils.js';
+import { months, monedaMaxValues, symbols } from '../../constants.js';
+import { filterData, formatYLabel, getColor} from '../../utils.js';
 import { BarChart } from 'react-native-gifted-charts';
 import theme from '../../styles/theme.js';
 import { atributos, barChart} from '../../constants.js';
@@ -22,7 +22,6 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
   const [monthsWithData, setMonthsWithData] = useState([]);
   const [selectedYearRef, setSelectedYearRef] = useState(selectedYear);
   const [impares, setImpares] = useState([]);
-  const [pares, setPares] = useState([]);
 
   useEffect(() => {
     const defaultYear = uniqueYears[0];
@@ -37,8 +36,8 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
     const filteredData = filterData(data, search,'','','year');
     const filteredDatagasto = filterData(datagasto, search,'','','year');
 
-    const uniqueYears = [...new Set(filteredData.map(item => item.year))];
-    const uniqueMonths = [...new Set(filteredData.map(item => item.month))];
+    const uniqueYears = [...new Set(filteredDatagasto.map(item => item.year))];
+    const uniqueMonths = [...new Set(filteredDatagasto.map(item => item.month))];
     setUniqueYears(uniqueYears);
     setUniqueMonths(uniqueMonths);
     if (uniqueYears.length === 1) {
@@ -48,33 +47,62 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
       setSelectedYear(uniqueYears[0]);
       setSelectedMonth2(uniqueMonths[0]);
     }
-
-      const stackData = filteredDatagasto.flatMap((item4, index) => [
-        {
-          value: parseInt(item4[`${atributos.gastoResumen} ${selectedMoneda}`] || 0),
-          year: item4.year,
-          month: months[item4.month],
-          frontColor: theme.colors.gasto,
-          spacing: 10,
-          labelWidth: 50,
-          labelTextStyle: styleResumen.labels,
-          label: `${item4.nombre} - ${item4.tipogasto}`,
+    
+    const stackedData = filteredData.reduce((acc, item) => {
+        const existingItem = acc.find((i) => i.label === item.nombre && i.month === months[item.month] && i.year === item.year);
+        if (!existingItem) {
+          const newGastoItem = {
+            spacing: 10,
+            labelTextStyle: [styleResumen.labels,{width:70}],
+            label: item.nombre,
+            month: months[item.month],
+            year: item.year,
+            borderTopLeftRadius:5,
+            borderTopRightRadius:5,
+            stacks: [
+              {
+                value: 0,
+              },
+            ],
+          };
+          acc.push(newGastoItem);
         }
-      ]);
       
-      filteredData.forEach(item3 => {
-        stackData.push({
-          value: parseInt(item3[`${atributos.ingresoResumen} ${selectedMoneda}`] || 0),
-          year: item3.year,
-          month: months[item3.month],
-          frontColor: theme.colors.ingreso,
+        const ingresoBar = {
+          label: `${item.nombre} ${atributos.ingreso}`,
+          labelTextStyle: {color:theme.colors.transparente},
           spacing: 8,
-          labelTextStyle: { color: theme.colors.transparente },
-          label: item3.nombre,
-        });
+          month: months[item.month],
+          year: item.year,
+          stacks: [
+            {
+              value: parseInt(item[`${atributos.ingresoResumen} ${selectedMoneda}`] || 0),
+              color: theme.colors.ingreso,
+            },
+          ],
+        };
+        acc.push(ingresoBar);
+      
+        return acc;
+      }, []);
+      
+      filteredDatagasto.forEach((item) => {
+        const existingItem = stackedData.find((i) => i.label === item.nombre && i.month === months[item.month] && i.year === item.year);
+        if (existingItem) {
+          const gastoBar = existingItem.stacks.find((s) => s.label === atributos.gasto);
+          if (!gastoBar) {
+            existingItem.stacks.push({
+              value: 0,
+            });
+          }
+          existingItem.stacks.push({
+            value: parseInt(item[`${atributos.gastoResumen} ${selectedMoneda}`] || 0),
+            color: getColor(item.tipogasto),
+            label: item.tipogasto,
+          });
+        }
       });
-
-      setStackData(stackData)
+      setStackData(stackedData);
 
   }, [resumen, search, selectedMoneda]);
 
@@ -85,20 +113,38 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
   useEffect(() => {
     if (resumen[3] && resumen[4] && stackData) {
       const filteredData = stackData.filter(item => item.year === selectedYearRef && item.month === months[selectedMonth2]);
+      let maxValue = 0;
+      filteredData.forEach(item => {
+        const maxStackValue = Math.max(...item.stacks.map(stack => stack.value));
+        maxValue = Math.max(maxValue, maxStackValue);
+      });
+      setMaxFilteredValue(maxValue * monedaMaxValues[selectedMoneda]);
       setTempFilteredStackData(filteredData);
-      if (filteredData.length > 0) {
-        const maxFilteredValue = Math.max(...filteredData.map(item => item.value));
-        setMaxFilteredValue(maxFilteredValue * monedaMaxValues[selectedMoneda]);
-      }
+      
       const availableMonths = [...new Set(stackData.filter(item => item.year === selectedYearRef).map(item => item.month))];
       setMonthsWithData(availableMonths);
 
-      const impares = filteredData.filter((item, index) => index % 2 !== 0);
-      const pares = filteredData.filter((item, index) => index % 2 === 0);
-      setImpares(impares);
-      setPares(pares);
+      const groupedGastos = filteredData.reduce((acc, item) => {
+        item.stacks.forEach((stack) => {
+          if (stack.value > 0 && stack.label !== atributos.ingreso && stack.label !==undefined) {
+            const tipogasto = stack.label;
+            const existingTipogasto = acc[tipogasto];
+            if (existingTipogasto) {
+              existingTipogasto.value += stack.value;
+            } else {
+              acc[tipogasto] = { value: stack.value, label: tipogasto };
+            }
+          }
+        });
+        return acc;
+      }, {});
+      
+      const imparesTransformed = Object.entries(groupedGastos)
+        .map(([key, value]) => ({ label: key, value: value.value }));
+      setImpares(imparesTransformed);
     }
   }, [resumen, selectedYearRef, selectedMonth2, stackData]);
+
 
   useEffect(() => {
     setFilteredStackData(tempFilteredStackData);
@@ -114,6 +160,70 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
     }
   }, [selectedYear, resumen, stackData]);
 
+  const renderDot = color => {
+    return (
+      <View
+        style={[styleResumen.renderDot,{backgroundColor: color,}]}
+      />
+    );
+  };
+  
+  const renderSquare = color => {
+    return (
+      <View
+        style={[styleResumen.renderSquare,{backgroundColor: color,}]}
+      />
+    );
+  };
+
+  const renderGastosLegendComponent = () => {
+    const hasGastos = filteredStackData.some(item => item.stacks.some(stack => stack.value > 0 && !item.label.includes(atributos.ingreso)));
+  
+    if (!hasGastos) return null;
+  
+    return (
+      <View style={styleResumen.viewContainerResponsableSection}>
+        <Text style={styleResumen.title}>{atributos.gasto}</Text>
+        <View style={styleResumen.containerLegend}>
+          {filteredStackData.flatMap(item => {
+            return item.stacks.filter(stack => stack.value > 0 && !item.label.includes(atributos.ingreso)).map(stack => (
+                <View style={styleResumen.containerLegendText}>
+                  {renderDot(stack.color)}
+                  <Text style={styleResumen.textLegend}>
+                    {item.label} {stack.label}: {symbols.peso}{stack.value}
+                  </Text>
+                </View>
+            ));
+          })}
+        </View>
+      </View>
+    );
+  };
+  
+  const renderIngresosLegendComponent = () => {
+    const hasIngresos = filteredStackData.some(item => item.stacks.some(stack => stack.value > 0 && item.label.includes(atributos.ingreso)));
+  
+    if (!hasIngresos) return null;
+  
+    return (
+      <View style={styleResumen.viewContainerResponsableSection}>
+        <Text style={styleResumen.title}>{atributos.ingreso}</Text>
+        <View style={styleResumen.containerLegend}>
+          {filteredStackData.flatMap(item => {
+            return item.stacks.filter(stack => stack.value > 0 && item.label.includes(atributos.ingreso)).map(stack => (
+                <View style={styleResumen.containerLegendText}>
+                  {renderSquare(stack.color)}
+                  <Text style={styleResumen.textLegend}>
+                    {item.label} {stack.label}: {symbols.peso}{stack.value}
+                  </Text>
+                </View>
+            ));
+          })}
+        </View>
+      </View>
+    );
+  };
+
   return (
     <View style={styleResumen.viewContainer}>
     {stackData && (
@@ -122,7 +232,7 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
     <Card style={styleResumen.titleContainer} >
       <TouchableOpacity onPress={() => setCard(!card)}>
           <Card.Title
-            title={`Por ${atributos.responsable}s ${search.length === 4 && search.match(/^\d{4}$/)? search : ''}`}
+            title={`Por ${atributos.tipo_gasto}s ${search.length === 4 && search.match(/^\d{4}$/)? search : ''}`}
             titleStyle={styleResumen.title}
             right={(props) => <Icon source={card? theme.icons.arriba : theme.icons.abajo} size={theme.fontSizes.body} color={theme.colors.white} />}
             rightStyle={styleResumen.rightCardTitle}
@@ -158,7 +268,7 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
             {stackData && (
                 <BarChart
                 key={filteredStackData.map(item => item.id).join(',')}
-                data={filteredStackData}
+                stackData={filteredStackData}
                 width={screenWidth - 120}
                 height={screenWidth - 120}
                 barWidth={barChart.barWidth}
@@ -172,31 +282,32 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
                 backgroundColor={theme.colors.pieInner}
                 yAxisThickness={barChart.ejesThickness}
                 xAxisThickness={barChart.ejesThickness}
-                barBorderRadius={barChart.barBorderRadius}
                 leftShiftForLastIndexTooltip={50}
                 maxValue={maxFilteredValue}
                 autoShiftLabels
+                disableScroll
                 hideOrigin
                 renderTooltip={(item, index) => {
                     return (
                       <View style={styleResumen.tooltipBarChart}>
-                        <Text style={styleResumen.textLegend}>{item.frontColor===theme.colors.gasto && atributos.gasto || atributos.ingreso}</Text>
-                        <Text style={styleResumen.pieCenterDescription}>{selectedMoneda}${item.value}</Text>
+                        <Text style={styleResumen.textLegend}>{item.spacing===10 && atributos.gasto || atributos.ingreso}</Text>
                       </View>
                     );
                   }}
                 />
             )}
-        </View>
+                    </View>
+        {renderGastosLegendComponent()}
+        {renderIngresosLegendComponent()}
         {stackData && (
         <View>
-            <ResponsablesSection data={impares} selectedMoneda={selectedMoneda} title={atributos.gasto} selectedMonth={months[selectedMonth2]} selectedYear={selectedYear}/>
-            <ResponsablesSection data={pares} selectedMoneda={selectedMoneda} title={atributos.ingreso} selectedMonth={months[selectedMonth2]} selectedYear={selectedYear}/>
-        </View>
+            <ResponsablesSection data={impares} selectedMoneda={selectedMoneda} title={atributos.tipo_gasto} selectedMonth={months[selectedMonth2]} selectedYear={selectedYear}/>
+            </View>
         )}
       </Card.Content>
       )}
         </Card>
+        
           ) : (<></>)}
         </View>
           )}

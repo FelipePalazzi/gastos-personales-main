@@ -173,6 +173,11 @@ const styleLista = StyleSheet.create({
       borderRadius: 5,
       marginRight: 10,
     },
+    renderSquare:{
+      height: 10,
+      width: 10,
+      marginRight: 10,
+    },
     containerLegend:{
       flexDirection: 'row',
       flexWrap: 'wrap' 
@@ -193,8 +198,10 @@ const styleLista = StyleSheet.create({
       marginTop:10,
     },
     viewContainerResponsableSection:{
-      margin: 20,
-      padding: 10,
+      marginHorizontal: 20,
+      marginVertical:10,
+      paddingHorizontal: 10,
+      paddingVertical:5,
       borderRadius: 20,
       backgroundColor: theme.colors.pieInner,
       alignItems:'center'

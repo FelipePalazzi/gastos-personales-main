@@ -9,6 +9,7 @@ import theme from '../../styles/theme.js';
 import { alerts, button_text } from '../../constants.js';
 import { Searchbar, ActivityIndicator} from 'react-native-paper';
 import ResponsablesSection from './ResponsablesSection.jsx';
+import StackTGResponsable from './StackTGResponsable.jsx';
 
 const Resumen = () => {
   const [search, setSearch] = useState('');
@@ -63,6 +64,7 @@ const Resumen = () => {
       </View>
           <IngrGastDiaMes resumen={resumen} search={search} selectedMoneda={selectedMoneda} />
           <IngrGastResponsable resumen={resumen} search={search} selectedMoneda={selectedMoneda} />
+          <StackTGResponsable resumen={resumen} search={search} selectedMoneda={selectedMoneda} />
         </>
       )}
     </View>
