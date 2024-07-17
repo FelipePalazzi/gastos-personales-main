@@ -136,9 +136,11 @@ export const filterData = (data, search, monedaProp, fechaProp, yearProp) => {
 
   export const formatYLabel = (value, selectedMoneda) => {
     const decimalPlaces = selectedMoneda === 'USD' ? 1 : 0;
-
-    if (value > 1000) {
-      return `${symbols.peso}${(value / 1000).toFixed(decimalPlaces)}${symbols.mil}`;
+  
+    if (value > 1000 || value < -1000) {
+      const absValue = Math.abs(value);
+      const formattedValue = `${symbols.peso}${(absValue / 1000).toFixed(decimalPlaces)}${symbols.mil}`;
+      return value < 0 ? `-${formattedValue}` : formattedValue;
     } else {
       return `${symbols.peso}${value}`;
     }

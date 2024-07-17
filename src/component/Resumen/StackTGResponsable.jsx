@@ -278,7 +278,7 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
                 noOfSections={barChart.noOfSections}
                 initialSpacing={barChart.initialSpacing}
                 rulesColor= {theme.colors.pieBackground}
-                yAxisTextStyle= {{color:theme.colors.white}}
+                yAxisTextStyle= {styleResumen.ejeYstyle}
                 backgroundColor={theme.colors.pieInner}
                 yAxisThickness={barChart.ejesThickness}
                 xAxisThickness={barChart.ejesThickness}

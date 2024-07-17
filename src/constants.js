@@ -18,6 +18,7 @@ const alerts = {
     noData:'No hay datos registrado',
     regresar:'Estas seguro de volver?',
     cantidad:'Cant.',
+    errorLineChart: 'No hay suficientes datos para graficar',
   };
  const symbols = {
     space: ' ',

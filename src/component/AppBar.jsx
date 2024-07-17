@@ -1,5 +1,5 @@
 import react from "react"
-import {View,StyleSheet, ScrollView, TouchableHighlight} from "react-native"
+import {View,StyleSheet, ScrollView, TouchableHighlight, StatusBar} from "react-native"
 import StyledText from "./StyledText.jsx"
 import Constants from 'expo-constants'
 import theme from '../styles/theme.js'
@@ -10,7 +10,7 @@ const styles = StyleSheet.create ({
     container: {
         backgroundColor: theme.appBar.primary,
         flexDirection: 'row',
-        paddingTop: Constants.statusBarHeight
+        paddingTop: 20
     },
     scroll:{
         paddingBottom: 15
@@ -43,6 +43,7 @@ const AppBarTab = ({children,to}) => {
 const AppBar = () => {
     return (
         <View style = {styles.container}>
+            <StatusBar backgroundColor={theme.appBar.primary} />
             <ScrollView showsHorizontalScrollIndicator={false} horizontal style={styles.scroll}>
                 <AppBarTab to={symbols.barra/*`${symbols.barra}${pagina.pagina_resumen}`*/}>Resumen</AppBarTab>
                 <AppBarTab to={`${symbols.barra}${pagina.pagina_ingreso}`}>Ingresos</AppBarTab>

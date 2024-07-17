@@ -111,6 +111,7 @@ const styleLista = StyleSheet.create({
     },
     ejeYstyle:{
       color: theme.colors.white,
+      fontSize:13,
     },
     pointer:{
       position:'absolute',
@@ -226,7 +227,21 @@ const styleLista = StyleSheet.create({
       fontSize: theme.fontSizes.pointer,
       color: theme.colors.white,
       fontWeight: theme.fontWeights.bold, 
-    }
+    }, labelStyleBalance:{
+      fontSize: 14,
+      marginTop: -250,
+      marginStart:-15,
+      width:40,
+      height:50,
+      color: theme.colors.white,
+    },
+    containerBalance:{
+      backgroundColor:theme.colors.pieInner,
+      marginTop:10,
+      paddingBottom:10,
+      borderRadius:4,
+      overflow:'hidden'
+    },
 
 
   })

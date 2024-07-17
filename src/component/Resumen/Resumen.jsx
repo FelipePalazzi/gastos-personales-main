@@ -66,7 +66,7 @@ const Resumen = () => {
           <IngrGastDiaMes resumen={resumen} search={search} selectedMoneda={selectedMoneda} />
           <IngrGastResponsable resumen={resumen} search={search} selectedMoneda={selectedMoneda} />
           <StackTGResponsable resumen={resumen} search={search} selectedMoneda={selectedMoneda} />
-          <BalanceResponsable resumen={resumen} search={search} selectedMoneda={selectedMoneda} />
+          <BalanceResponsable resumen={resumen} selectedMoneda={selectedMoneda} />
         </>
       )}
     </View>
