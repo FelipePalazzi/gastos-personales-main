@@ -64,7 +64,7 @@ const atributos = {
     tipo_importe:'Tipo de importe',
     gastoResumen:'GASTO',
     ingresoResumen:'INGRESO',
-
+    balanceResumen: 'BALANCE'
   }
 const pagina = {
     nombre:'Página',

@@ -363,16 +363,16 @@ resumenController.getResumen5 = async (req, res, next) => {
     EXTRACT(DAY FROM sq.fecha) AS DAY,
     EXTRACT(MONTH FROM sq.fecha) AS MONTH,
     EXTRACT(YEAR FROM sq.fecha) AS YEAR,
-    SUM(sq.balance_ar) OVER (PARTITION BY r.id ORDER BY sq.fecha) AS balance_ar,
-    SUM(sq.balance_uyu) OVER (PARTITION BY r.id ORDER BY sq.fecha) AS balance_uyu,
-    SUM(sq.balance_usd) OVER (PARTITION BY r.id ORDER BY sq.fecha) AS balance_usd
+    SUM(sq."BALANCE ARG") OVER (PARTITION BY r.id ORDER BY sq.fecha)::numeric(10, 2) AS "BALANCE ARG",
+    SUM(sq."BALANCE UYU") OVER (PARTITION BY r.id ORDER BY sq.fecha)::numeric(10, 2) AS "BALANCE UYU",
+    SUM(sq."BALANCE USD") OVER (PARTITION BY r.id ORDER BY sq.fecha)::numeric(10, 2) AS "BALANCE USD"
   FROM (
     SELECT 
       fecha,
       responsable,
-      SUM(COALESCE(ingreso_ar, 0)) - SUM(COALESCE(gasto_ar, 0)) AS balance_ar,
-      SUM(COALESCE(ingreso_uyu, 0)) - SUM(COALESCE(gasto_uyu, 0)) AS balance_uyu,
-      SUM(COALESCE(ingreso_usd, 0)) - SUM(COALESCE(gasto_usd, 0)) AS balance_usd
+      SUM(COALESCE(ingreso_ar, 0)) - SUM(COALESCE(gasto_ar, 0)) AS "BALANCE ARG",
+      SUM(COALESCE(ingreso_uyu, 0)) - SUM(COALESCE(gasto_uyu, 0)) AS "BALANCE UYU",
+      SUM(COALESCE(ingreso_usd, 0)) - SUM(COALESCE(gasto_usd, 0)) AS "BALANCE USD"
     FROM (
       SELECT 
         g.fecha,
