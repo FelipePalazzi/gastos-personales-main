@@ -354,5 +354,108 @@ resumenController.getResumen4 = async (req, res, next) => {
   }
 };
 
+resumenController.getResumen5 = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(`
+    SELECT 
+    r.nombre AS nombre,
+    EXTRACT(DAY FROM sq.fecha) AS DAY,
+    EXTRACT(MONTH FROM sq.fecha) AS MONTH,
+    EXTRACT(YEAR FROM sq.fecha) AS YEAR,
+    SUM(sq.balance_ar) OVER (PARTITION BY r.id ORDER BY sq.fecha) AS balance_ar,
+    SUM(sq.balance_uyu) OVER (PARTITION BY r.id ORDER BY sq.fecha) AS balance_uyu,
+    SUM(sq.balance_usd) OVER (PARTITION BY r.id ORDER BY sq.fecha) AS balance_usd
+  FROM (
+    SELECT 
+      fecha,
+      responsable,
+      SUM(COALESCE(ingreso_ar, 0)) - SUM(COALESCE(gasto_ar, 0)) AS balance_ar,
+      SUM(COALESCE(ingreso_uyu, 0)) - SUM(COALESCE(gasto_uyu, 0)) AS balance_uyu,
+      SUM(COALESCE(ingreso_usd, 0)) - SUM(COALESCE(gasto_usd, 0)) AS balance_usd
+    FROM (
+      SELECT 
+        g.fecha,
+        g.responsable,
+        0 AS ingreso_ar, 
+        SUM(g.totalar) AS gasto_ar,
+        0 AS ingreso_uyu,
+        SUM(g.total) AS gasto_uyu,
+        0 AS ingreso_usd,
+        SUM(g.total / (
+          SELECT tipo_cambio 
+          FROM tipo_cambio_usd_uyu 
+          WHERE fecha <= g.fecha 
+          ORDER BY fecha DESC 
+          LIMIT 1
+        )) AS gasto_usd
+      FROM 
+        gasto g
+      WHERE 
+        g.responsable = $1
+      GROUP BY 
+        g.fecha, g.responsable
+      UNION ALL
+      SELECT 
+        i.fecha,
+        i.responsable,
+        SUM(CASE 
+          WHEN i.moneda = 1 THEN i.importe * i.tipocambio 
+          WHEN i.moneda = 2 THEN i.importe / i.tipocambio
+          WHEN i.moneda = 3 THEN i.importe * 1 
+          ELSE 0
+        END) AS ingreso_ar,
+        0 AS gasto_ar,
+        SUM(CASE 
+          WHEN i.moneda = 1 THEN i.importe * (
+            SELECT tipo_cambio 
+            FROM tipo_cambio_usd_uyu 
+            WHERE fecha <= i.fecha 
+            ORDER BY fecha DESC 
+            LIMIT 1
+          )
+          WHEN i.moneda = 2 THEN i.importe 
+          WHEN i.moneda = 3 THEN (SELECT g2.tipocambio FROM gasto g2 WHERE g2.fecha <= i.fecha ORDER BY g2.fecha DESC LIMIT 1) * i.importe
+          ELSE 0
+        END) AS ingreso_uyu,
+        0 AS gasto_uyu,
+        SUM(CASE 
+          WHEN i.moneda = 1 THEN i.importe 
+          WHEN i.moneda = 2 THEN i.importe / (
+            SELECT tipo_cambio 
+            FROM tipo_cambio_usd_uyu 
+            WHERE fecha <= i.fecha 
+            ORDER BY fecha DESC 
+            LIMIT 1
+          )
+          WHEN i.moneda = 3 THEN i.importe / (
+            SELECT tipo_cambio 
+            FROM tipo_cambio_usd_uyu 
+            WHERE fecha <= i.fecha 
+            ORDER BY fecha DESC 
+            LIMIT 1
+          )
+          ELSE 0
+        END) AS ingreso_usd,
+        0 AS gasto_usd
+      FROM 
+        ingreso i
+      WHERE 
+        i.responsable = $1
+      GROUP BY 
+        i.fecha, i.responsable
+    ) AS subquery
+    GROUP BY 
+      fecha, responsable
+  ) AS sq
+  JOIN responsable r ON sq.responsable = r.id
+  ORDER BY 
+    r.nombre;
+    `, [id]);
+    res.status(200).json(result.rows);
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = resumenController

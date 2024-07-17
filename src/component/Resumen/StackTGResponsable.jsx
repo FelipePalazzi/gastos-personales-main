@@ -35,7 +35,6 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
     const datagasto = resumen [4]
     const filteredData = filterData(data, search,'','','year');
     const filteredDatagasto = filterData(datagasto, search,'','','year');
-
     const uniqueYears = [...new Set(filteredDatagasto.map(item => item.year))];
     const uniqueMonths = [...new Set(filteredDatagasto.map(item => item.month))];
     setUniqueYears(uniqueYears);
@@ -113,6 +112,7 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
   useEffect(() => {
     if (resumen[3] && resumen[4] && stackData) {
       const filteredData = stackData.filter(item => item.year === selectedYearRef && item.month === months[selectedMonth2]);
+
       let maxValue = 0;
       filteredData.forEach(item => {
         const maxStackValue = Math.max(...item.stacks.map(stack => stack.value));
@@ -228,7 +228,7 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
     <View style={styleResumen.viewContainer}>
     {stackData && (
         <View>
-          {((search.length >= 0 && search.length < 4)   || (search.length === 4 && search.match(/^\d{4}$/) && (stackData.some(item => item.value === 0)))) ? (
+          {((search.length >= 0 && search.length < 4)   || (search.length === 4 && search.match(/^\d{4}$/) && (stackData.some(item => item.stacks.some(stack => stack.value === 0))))) ? (
     <Card style={styleResumen.titleContainer} >
       <TouchableOpacity onPress={() => setCard(!card)}>
           <Card.Title
@@ -265,8 +265,8 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
                   />
               </View>
               <View>
-            {stackData && (
-                <BarChart
+              {stackData && filteredStackData && filteredStackData.some(item => item.year === selectedYear) && (
+              <BarChart
                 key={filteredStackData.map(item => item.id).join(',')}
                 stackData={filteredStackData}
                 width={screenWidth - 120}
@@ -299,7 +299,7 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
                     </View>
         {renderGastosLegendComponent()}
         {renderIngresosLegendComponent()}
-        {stackData && (
+        {stackData && impares && impares.length > 0 && (
         <View>
             <ResponsablesSection data={impares} selectedMoneda={selectedMoneda} title={atributos.tipo_gasto} selectedMonth={months[selectedMonth2]} selectedYear={selectedYear}/>
             </View>
