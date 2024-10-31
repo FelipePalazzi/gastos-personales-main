@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { pagina, symbols, alerts } from '../constants.js'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
@@ -9,7 +10,17 @@ const useResumen = () => {
 
   const fetchResumen = async (id) => {
     try {
-      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_resumen}${symbols.barra}${id}`);
+      const token = await AsyncStorage.getItem('userToken');
+      
+      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_resumen}${symbols.barra}${id}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });  
+        if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
       const json = await response.json();
       setResumenData((prevData) => ({...prevData, [id]: json }));
     } catch (error) {
@@ -18,7 +29,16 @@ const useResumen = () => {
   };
   const fetchResumen5 = async (id) => {
     try {
-      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_resumen}${symbols.barra}5${symbols.barra}${id}`);
+      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_resumen}${symbols.barra}5${symbols.barra}${id}`        , {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
       const json = await response.json();
       setResumenData((prevData) => ({...prevData, [`5,${id}`]: json }));
     } catch (error) {

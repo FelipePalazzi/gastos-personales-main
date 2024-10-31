@@ -4,6 +4,16 @@ const resumenController = {};
 
 resumenController.getResumen1 = async (req, res, next) => {
   try {
+    const { keyId } = req.params;  
+    const keyIdNum = Number(keyId);
+    
+    if (!req.user.keyIds.includes(keyIdNum)) {
+      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+    }
+    const keyCheck = await pool.query(`SELECT * FROM user_keys WHERE key_id = $1`, [keyId]);
+    if (keyCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Key ID no válida.' });
+    }
     const result = await pool.query(`WITH tipo_cambio_mensual AS (
       SELECT 
           EXTRACT(YEAR FROM fecha) AS YEAR, 
@@ -53,6 +63,8 @@ resumenController.getResumen1 = async (req, res, next) => {
       0 AS ingreso_usd
     FROM 
       gasto g
+    WHERE 
+      g.key_id = $1
     GROUP BY 
       YEAR, MONTH
     UNION ALL
@@ -82,13 +94,15 @@ resumenController.getResumen1 = async (req, res, next) => {
       END) AS ingreso_usd
     FROM 
       ingreso i
+    WHERE 
+      i.key_id = $1
     GROUP BY 
       YEAR, MONTH
   ) AS subquery
   GROUP BY 
     YEAR, MONTH
   ORDER BY 
-    YEAR, MONTH;`);
+    YEAR, MONTH;`, [keyId]);
     res.status(200).json(result.rows);
   } catch (err) {
     next(err);
@@ -97,6 +111,16 @@ resumenController.getResumen1 = async (req, res, next) => {
 
 resumenController.getResumen2 = async (req, res, next) => {
   try {
+    const { keyId } = req.params;
+    const keyIdNum = Number(keyId);
+    
+    if (!req.user.keyIds.includes(keyIdNum)) {
+      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+    }
+    const keyCheck = await pool.query(`SELECT * FROM user_keys WHERE key_id = $1`, [keyId]);
+    if (keyCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Key ID no válida.' });
+    }
     const result = await pool.query(`SELECT 
     EXTRACT(DAY FROM fecha) AS DAY,
     EXTRACT(MONTH FROM fecha) AS MONTH,
@@ -142,6 +166,8 @@ resumenController.getResumen2 = async (req, res, next) => {
       0 AS ingreso_usd
     FROM 
       gasto g
+    WHERE 
+      g.key_id = $1
     GROUP BY 
       g.fecha
     UNION ALL
@@ -188,13 +214,15 @@ resumenController.getResumen2 = async (req, res, next) => {
       END) AS ingreso_usd
     FROM 
       ingreso i
+    WHERE 
+      i.key_id = $1
     GROUP BY 
       i.fecha
   ) AS subquery
   GROUP BY 
     fecha
   ORDER BY 
-    YEAR, MONTH, DAY;`);
+    YEAR, MONTH, DAY;`, [keyId]);
     res.status(200).json(result.rows);
   } catch (err) {
     next(err);
@@ -203,6 +231,17 @@ resumenController.getResumen2 = async (req, res, next) => {
 
 resumenController.getResumen3 = async (req, res, next) => {
   try {
+    const { keyId } = req.params;
+    const keyIdNum = Number(keyId);
+    
+    if (!req.user.keyIds.includes(keyIdNum)) {
+      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+    }
+    const keyCheck = await pool.query(`SELECT * FROM user_keys WHERE key_id = $1`, [keyId]);
+    if (keyCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Key ID no válida.' });
+    }
+
     const result = await pool.query(`WITH tipo_cambio_mensual AS (
       SELECT 
           EXTRACT(YEAR FROM fecha) AS YEAR, 
@@ -255,6 +294,8 @@ resumenController.getResumen3 = async (req, res, next) => {
     FROM 
       gasto g
       join responsable r on r.id = g.responsable
+    WHERE 
+      g.key_id = $1
     GROUP BY 
       YEAR, MONTH, r.nombre
     UNION ALL
@@ -286,13 +327,15 @@ resumenController.getResumen3 = async (req, res, next) => {
     FROM 
       ingreso i
           join responsable r on r.id = i.responsable
+    WHERE 
+      i.key_id = $1
     GROUP BY 
       YEAR, MONTH, r.nombre
   ) AS subquery
   GROUP BY 
     YEAR, MONTH, nombre
   ORDER BY 
-    YEAR, MONTH, nombre;`);
+    YEAR, MONTH, nombre;`, [keyId]);
     res.status(200).json(result.rows);
   } catch (err) {
     next(err);
@@ -301,6 +344,16 @@ resumenController.getResumen3 = async (req, res, next) => {
 
 resumenController.getResumen4 = async (req, res, next) => {
   try {
+    const { keyId } = req.params;
+    const keyIdNum = Number(keyId);
+    
+    if (!req.user.keyIds.includes(keyIdNum)) {
+      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+    }
+    const keyCheck = await pool.query(`SELECT * FROM user_keys WHERE key_id = $1`, [keyId]);
+    if (keyCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Key ID no válida.' });
+    }
     const result = await pool.query(`WITH tipo_cambio_mensual AS (
       SELECT 
           EXTRACT(YEAR FROM fecha) AS YEAR, 
@@ -341,13 +394,15 @@ resumenController.getResumen4 = async (req, res, next) => {
       gasto g
       JOIN responsable r ON r.id = g.responsable
       JOIN tipogasto tg ON tg.id = g.tipogasto
+    WHERE 
+      g.key_id = $1
     GROUP BY 
       YEAR, MONTH, r.nombre, tg.descripcion
     ) AS subquery
     GROUP BY 
     YEAR, MONTH, nombre, tipogasto
     ORDER BY 
-    YEAR, MONTH, nombre, tipogasto;`);
+    YEAR, MONTH, nombre, tipogasto;`, [keyId]);
     res.status(200).json(result.rows);
   } catch (err) {
     next(err);
@@ -357,6 +412,16 @@ resumenController.getResumen4 = async (req, res, next) => {
 resumenController.getResumen5 = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const { keyId } = req.params;
+    const keyIdNum = Number(keyId);
+    
+    if (!req.user.keyIds.includes(keyIdNum)) {
+      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+    }
+    const keyCheck = await pool.query(`SELECT * FROM user_keys WHERE key_id = $1`, [keyId]);
+    if (keyCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Key ID no válida.' });
+    }
     const result = await pool.query(`
     SELECT 
     r.nombre AS nombre,
@@ -392,7 +457,7 @@ resumenController.getResumen5 = async (req, res, next) => {
       FROM 
         gasto g
       WHERE 
-        g.responsable = $1
+        g.responsable = $1 AND g.key_id = $2
       GROUP BY 
         g.fecha, g.responsable
       UNION ALL
@@ -441,7 +506,7 @@ resumenController.getResumen5 = async (req, res, next) => {
       FROM 
         ingreso i
       WHERE 
-        i.responsable = $1
+        i.responsable = $1 AND i.key_id = $2
       GROUP BY 
         i.fecha, i.responsable
     ) AS subquery
@@ -451,7 +516,7 @@ resumenController.getResumen5 = async (req, res, next) => {
   JOIN responsable r ON sq.responsable = r.id
   ORDER BY 
     r.nombre;
-    `, [id]);
+    `, [id, keyId]);
     res.status(200).json(result.rows);
   } catch (error) {
     next(error);

@@ -9,6 +9,7 @@ const router4 = require('./routes/ingreso.routes.js');
 const router5 = require('./routes/monedaingreso.routes.js');
 const router6 = require('./routes/responsableingreso.routes.js');
 const router7 = require('./routes/resumen.routes.js');
+const login = require('./routes/login/login.routes.js');
 const { pagina, symbols } = require('./constants.js');
 require('dotenv').config();
 const port = process.env.PORT || 3000
@@ -35,6 +36,7 @@ app.use(router4)
 app.use(router5)
 app.use(router6)
 app.use(router7)
+app.use(login)
 
 // handling errors
 app.use((err, req, res, next) => {
