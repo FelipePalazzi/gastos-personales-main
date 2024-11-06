@@ -2,6 +2,7 @@ import moment from 'moment'
 import theme from './styles/theme'
 import { symbols, predefinedColors } from './constants';
 import chroma from 'chroma-js';
+import { jwtDecode } from "jwt-decode";
 
 export const filterData = (data, search, monedaProp, fechaProp, yearProp) => {
   if (!search) {
@@ -158,4 +159,15 @@ export const filterData = (data, search, monedaProp, fechaProp, yearProp) => {
     const hue = (hash % 360);  // Tono
     const color = chroma.hsv(hue, 1, 1).hex();  // Saturación y valor
     return color;
+  }
+
+  export function decodeToken (token) {
+    try {
+        const decoded = jwtDecode(token);
+        const keyIds = decoded.keyIds; 
+        return keyIds;
+    } catch (error) {
+        console.error('Error al decodificar el token:', error);
+        return null;
+    }
   }

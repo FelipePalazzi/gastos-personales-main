@@ -24,7 +24,7 @@ loginController.register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         await pool.query(`INSERT INTO users (username, password, role) VALUES ($1, $2, $3)`, [username, hashedPassword, role || 'user']);
         
-        res.status(201).send('Usuario registrado exitosamente');
+        res.status(200).send('Usuario registrado exitosamente');
     } catch (error) {
         res.status(400).send('Error al registrar el usuario');
     }
@@ -55,7 +55,7 @@ loginController.login = async (req, res) => {
                         keyIds
                     }, 
                     process.env.JWT_SECRET, 
-                    { expiresIn: '1h' }
+                    { expiresIn: '30d' }
                 );
                 
                 res.status(200).json({ token });

@@ -11,7 +11,7 @@ const useGastos = () => {
   const fetchGastos = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}`, {
+      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}2`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,

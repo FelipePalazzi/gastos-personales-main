@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, ScrollView,BackHandler} from 'react-native'
-import useGastos from '../../hooks/useGastos'
+import { View, Text, ScrollView} from 'react-native'
 import useTipoGasto from '../../hooks/useTipoGasto'
 import useCategoriaGasto from '../../hooks/useCategoriaGasto'
 import useResponsableIngreso from '../../hooks/useResponsableIngreso'
-import { useParams, useLocation  } from "react-router-dom"
-import {useNavigate} from 'react-router-native'
 import {Picker} from '@react-native-picker/picker'
 import DateTimePickerModal from "react-native-modal-datetime-picker"
 import Icon from 'react-native-vector-icons/FontAwesome'
@@ -18,88 +15,100 @@ import { styleForm } from '../../styles/styles.js'
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
-const AgregarGasto = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const deleteMode = location.state?.deleteMode
-  const [tipogasto, setTipogasto] = useState('')
-  const [tipocambio, settipocambio] = useState(0)
-  const [totalar, setTotalar] = useState(0)
-  const [total, setTotal] = useState(0)
-  const [descripcion, setDescripcion] = useState('')
-  const [categoria, setCategoria] = useState('')
-  const [responsable, setResponsable] = useState('')
-  const { loading } = useGastos()
+const AgregarGasto = ({ route, navigation }) => {
+  const {gastoParam,deleteMode} = route.params;
+  const [item, setItem] = useState({});
+  const [loading, setLoading] = useState(true);
   const { tipogastos } = useTipoGasto()
   const {responsableIngresos} = useResponsableIngreso()
   const {categoriaGastos} = useCategoriaGasto()  
   const [datePickerVisible, setDatePickerVisible] = useState(false)
   const [selectedDate, setSelectedDate] = useState(moment())
-  const params = useParams()
-  const id = params.id
   const [visible, setVisible] = useState(false);
   const [visibleOK, setvisibleOK] = useState(false);
   const [visibleDelete, setvisibleDelete] = useState(false);
   const [visibleOKDelete, setvisibleOKDelete] = useState(false);
-  const [visibleBack, setVisibleBack] = useState(false);
   const [message, setMessage] = useState([]);
 
   useEffect(() => {
-      const fetchData = async () => {
-        const gasto = await obtenerGasto(id)
-        settipocambio(gasto[0].tipocambio.toFixed(4))
-        setTotalar(gasto[0].totalar.toFixed(0))
-        setTotal(gasto[0].total.toFixed(2))
-        setDescripcion(gasto[0].descripcion)
-        const tipogasto = tipogastos.find((tg) => tg.descripcion === gasto[0].tipogasto)
-        if (tipogasto) {
-          setTipogasto(tipogasto.id)
-          setCategoria(tipogasto.categoria)
-        }
-        setResponsable(responsableIngresos.find((r) => r.nombre === gasto[0].responsable).id)
-      }
-      fetchData()
-    }, [id, tipogastos, responsableIngresos])
-
-  const obtenerGasto = async (id) => {
-    const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${id}`)
-    const gasto = await response.json()
-    const fechaMoment = moment.utc(gasto[0].fecha)
-    setSelectedDate(fechaMoment)
-    return gasto
-  }
+    if (gastoParam && tipogastos.length > 0 && responsableIngresos.length > 0) {
+      setItem(gastoParam);
   
-  const handletipoCambioChange = (text) => {
-    settipocambio(text)
-    if (totalar && tipocambio) {
-      const total = totalar * text
-      setTotal(total.toFixed(2))
+      const tipogastoSeleccionado = tipogastos.find(
+        (tg) => tg.descripcion === gastoParam?.tipogasto
+      );
+      if (tipogastoSeleccionado) {
+        updateItemProperty("tipogasto", tipogastoSeleccionado.id);
+        updateItemProperty("categoria", tipogastoSeleccionado.categoria);
+      } else {
+        updateItemProperty("tipogasto", "");
+        updateItemProperty("categoria", "");
+      }
+  
+      const responsableSeleccionado = responsableIngresos.find(
+        (r) => r.nombre === gastoParam.responsable
+      );
+      updateItemProperty("responsable", responsableSeleccionado ? responsableSeleccionado.id : "");
+      updateItemProperty("fecha", gastoParam.fecha ? moment.utc(gastoParam.fecha).format('YYYY-MM-DD HH:mm:ss') : selectedDate.format('YYYY-MM-DD HH:mm:ss'));
+      updateItemProperty("descripcion", gastoParam.descripcion ? gastoParam.descripcion : '');
+      updateItemProperty('total', gastoParam.total ? gastoParam.total.toFixed(2) : 0);
+      updateItemProperty('totalar', gastoParam.totalar ? gastoParam.totalar.toFixed(0) : 0);
+      updateItemProperty('tipocambio', gastoParam.tipocambio ? gastoParam.tipocambio.toFixed(4) : 0);
+      if (gastoParam && Object.keys(gastoParam).length > 0) {
+        const allFieldsFilled = [
+          gastoParam.tipogasto || '', 
+          gastoParam.responsable || '',
+          gastoParam.fecha || '',
+          gastoParam.descripcion || '',
+          gastoParam.total || 0, 
+          gastoParam.totalar || 0,
+          gastoParam.tipocambio || 0
+      ].every(field => field !== null && field !== undefined && field !== "");
+    
+        if (!allFieldsFilled) {
+            setLoading(false);
+        }
     } else {
-      setTotal(0)
+        setLoading(false);
+    }
+    }
+  }, [gastoParam, tipogastos, responsableIngresos, categoriaGastos]);
+
+  const updateItemProperty = (key, value) => {
+    setItem(prevItem => ({
+      ...prevItem,
+      [key]: value,
+    }));
+  };
+
+  const handletipoCambioChange = (text) => {
+    updateItemProperty('tipocambio', text)
+    if (item.totalar && item.tipocambio) {
+      const total = item.totalar * text
+      updateItemProperty('total', total.toFixed(2));
+    } else {
+      updateItemProperty('total', 0);
     }
   }
   const handleTotalarChange = (text) => {
-    if (text === 0) {
-      setTotalar(null)
+    updateItemProperty('totalar', text || null);
+    if (text && item.tipocambio) {
+      const total = text * item.tipocambio;
+      updateItemProperty('total', total.toFixed(2));
     } else {
-     setTotalar(text)
-      if (totalar && tipocambio) {
-        const total = text * tipocambio
-        setTotal(total.toFixed(2))
-      } else {
-        setTotal(0)
-      }
-  }}
+      updateItemProperty('total', 0);
+    }
+  };
 
   const handleTipogastoChange = (itemValue) => {
-    setTipogasto(itemValue)
+    updateItemProperty('tipogasto', itemValue);
     const tipogastoSeleccionado = tipogastos.find((tg) => tg.id === itemValue)
     if (tipogastoSeleccionado) {
-      setCategoria(tipogastoSeleccionado.categoria)
-      setResponsable(tipogastoSeleccionado.responsable)
+      updateItemProperty('categoria', tipogastoSeleccionado.categoria)
+      updateItemProperty('responsable', tipogastoSeleccionado.responsable)
     } else {
-      setCategoria('')
-      setResponsable('')
+      updateItemProperty('categoria', '')
+      updateItemProperty('responsable', '')
     }
   }
 
@@ -112,11 +121,11 @@ const AgregarGasto = () => {
   }
 
   const handleConfirm = (date) => {
-    hideDatePicker()
-    const utcDate = moment(date)
-    setSelectedDate(utcDate)
-    setFecha(utcDate)
-  }
+    const utcDate = moment(date).format('YYYY-MM-DD HH:mm:ss');
+    hideDatePicker();
+    setSelectedDate(utcDate);
+    updateItemProperty('fecha', utcDate);
+  };
 
   const createGasto = async (gasto) => {
     try {
@@ -136,13 +145,14 @@ const AgregarGasto = () => {
 
   const updateGasto = async (gasto) => {
     try {
-      await fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${gasto.id}`, {
+     const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${gasto.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(gasto),
       })
+      const data = await response.json()
       setvisibleOK(true);
     } catch (error) {
       console.error(error)
@@ -153,22 +163,22 @@ const AgregarGasto = () => {
     e.preventDefault()
     const missingFields = [];
     
-    if (!tipogasto) {
+    if (!item.tipogasto) {
       missingFields.push(atributos.tipo_gasto);
     }
         
-    if (!responsable) {
+    if (!item.responsable) {
       missingFields.push(atributos.responsable);
     }
-    if (!tipocambio) {
+    if (!item.tipocambio) {
       missingFields.push(atributos.tipo_cambio);
     }
 
-    if (!totalar) {
+    if (!item.totalar) {
       missingFields.push(atributos.total_arg);
     }
     
-    if (!total) {
+    if (!item.total) {
       missingFields.push(atributos.total_uyu);
     }
 
@@ -180,37 +190,18 @@ const AgregarGasto = () => {
       return;
     }
 
-    const gasto = {  fecha: selectedDate.format('YYYY-MM-DD HH:mm:ss'), tipogasto, tipocambio, totalar, total, descripcion, responsable, id }
-    if (gasto.id) {
-      await updateGasto(gasto)
+    if (item.id) {
+      await updateGasto(item)
     } else {
-      await createGasto(gasto)
+      await createGasto(item)
     }
-  }
-
-  const handleCancel = () => {
-    navigate(`${symbols.barra}${pagina.pagina_gasto}`, { replace: true })
   }
 
   const handleDelete = async () => {
-    if (id) {
+    if (item.id) {
       setvisibleDelete(true);
     }
   }
-  useEffect(() => {
-    const backAction = () => {
-      setVisibleBack(true)
-      return true;
-    };
-    
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-  
-    return () => backHandler.remove();
-  }, []);
-
 
   return (
     <>
@@ -220,24 +211,6 @@ const AgregarGasto = () => {
     scrollEventThrottle={theme.scroll.desplazamiento}
     >
     <View >
-     {/*Mensaje de volver*/}
-    <Portal>
-      <Dialog visible={visibleBack} onDismiss={() => setVisibleBack(false)}>
-        <Dialog.Icon icon={theme.icons.volverAlert} />
-        <Dialog.Title style={styleForm.title}>{alerts.regresar}</Dialog.Title>
-        <Dialog.Actions style={styleForm.dialogActions}>
-        <Icon.Button name={theme.icons.close} backgroundColor={theme.colors.transparente} color={theme.colors.edit} onPress={() => setVisibleBack(false)}>{button_text.cancel}</Icon.Button>
-              <Icon.Button name={theme.icons.volver} onPress={() => 
-                navigate(`${symbols.barra}${pagina.pagina_gasto}`, { replace: true })}>
-                  {button_text.volver}
-                  </Icon.Button>
-            </Dialog.Actions>
-      </Dialog>
-    </Portal>
-
-       <View style={styleForm.loadingContainer}>
-        <Text style={styleForm.loadingText}>{`${button_text.formulario}${atributos.gasto}`}</Text>
-      </View>
       {loading ? (
         <View style={styleForm.loadingContainer}>
           <ActivityIndicator animating={true} color={theme.colors.primary} size={theme.icons.big} />
@@ -250,7 +223,7 @@ const AgregarGasto = () => {
 
           <View style={styleForm.rowContainer}>
       <Text style={styleForm.text}>{`${atributos.fecha}${symbols.colon}`}</Text>
-        <Text style={[styleForm.dateText, { color: !deleteMode? theme.colors.black : theme.colors.gray }]}>{selectedDate.format('LL')}</Text>
+        <Text style={[styleForm.dateText, { color: !deleteMode? theme.colors.black : theme.colors.gray }]}>{item.fecha ? moment(item.fecha).format('LL') : 'Fecha no disponible'}</Text>
       <View style={styleForm.buttonContainer}>
   <Icon.Button name={theme.icons.calendar} disabled={deleteMode} backgroundColor={!deleteMode ? theme.colors.blue : theme.colors.disabled} onPress={showDatePicker}>{`${button_text.select}`}</Icon.Button>
       </View>
@@ -268,7 +241,7 @@ const AgregarGasto = () => {
     <Text style={styleForm.text}>{`${atributos.tipo_gasto}${symbols.colon}`}</Text>
     <Picker
     enabled={!deleteMode}
-        selectedValue={tipogasto}
+        selectedValue={item.tipogasto}
         onValueChange={handleTipogastoChange}
         style={styleForm.picker}
         mode={theme.picker.modo}
@@ -285,8 +258,8 @@ const AgregarGasto = () => {
     <Text style={styleForm.text}>{`${atributos.responsable}${symbols.colon}`}</Text>
     <Picker
     enabled={!deleteMode}
-        selectedValue={responsable}
-        onValueChange={(text) => setResponsable(text)}
+        selectedValue={item.responsable}
+        onValueChange={(text) => updateItemProperty('responsable', text)}
         style={styleForm.picker}
         mode={theme.picker.modo}
         dropdownIconColor={deleteMode? theme.colors.disabled :theme.colors.textSecondary}
@@ -303,7 +276,7 @@ const AgregarGasto = () => {
     <TextInput
     disabled={deleteMode}
     mode='outlined'
-      value={tipocambio}
+      value={item.tipocambio}
       onChangeText={handletipoCambioChange}
       placeholder={atributos.tipo_cambio}
       keyboardType="numeric"
@@ -312,15 +285,13 @@ const AgregarGasto = () => {
     />
   </View>
 
-
-
   <View style={styleForm.rowContainer}>
     <Text style={styleForm.text}>{`${atributos.total_arg}${symbols.colon}`}</Text>
     <TextInput
     disabled={deleteMode}
     mode='outlined'
-      value={totalar}
-      onChangeText={handleTotalarChange}
+      value={item.totalar}
+      onChangeText={(text) => handleTotalarChange(parseFloat(text) || 0)}
       placeholder={atributos.total_arg}
       keyboardType="numeric"
       style={styleForm.text_input}
@@ -331,10 +302,10 @@ const AgregarGasto = () => {
 
   <View style={styleForm.rowContainer}>
     <Text style={styleForm.text}>{`${atributos.total_uyu}${symbols.colon}`}</Text>
-   {totalar? 
-  (tipocambio?  <TextInput style={styleForm.text_input} mode='outlined' disabled>{total}</TextInput> : <TextInput style={styleForm.text_input} mode='outlined' disabled >{`${button_text.ingresar}${symbols.space}${atributos.tipo_cambio}`}</TextInput>) 
+   {item.totalar? 
+  (item.tipocambio?  <TextInput style={styleForm.text_input} mode='outlined' disabled>{item.total}</TextInput> : <TextInput style={styleForm.text_input} mode='outlined' disabled >{`${button_text.ingresar}${symbols.space}${atributos.tipo_cambio}`}</TextInput>) 
   : 
-  (tipocambio? <TextInput style={styleForm.text_input} mode='outlined' disabled>{`${button_text.ingresar}${symbols.space}${atributos.total_arg}`}</TextInput> 
+  (item.tipocambio? <TextInput style={styleForm.text_input} mode='outlined' disabled>{`${button_text.ingresar}${symbols.space}${atributos.total_arg}`}</TextInput> 
   : <TextInput style={styleForm.text_input}  mode='outlined' disabled>{`${button_text.ingresar}${symbols.space}${atributos.total_arg}${symbols.and}${atributos.tipo_cambio}`}</TextInput>)
 }
   </View>
@@ -345,8 +316,8 @@ const AgregarGasto = () => {
       <TextInput
       disabled={deleteMode}
       mode='outlined'
-        value={descripcion}
-        onChangeText={(text) => setDescripcion(text)}
+        value={item.descripcion}
+        onChangeText={(text) => updateItemProperty('descripcion', text)}
         placeholder={`${atributos.descripcion}${symbols.space}${button_text.opcional}`}
         style={styleForm.text_input}
         outlineStyle={deleteMode? { borderColor: theme.colors.disabled } : { borderColor: theme.colors.primary }}
@@ -357,11 +328,18 @@ const AgregarGasto = () => {
 
 <View>
 
-      <View style={styleForm.rowContainer}>
-        <Text style={styleForm.text}>{`${atributos.categoria}${symbols.colon}`}</Text>
-          {categoria ? <TextInput style={styleForm.text_input} mode='outlined' disabled>{categoriaGastos.find((c) => c.id === categoria).descripcion}</TextInput> : 
-          <TextInput style={styleForm.text_input} mode='outlined' disabled>{`${button_text.select}${symbols.space}${atributos.tipo_gasto}`}</TextInput>}
-      </View>
+<View style={styleForm.rowContainer}>
+    <Text style={styleForm.text}>{`${atributos.categoria}${symbols.colon}`}</Text>
+    {item.categoria ? (<TextInput style={styleForm.text_input} mode='outlined' disabled>
+            {categoriaGastos.find((c) => c.id === item.categoria)  ? categoriaGastos.find((c) => c.id === item.categoria).descripcion  : item.categoria }
+        </TextInput>
+    ) : (
+        <TextInput style={styleForm.text_input} mode='outlined'  disabled>
+            {`${button_text.select}${symbols.space}${atributos.tipo_gasto}`}
+        </TextInput>
+    )}
+</View>
+
     </View>
 
     </View>
@@ -384,7 +362,7 @@ const AgregarGasto = () => {
         <Dialog.Icon icon={theme.icons.okAlert} />
         <Dialog.Title style={styleForm.title}>{alerts.guardado_exito}</Dialog.Title>
         <Dialog.Actions>
-              <Icon.Button name={theme.icons.ok} onPress={() => navigate(`${symbols.barra}${pagina.pagina_gasto}`, { replace: true })}>{button_text.ok}</Icon.Button>
+              <Icon.Button name={theme.icons.ok} onPress={() => navigation.navigate(`Gastos`)}>{button_text.ok}</Icon.Button>
             </Dialog.Actions>
       </Dialog>
     </Portal>
@@ -396,7 +374,7 @@ const AgregarGasto = () => {
         <Dialog.Actions style={styleForm.dialogActions}>
               <Icon.Button name={theme.icons.close} backgroundColor={theme.colors.transparente} color={theme.colors.edit} onPress={() => setvisibleDelete(false)}>{button_text.cancel}</Icon.Button>
               <Icon.Button name={theme.icons.borrar} backgroundColor={theme.colors.delete} onPress={async () => {try {
-          const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${id}`, {
+          const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${item.id}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json'
@@ -414,7 +392,7 @@ const AgregarGasto = () => {
         <Dialog.Icon icon={theme.icons.deleteComplete} />
         <Dialog.Title style={styleForm.title}>{alerts.delete_exito}</Dialog.Title>
         <Dialog.Actions>
-              <Icon.Button name={theme.icons.ok} onPress={() => navigate(`${symbols.barra}${pagina.pagina_gasto}`, { replace: true })}>{button_text.ok}</Icon.Button>
+              <Icon.Button name={theme.icons.ok} onPress={() => navigation.navigate(`Gastos`)}>{button_text.ok}</Icon.Button>
             </Dialog.Actions>
       </Dialog>
       </Portal>
@@ -422,7 +400,7 @@ const AgregarGasto = () => {
 
     <View style={styleForm.rowButton}>
       <View style={styleForm.button}>
-      <Icon.Button backgroundColor={theme.colors.cancelar} name={theme.icons.close}  onPress={handleCancel}>{button_text.cancel}</Icon.Button>
+      <Icon.Button backgroundColor={theme.colors.cancelar} name={theme.icons.close}  onPress={() => navigation.navigate('Gastos')}>{button_text.cancel}</Icon.Button>
       </View>
       {!deleteMode && (
     <View style={styleForm.button}>

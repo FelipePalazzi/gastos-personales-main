@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { pagina, symbols, alerts } from '../constants';
-
+import { decodeToken } from '../utils.js';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
 const useCategoriaGasto = () => {
@@ -11,8 +11,8 @@ const useCategoriaGasto = () => {
   const fetchCategoriaGastos = useCallback(async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-
-      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_categoria_gasto}`
+      const keyIds = decodeToken(token);
+      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_categoria_gasto}${symbols.barra}${keyIds[0]}`
         , {
         method: 'GET',
         headers: {

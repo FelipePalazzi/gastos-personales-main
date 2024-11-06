@@ -1,14 +1,15 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { View, Text,ScrollView, RefreshControl, BackHandler } from 'react-native';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
+import { View, Text,ScrollView, RefreshControl } from 'react-native';
 import { DataTable,Searchbar, ActivityIndicator,Card } from 'react-native-paper';
-import {useNavigate} from 'react-router-native'
+import { useFocusEffect } from '@react-navigation/native';
 import theme from '../../styles/theme.js';
 import moment from 'moment'
 import { Feather } from '@expo/vector-icons'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { alerts, button_text, atributos, symbols, pagina } from '../../constants.js';
-import { filterData, sortData,  getSortIcon } from '../../utils.js';
+import { filterData, sortData,  getSortIcon, decodeToken } from '../../utils.js';
 import {styleLista} from '../../styles/styles.js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
@@ -17,7 +18,14 @@ const useFetchGastos = () => {
   const [loading, setLoading] = useState(true);
   const fetchGastos = async () => {
     try {
-      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}`);
+      const token = await AsyncStorage.getItem('userToken');
+      const keyIds = decodeToken(token);
+      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${keyIds[0]}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const json = await response.json();
       setGastos(json);
       setLoading(false);
@@ -31,7 +39,7 @@ const useFetchGastos = () => {
 
 const numberOfItemsPerPageList = [5,6,7,8,9,10];
 
-const GastoList = () => {
+const GastoList = ({ navigation }) => {
   const [orden, setOrden] = useState('asc');
   const [columna, setColumna] = useState('id');
   const [search, setSearch] = useState('');
@@ -41,8 +49,7 @@ const GastoList = () => {
   const [numberOfItemsPerPage, onItemsPerPageChange] = useState(7);
   const { gastos, loading, fetchGastos } = useFetchGastos();
   const [expanded, setExpanded] = useState({});
-  const navigate = useNavigate()
-  const [gasto, setGastos] = useState({})
+  const [gasto, setGastos] = useState({});
   
   const handlePressGasto = useCallback((gastoId, index) => {
     setExpanded((prevExpanded) => ({ ...prevExpanded, [gastoId]: !prevExpanded[gastoId] }));
@@ -53,9 +60,16 @@ const GastoList = () => {
     await fetchGastos();
     setRefreshing(false);
   };
-  useEffect(() => {
-    fetchGastos();
-  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        await fetchGastos();
+      };
+  
+      fetchData();
+    }, [fetchGastos])
+  );
 
   
   const filteredData = filterData(gastos, search, ['totalar', 'total'], 'fecha','fecha');
@@ -93,31 +107,19 @@ const GastoList = () => {
   };
 
   const handleSubmit = async (gasto) => {
-    navigate(`${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${pagina.pagina_new}`, { replace: true }) 
+    navigation.navigate(`GastoForm`,{gastoParam:gasto, deleteMode:false}) 
     await createGasto(gasto) 
   } 
-  const onEdit = async (updatedGasto) => {
-    navigate(`${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${updatedGasto.id}`, { replace: true }) 
-    await updateGasto(updatedGasto) 
+  const onEdit = async (gasto) => {
+    navigation.navigate(`GastoForm`,{gastoParam:gasto, deleteMode:false}) 
+    await updateGasto(gasto) 
   } 
 
-  const onDelete = async (id) => {
-    navigate(`${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${id}`, { state: { deleteMode: true } }) 
-    await deleteGasto(id) 
+  const onDelete = async (gasto) => {
+    navigation.navigate(`GastoForm`,{gastoParam:gasto, deleteMode:true}) 
+    await deleteGasto(gasto.id) 
   } 
-  useEffect(() => {
-    const backAction = () => {
-      navigate(`${symbols.barra}`, { replace: true }) 
-      return true;
-    };
-    
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-  
-    return () => backHandler.remove();
-  }, []);
+
 
   return (
     <ScrollView  showsVerticalScrollIndicator={true}
@@ -226,7 +228,7 @@ const GastoList = () => {
               <Icon.Button
                 backgroundColor={theme.colors.delete}
                 name={theme.icons.borrar}
-                onPress={() => onDelete(gasto.id)}
+                onPress={() => onDelete(gasto)}
               >{button_text.delete}
               </Icon.Button>
               </View>
