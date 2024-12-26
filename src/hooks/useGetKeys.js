@@ -12,15 +12,17 @@ const useGetKeys = () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
       const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}conseguirllaves`, {
-        method: 'POST',
+        method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        body: token.userId,
+        body: {
+            "user_id": "2"
+          }
       });
       const json = await response.json();
       setGetkeys(json);
-  console.log(json)
+   console.log(json)
 
       setLoading(false);
     } catch (error) {

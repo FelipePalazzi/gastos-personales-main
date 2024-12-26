@@ -24,23 +24,22 @@ const Drawer = createDrawerNavigator();
 
 function DrawerNavigator() {
   const { getkeys, loading, fetchGetKeys } = useGetKeys(); // Usar el hook para obtener las keys
-  const [keyId, setKeyId] = useState(getkeys.length > 0 ? getkeys[0].key_id : null);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (keyId && keyId !== previousKeyId.current) {
-        previousKeyId.current = keyId;
-        fetchGetKeys();
-      }
-    }, [keyId, fetchGetKeys])
-  );
+  const [keyId, setKeyId] = useState(null);
 
   useEffect(() => {
-    fetchGetKeys
+    const loadKeys = async () => {
+      await fetchGetKeys(); // Llama a la función para obtener las keys
+    };
+
+    loadKeys();
+  }, []); // Solo se ejecuta una vez al montar el componente
+
+  useEffect(() => {
     if (getkeys.length > 0) {
       setKeyId(getkeys[0].key_id); // Establecer la primera key como seleccionada por defecto
     }
   }, [getkeys]);
+  console.log(getkeys)
 
   return (
     <Drawer.Navigator
