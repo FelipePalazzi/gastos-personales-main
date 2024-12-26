@@ -16,8 +16,6 @@ import { View, Text } from 'react-native';
 import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
 import { styleLista, styleForm } from '../styles/styles.js';
 import {Picker} from '@react-native-picker/picker'
-import { decodeToken } from '../utils.js';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import useGetKeys from '../hooks/useGetKeys.js';
 
 const Tab = createMaterialTopTabNavigator();

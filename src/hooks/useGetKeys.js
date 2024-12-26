@@ -12,7 +12,7 @@ const useGetKeys = () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
       const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}conseguirllaves`, {
-        method: 'GET',
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
         },
