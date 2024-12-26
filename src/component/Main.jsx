@@ -25,14 +25,24 @@ const HomeStack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
 function DrawerNavigator() {
-  const keys = useGetKeys(); // Usar el hook para obtener las keys
-  const [keyId, setKeyId] = useState(keys.length > 0 ? keys[0].key_id : null);
+  const { getkeys, loading, fetchGetKeys } = useGetKeys(); // Usar el hook para obtener las keys
+  const [keyId, setKeyId] = useState(getkeys.length > 0 ? getkeys[0].key_id : null);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (keyId && keyId !== previousKeyId.current) {
+        previousKeyId.current = keyId;
+        fetchGetKeys();
+      }
+    }, [keyId, fetchGetKeys])
+  );
 
   useEffect(() => {
-    if (keys.length > 0) {
-      setKeyId(keys[0].key_id); // Establecer la primera key como seleccionada por defecto
+    fetchGetKeys
+    if (getkeys.length > 0) {
+      setKeyId(getkeys[0].key_id); // Establecer la primera key como seleccionada por defecto
     }
-  }, [keys]);
+  }, [getkeys]);
 
   return (
     <Drawer.Navigator
@@ -40,7 +50,7 @@ function DrawerNavigator() {
         <CustomDrawerContent
           keyId={keyId}
           setKeyId={setKeyId}
-          keys={keys}
+          keys={getkeys}
         />
       )}
       screenOptions={{

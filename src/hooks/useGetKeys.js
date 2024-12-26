@@ -20,6 +20,8 @@ const useGetKeys = () => {
       });
       const json = await response.json();
       setGetkeys(json);
+  console.log(json)
+
       setLoading(false);
     } catch (error) {
       console.error(`${alerts.error_ocurrido}${atributos.gasto}`, error);
