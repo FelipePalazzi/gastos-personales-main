@@ -111,7 +111,7 @@ const LoginScreen = () => {
 
         if (result.success) {
           setLoading(false)
-          navigation.navigate(`HomeTab`)
+          navigation.navigate(`Drawer`)
         } else {
           setLoading(false)
         }
@@ -183,14 +183,14 @@ const LoginScreen = () => {
           </View>
 
           <Portal>
-            <Dialog visible={visibleOK} onDismiss={() => [navigation.navigate(`HomeTab`), setvisibleOK(false)]}>
+            <Dialog visible={visibleOK} onDismiss={() => [navigation.navigate(`Drawer`), setvisibleOK(false)]}>
               <Dialog.Icon icon={'account-check'} />
               <Dialog.Title style={styleForm.title}>{'Inicio de sesion correcto'}</Dialog.Title>
               <Dialog.Content>
                 <Text style={styleForm.dateText}>{`Bienvenido ${nombreUsuario}!`}</Text>
               </Dialog.Content>
               <Dialog.Actions>
-                <Icon.Button name={'check'} onPress={() => [navigation.navigate(`HomeTab`), setvisibleOK(false)]}>{'Entrar'}</Icon.Button>
+                <Icon.Button name={'check'} onPress={() => [navigation.navigate(`Drawer`), setvisibleOK(false)]}>{'Entrar'}</Icon.Button>
               </Dialog.Actions>
             </Dialog>
           </Portal>

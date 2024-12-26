@@ -1,25 +1,25 @@
 import { useState } from "react";
-import {pagina,symbols ,alerts} from '../constants'
+import {symbols ,alerts} from '../constants'
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
-const useGastos = (keyId) => {
-  const [gastos, setGastos] = useState([]);
+const useGetKeys = () => {
+  const [getkeys, setGetkeys] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchGastos = async () => {
-    if (!keyId) return; 
+  const fetchGetKeys = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${keyId}`, {
+      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}conseguirllaves`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        body: token.userId,
       });
       const json = await response.json();
-      setGastos(json);
+      setGetkeys(json);
       setLoading(false);
     } catch (error) {
       console.error(`${alerts.error_ocurrido}${atributos.gasto}`, error);
@@ -27,7 +27,7 @@ const useGastos = (keyId) => {
     }
   };
 
-  return { gastos, loading, fetchGastos };
+  return { getkeys, loading, fetchGetKeys };
 };
 
-export default useGastos;
+export default useGetKeys;

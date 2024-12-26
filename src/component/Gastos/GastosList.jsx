@@ -7,39 +7,13 @@ import moment from 'moment'
 import { Feather } from '@expo/vector-icons'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { alerts, button_text, atributos, symbols, pagina } from '../../constants.js';
-import { filterData, sortData,  getSortIcon, decodeToken } from '../../utils.js';
+import { filterData, sortData,  getSortIcon } from '../../utils.js';
 import {styleLista} from '../../styles/styles.js';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
-const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
-
-const useFetchGastos = () => {
-  const [gastos, setGastos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const fetchGastos = async () => {
-    try {
-      const token = await AsyncStorage.getItem('userToken');
-      const keyIds = decodeToken(token);
-      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${keyIds[0]}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const json = await response.json();
-      setGastos(json);
-      setLoading(false);
-    } catch (error) {
-      console.error(`${alerts.error_ocurrido}${atributos.gasto}`, error);
-      setLoading(false);
-    }
-  };
-  return { gastos, loading, fetchGastos };
-};
+import useGastos from '../../hooks/useGastos.js';
 
 const numberOfItemsPerPageList = [5,6,7,8,9,10];
 
-const GastoList = ({ navigation }) => {
+const GastoList = ({ navigation , keyId}) => {
   const [orden, setOrden] = useState('asc');
   const [columna, setColumna] = useState('id');
   const [search, setSearch] = useState('');
@@ -47,10 +21,10 @@ const GastoList = ({ navigation }) => {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(7);
   const [numberOfItemsPerPage, onItemsPerPageChange] = useState(7);
-  const { gastos, loading, fetchGastos } = useFetchGastos();
+  const { gastos, loading, fetchGastos } = useGastos(keyId);
   const [expanded, setExpanded] = useState({});
   const [gasto, setGastos] = useState({});
-  
+
   const handlePressGasto = useCallback((gastoId, index) => {
     setExpanded((prevExpanded) => ({ ...prevExpanded, [gastoId]: !prevExpanded[gastoId] }));
   }, []);
@@ -63,14 +37,15 @@ const GastoList = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      const fetchData = async () => {
-        await fetchGastos();
-      };
-  
-      fetchData();
-    }, [fetchGastos])
+      if (keyId && keyId !== previousKeyId.current) {
+        previousKeyId.current = keyId;
+        fetchGastos();
+      }
+    }, [keyId, fetchGastos])
   );
-
+  
+  const previousKeyId = useRef(keyId); 
+  
   
   const filteredData = filterData(gastos, search, ['totalar', 'total'], 'fecha','fecha');
 

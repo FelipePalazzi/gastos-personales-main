@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler';
 import React from 'react'
 import Main from './src/component/Main.jsx'
 import {NativeRouter} from 'react-router-native'
