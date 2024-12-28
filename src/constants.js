@@ -78,6 +78,7 @@ const pagina = {
     pagina_moneda_ingreso: 'monedaingreso',
     pagina_responsable:'responsableIngreso',
     pagina_tipo_gasto: 'tipogasto',
+    pagina_key:'keys',
 
   }
   const months = {
@@ -138,6 +139,43 @@ const pieChart={
   innerRadius:60,
 }
 
+const clasesEntidad = {
+  categoriagasto: {
+    title: "Categoría",
+    fields: [
+      { name: "descripcion", label: "Descripción", type: "textarea" },
+    ],
+  },
+  tipogasto: {
+    title: "Tipo de Categoría",
+    fields: [
+      { name: "descripcion", label: "Descripción", type: "textarea" },
+      { name: "categoria", label: "Categoría", type: "picker", pickerDataHook: "useCategoriaGasto" }, // Nuevo tipo picker
+      { name: "responsable", label: "Responsable", type: "picker", pickerDataHook: "useResponsableIngreso" }, // Nuevo tipo picker
+    ],
+  },
+  responsableIngreso: {
+    title: "Responsable",
+    fields: [
+      { name: "nombre", label: "Nombre", type: "text" },
+    ],
+  },
+  monedaingreso: {
+    title: "Moneda",
+    fields: [
+      { name: "descripcion", label: "Descripción", type: "text" },
+    ],
+  },
+  keys: {
+    title: "Categoria de Entrada y Salidas",
+    fields: [
+      { name: "key_name", label: "Nombre", type: "text" },
+      { name: "descripcion", label: "Descripción", type: "textarea" },
+    ],
+  },
+};
+
+
   module.exports = {
     predefinedColors,
     alerts,
@@ -151,4 +189,5 @@ const pieChart={
     pointerConfig,
     barChart,
     pieChart,
+    clasesEntidad,
   };

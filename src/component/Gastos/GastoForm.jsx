@@ -12,16 +12,19 @@ import moment from 'moment'
 import 'moment/locale/es'
 import { alerts,button_text, atributos, symbols,pagina } from '../../constants'
 import { styleForm } from '../../styles/styles.js'
+import { useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
-const AgregarGasto = ({ route, navigation }) => {
-  const {gastoParam,deleteMode} = route.params;
+const AgregarGasto = ({ navigation }) => {
+  const route = useRoute();
+  const {gastoParam,deleteMode, keyid} = route.params;
   const [item, setItem] = useState({});
   const [loading, setLoading] = useState(true);
-  const { tipogastos } = useTipoGasto()
-  const {responsableIngresos} = useResponsableIngreso()
-  const {categoriaGastos} = useCategoriaGasto()  
+  const { tipogastos } = useTipoGasto(keyid)
+  const {responsableIngresos} = useResponsableIngreso(keyid)
+  const {categoriaGastos} = useCategoriaGasto(keyid)  
   const [datePickerVisible, setDatePickerVisible] = useState(false)
   const [selectedDate, setSelectedDate] = useState(moment())
   const [visible, setVisible] = useState(false);
@@ -32,6 +35,7 @@ const AgregarGasto = ({ route, navigation }) => {
 
   useEffect(() => {
     if (gastoParam && tipogastos.length > 0 && responsableIngresos.length > 0) {
+      delete gastoParam.categoria
       setItem(gastoParam);
   
       const tipogastoSeleccionado = tipogastos.find(
@@ -39,10 +43,8 @@ const AgregarGasto = ({ route, navigation }) => {
       );
       if (tipogastoSeleccionado) {
         updateItemProperty("tipogasto", tipogastoSeleccionado.id);
-        updateItemProperty("categoria", tipogastoSeleccionado.categoria);
       } else {
         updateItemProperty("tipogasto", "");
-        updateItemProperty("categoria", "");
       }
   
       const responsableSeleccionado = responsableIngresos.find(
@@ -104,10 +106,8 @@ const AgregarGasto = ({ route, navigation }) => {
     updateItemProperty('tipogasto', itemValue);
     const tipogastoSeleccionado = tipogastos.find((tg) => tg.id === itemValue)
     if (tipogastoSeleccionado) {
-      updateItemProperty('categoria', tipogastoSeleccionado.categoria)
       updateItemProperty('responsable', tipogastoSeleccionado.responsable)
     } else {
-      updateItemProperty('categoria', '')
       updateItemProperty('responsable', '')
     }
   }
@@ -129,12 +129,14 @@ const AgregarGasto = ({ route, navigation }) => {
 
   const createGasto = async (gasto) => {
     try {
-      const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}`, {
+      const token = await AsyncStorage.getItem('userToken');
+      const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${keyid}`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(gasto),
+        body: JSON.stringify(gasto)
       })
       const data = await response.json()
       setvisibleOK(true);
@@ -145,10 +147,12 @@ const AgregarGasto = ({ route, navigation }) => {
 
   const updateGasto = async (gasto) => {
     try {
-     const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${gasto.id}`, {
+      const token = await AsyncStorage.getItem('userToken');
+     const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${keyid}${symbols.barra}${gasto.id}`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(gasto),
       })
@@ -362,7 +366,7 @@ const AgregarGasto = ({ route, navigation }) => {
         <Dialog.Icon icon={theme.icons.okAlert} />
         <Dialog.Title style={styleForm.title}>{alerts.guardado_exito}</Dialog.Title>
         <Dialog.Actions>
-              <Icon.Button name={theme.icons.ok} onPress={() => navigation.navigate(`Gastos`)}>{button_text.ok}</Icon.Button>
+              <Icon.Button name={theme.icons.ok} onPress={() => navigation.navigate('Gastos', { refresh: true })}>{button_text.ok}</Icon.Button>
             </Dialog.Actions>
       </Dialog>
     </Portal>
@@ -400,7 +404,7 @@ const AgregarGasto = ({ route, navigation }) => {
 
     <View style={styleForm.rowButton}>
       <View style={styleForm.button}>
-      <Icon.Button backgroundColor={theme.colors.cancelar} name={theme.icons.close}  onPress={() => navigation.navigate('Gastos')}>{button_text.cancel}</Icon.Button>
+      <Icon.Button backgroundColor={theme.colors.cancelar} name={theme.icons.close}  onPress={() => navigation.navigate('Gastos', { refresh: true })}>{button_text.cancel}</Icon.Button>
       </View>
       {!deleteMode && (
     <View style={styleForm.button}>

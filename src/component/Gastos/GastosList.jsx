@@ -1,7 +1,7 @@
-import React, { useState, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View, Text,ScrollView, RefreshControl } from 'react-native';
 import { DataTable,Searchbar, ActivityIndicator,Card } from 'react-native-paper';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect , useNavigation, useRoute} from '@react-navigation/native';
 import theme from '../../styles/theme.js';
 import moment from 'moment'
 import { Feather } from '@expo/vector-icons'
@@ -13,7 +13,9 @@ import useGastos from '../../hooks/useGastos.js';
 
 const numberOfItemsPerPageList = [5,6,7,8,9,10];
 
-const GastoList = ({ navigation , keyId}) => {
+const GastoList = ({ keyId}) => {
+  const navigation = useNavigation();
+  const route = useRoute();
   const [orden, setOrden] = useState('asc');
   const [columna, setColumna] = useState('id');
   const [search, setSearch] = useState('');
@@ -25,6 +27,13 @@ const GastoList = ({ navigation , keyId}) => {
   const [expanded, setExpanded] = useState({});
   const [gasto, setGastos] = useState({});
 
+  useEffect(() => {
+    if (route.params?.refresh) {
+      onRefresh(); 
+      navigation.setParams({ refresh: false });
+    }
+  }, [route.params]);
+
   const handlePressGasto = useCallback((gastoId, index) => {
     setExpanded((prevExpanded) => ({ ...prevExpanded, [gastoId]: !prevExpanded[gastoId] }));
   }, []);
@@ -34,7 +43,7 @@ const GastoList = ({ navigation , keyId}) => {
     await fetchGastos();
     setRefreshing(false);
   };
-
+  
   useFocusEffect(
     useCallback(() => {
       if (keyId && keyId !== previousKeyId.current) {
@@ -82,16 +91,16 @@ const GastoList = ({ navigation , keyId}) => {
   };
 
   const handleSubmit = async (gasto) => {
-    navigation.navigate(`GastoForm`,{gastoParam:gasto, deleteMode:false}) 
+    navigation.navigate(`GastoForm`,{gastoParam:gasto, deleteMode:false, keyid:keyId}) 
     await createGasto(gasto) 
   } 
   const onEdit = async (gasto) => {
-    navigation.navigate(`GastoForm`,{gastoParam:gasto, deleteMode:false}) 
+    navigation.navigate(`GastoForm`,{gastoParam:gasto, deleteMode:false, keyid:keyId}) 
     await updateGasto(gasto) 
   } 
 
   const onDelete = async (gasto) => {
-    navigation.navigate(`GastoForm`,{gastoParam:gasto, deleteMode:true}) 
+    navigation.navigate(`GastoForm`,{gastoParam:gasto, deleteMode:true, keyid:keyId}) 
     await deleteGasto(gasto.id) 
   } 
 

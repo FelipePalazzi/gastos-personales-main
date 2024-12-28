@@ -171,3 +171,13 @@ export const filterData = (data, search, monedaProp, fechaProp, yearProp) => {
         return null;
     }
   }
+  export function decodeTokenUserId (token) {
+    try {
+        const decoded = jwtDecode(token);
+        const userId = decoded.userId; 
+        return userId;
+    } catch (error) {
+        console.error('Error al decodificar el token:', error);
+        return null;
+    }
+  }

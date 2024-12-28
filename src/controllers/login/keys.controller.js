@@ -1,8 +1,8 @@
 const pool = require('../../db/dbConnection.js');
-const getkeysController = {};
+const keysController = {};
 require('dotenv').config();
 
-getkeysController.conseguirllaves = async (req, res) => {
+keysController.getkeys = async (req, res) => {
         try {
           const {userId} = req.params;
 
@@ -21,4 +21,18 @@ getkeysController.conseguirllaves = async (req, res) => {
         }
       };
 
-module.exports = getkeysController;
+keysController.createkey = async (req, res, next) => {
+    try {
+      const { key_name, description } = req.body;
+
+      const newkey = await pool.query(
+        `INSERT INTO keys (key_name, description) VALUES ($1, $2) RETURNING *`,
+        [key_name, description]
+      );
+      res.status(200).json(newkey.rows);
+    } catch (err) {
+      next(err);
+    }
+  };
+
+module.exports = keysController;
