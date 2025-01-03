@@ -1,27 +1,29 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-const cron = require('node-cron');
-const router = require('./routes/gasto.routes.js');
-const router2 = require('./routes/tipogasto.routes.js');
-const router3 = require('./routes/categoriagasto.routes.js');
-const router4 = require('./routes/ingreso.routes.js');
-const router5 = require('./routes/monedaingreso.routes.js');
-const router6 = require('./routes/responsableingreso.routes.js');
-const router7 = require('./routes/resumen.routes.js');
-const login = require('./routes/login/login.routes.js');
-const keys = require('./routes/login/keys.routes.js');
+const gasto = require('./backend/routes/gasto.routes.js');
+const ingreso = require('./backend/routes/ingreso.routes.js')
+const categoria = require('./backend/routes/categoria.routes.js');
+const metodopago = require('./backend/routes/metodopago.routes.js');
+const moneda = require('./backend/routes/moneda.routes.js');
+const monedasposibles = require('./backend/routes/monedasposibles.routes.js')
+const responsable = require('./backend/routes/responsable.routes.js')
+const subcategoria = require('./backend/routes/subcategoria.routes.js')
+const submetodopago = require('./backend/routes/submetodopago.routes.js')
+const keys = require('./backend/routes/keys.routes.js')
+const login = require('./backend/routes/login.routes.js');
+const invitaciones = require('./backend/routes/invitaciones.routes.js')
 const { pagina, symbols } = require('./constants.js');
 require('dotenv').config();
 const port = process.env.PORT || 3000
-
-
 
 const app = express()
 
 // Middlewares
 app.use(cors())
-app.use(morgan("dev"))
+app.use(morgan('tiny', {
+  skip: (req, res) => res.statusCode < 400
+}));
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
@@ -30,32 +32,30 @@ app.get(`${symbols.barra}`, (req, res) => {
   res.json({ message: `${pagina.mensaje}` })
 })
 
-app.use(router)
-app.use(router2)
-app.use(router3)
-app.use(router4)
-app.use(router5)
-app.use(router6)
-app.use(router7)
-app.use(login)
+app.use(categoria)
+app.use(gasto)
+app.use(ingreso)
+app.use(invitaciones)
 app.use(keys)
+app.use(login)
+app.use(metodopago)
+app.use(moneda)
+app.use(monedasposibles)
+app.use(responsable)
+app.use(subcategoria)
+app.use(submetodopago)
 
 // handling errors
 app.use((err, req, res, next) => {
   if (res.headersSent) {
-    return next(err)
+    return next(err);
   }
-  console.log(err)
-  res.status(500).json({ error: err.message })
+  console.error(err.stack);
+  const message = process.env.NODE_ENV === 'production' ? 'Error interno del servidor' : err.message;
+  res.status(500).json({ error: message });
 });
 
-cron.schedule('*/12 * * * *', () => {
-  console.log('Actualizando server');
-  fetch(`${process.env.PAGINA_URL}${symbols.barra}`)
-   .then(response => response.json())
-   .then(data => console.log(data))
-  .catch(error => console.error(error));
-});
+require('./backend/cronjobs');
 
 app.listen(port, () => {
   console.log(`Server on port ${port}`)

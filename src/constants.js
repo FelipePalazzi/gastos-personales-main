@@ -74,11 +74,15 @@ const pagina = {
     pagina_ingreso: 'ingreso',
     pagina_new:'new',
     pagina_resumen:'resumen',
-    pagina_categoria_gasto:'categoriagasto',
-    pagina_moneda_ingreso: 'monedaingreso',
-    pagina_responsable:'responsableIngreso',
-    pagina_tipo_gasto: 'tipogasto',
+    pagina_categoria:'categoria',
+    pagina_moneda: 'moneda',
+    pagina_monedas_posibles:'monedasposibles',
+    pagina_responsable:'responsable',
+    pagina_subcategoria: 'subcategoria',
     pagina_key:'keys',
+    pagina_invitaciones:'invitaciones',
+    pagina_metodopago:'metodopago',
+    pagina_submetodopago:'submetodopago',
 
   }
   const months = {
@@ -150,14 +154,14 @@ const clasesEntidad = {
     title: "Tipo de Categoría",
     fields: [
       { name: "descripcion", label: "Descripción", type: "textarea" },
-      { name: "categoria", label: "Categoría", type: "picker", pickerDataHook: "useCategoriaGasto" }, // Nuevo tipo picker
-      { name: "responsable", label: "Responsable", type: "picker", pickerDataHook: "useResponsableIngreso" }, // Nuevo tipo picker
+      { name: "categoria", label: "Categoría", type: "picker", pickerDataHook: "useCategoriaGasto" }, 
+      { name: "responsable", label: "Responsable", type: "picker", pickerDataHook: "useResponsableIngreso" }, 
     ],
   },
   responsableIngreso: {
     title: "Responsable",
     fields: [
-      { name: "nombre", label: "Nombre", type: "text" },
+      { name: "nombre", label: "Nombre", type: "textarea" },
     ],
   },
   monedaingreso: {
@@ -170,7 +174,7 @@ const clasesEntidad = {
     title: "Categoria de Entrada y Salidas",
     fields: [
       { name: "key_name", label: "Nombre", type: "text" },
-      { name: "descripcion", label: "Descripción", type: "textarea" },
+      { name: "description", label: "Descripción", type: "textarea" },
     ],
   },
 };
