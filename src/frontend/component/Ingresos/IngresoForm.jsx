@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, ScrollView, BackHandler} from 'react-native'
-import useIngresos from '../../../hooks/useIngresos'
-import useMonedaIngreso from '../../../hooks/useMonedaIngreso'
-import useResponsableIngreso from '../../../hooks/useResponsableIngreso'
+import useIngresos from '../../hooks/useIngresos'
+import useMonedaIngreso from '../../hooks/useMonedaIngreso'
+import useResponsableIngreso from '../../hooks/useResponsableIngreso'
 import { useParams, useLocation  } from "react-router-dom"
 import {useNavigate} from 'react-router-native'
 import {Picker} from '@react-native-picker/picker'

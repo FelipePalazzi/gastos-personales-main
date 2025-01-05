@@ -155,6 +155,69 @@ loginController.refreshToken = async (req, res) => {
     }
   };
   
+loginController.refreshTokenJSON = async (req, res) => {
+    const refreshToken = req.headers['refresh-token'];
+  
+    if (!refreshToken) {
+      return res.status(403).send('Refresh token requerido');
+    }
+  
+    try {
+      const tokenResult = await pool.query(`SELECT * FROM refresh_tokens WHERE token = $1 AND expires_at > NOW()`, [refreshToken]);
+      if (tokenResult.rowCount === 0) {
+        return res.status(403).send('Refresh token inválido o expirado');
+      }
+      
+      const tokenData = tokenResult.rows[0];
+      const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+      if (payload.userId !== tokenData.user_id) {
+        return res.status(403).send('Refresh token no válido para este usuario');
+      }
+
+      const keyRoleResult = await pool.query(`
+          SELECT uk.key_id, r.nombre
+          FROM user_keys uk
+          JOIN role_user_keys r ON uk.role = r.id
+          WHERE uk.user_id = $1
+      `, [payload.userId]);
+  
+      const keyRoles = keyRoleResult.rows;
+      const keyIds = keyRoles.map(row => row.key_id);
+      const roles = keyRoles.map(row => row.nombre);
+  
+      const newAccessToken = jwt.sign(
+        {
+          userId: payload.userId,
+          username: payload.username,
+          roles: roles,
+          keyIds: keyIds
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '15m' }
+      );
+  
+      const newRefreshToken = jwt.sign(
+        {
+          userId: payload.userId,
+          username: payload.username,
+          roles: roles,
+          keyIds: keyIds
+        },
+        process.env.REFRESH_TOKEN_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      await pool.query(`INSERT INTO refresh_tokens (token, user_id) VALUES ($1, $2)`, [newRefreshToken, payload.userId]);
+      await pool.query(`DELETE FROM refresh_tokens WHERE token = $1`, [refreshToken]);
+
+      return res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+  
+    } catch (error) {
+      console.error('Error al refrescar el token:', error);
+      return res.status(500).send('Error al renovar los tokens');
+    }
+  };
+  
 
 loginController.otorgarAcceso = async (req, res) => {
     const { userId, keyId } = req.body;

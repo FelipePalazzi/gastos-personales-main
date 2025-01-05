@@ -10,6 +10,8 @@ router.post(`${symbols.barra}login`, loginController.login);
 
 router.post(`${symbols.barra}refresh`, loginController.refreshToken);
 
+router.post(`${symbols.barra}refreshTokens`, loginController.refreshTokenJSON);
+
 router.post(`${symbols.barra}otorgaracceso`, authenticateToken, loginController.otorgarAcceso);
 
 router.post(`${symbols.barra}eliminaracceso`, authenticateToken, loginController.eliminarAcceso);

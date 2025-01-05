@@ -28,6 +28,7 @@ const authenticateToken = async (req, res, next) => {
               }
 
               res.set('Authorization', `Bearer ${newTokens.accessToken}`);
+              res.set('refresh-token', newTokens.refreshToken);
               req.user = jwt.decode(newTokens.accessToken);
               return next();
           } catch (refreshError) {

@@ -9,7 +9,7 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import { alerts, button_text, atributos, symbols, pagina } from '../../../constants.js';
 import { filterData, sortData,  getSortIcon } from '../../utils.js';
 import {styleLista} from '../../styles/styles.js';
-import useGastos from '../../../hooks/useGastos.js';
+import useGastos from '../../hooks/useGastos.js';
 
 const numberOfItemsPerPageList = [5,6,7,8,9,10];
 

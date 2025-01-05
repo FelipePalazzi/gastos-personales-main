@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, ScrollView} from 'react-native'
-import useTipoGasto from '../../../hooks/useTipoGasto'
-import useCategoriaGasto from '../../../hooks/useCategoriaGasto'
-import useResponsableIngreso from '../../../hooks/useResponsableIngreso'
+import useTipoGasto from '../../hooks/useTipoGasto'
+import useCategoriaGasto from '../../hooks/useCategoria'
+import useResponsableIngreso from '../../hooks/useResponsableIngreso'
 import {Picker} from '@react-native-picker/picker'
 import DateTimePickerModal from "react-native-modal-datetime-picker"
 import Icon from 'react-native-vector-icons/FontAwesome'

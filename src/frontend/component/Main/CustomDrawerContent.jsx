@@ -5,7 +5,7 @@ import { View, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { styleLista, styleForm } from '../../styles/styles.js';
 import { Picker } from '@react-native-picker/picker'
-import Submenu from '../Submenu.jsx';
+import Submenu from './Submenu.jsx';
 
 function CustomDrawerContent({ keyId, setKeyId, keys }) {
     const navigation = useNavigation();
@@ -72,9 +72,9 @@ function CustomDrawerContent({ keyId, setKeyId, keys }) {
           >
             {keys.map((key, index) => (
               <Picker.Item
-                key={key.key_id} // Usa key_id como clave
-                label={truncateLabel(key.Nombre, key.Descripcion, 200)} // Muestra el nombre y la descripción
-                value={key.key_id} // Usa key_id como valor
+                key={key.id_key} // Usa key_id como clave
+                label={truncateLabel(key.nombre, key.descripcion, 200)} // Muestra el nombre y la descripción
+                value={key.id_key} // Usa key_id como valor
                 style={{
                   backgroundColor: theme.colors.card,
                   color: index % 2 === 0 ? theme.colors.pieBackground : theme.colors.pieInner // Alterna entre primary y secondary

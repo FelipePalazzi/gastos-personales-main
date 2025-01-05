@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text } from 'react-native';
 import { TextInput, ActivityIndicator } from 'react-native-paper';
 import { useRoute } from '@react-navigation/native';
-import useCategoriaGasto from '../../../hooks/useCategoriaGasto';
-import useResponsableIngreso from '../../../hooks/useResponsableIngreso';
+import useCategoriaGasto from '../../hooks/useCategoria';
+import useResponsableIngreso from '../../hooks/useResponsableIngreso';
 import { symbols, clasesEntidad, button_text } from '../../../constants';
 import { styleForm, } from '../../styles/styles';
 import theme from '../../theme/theme'
@@ -11,9 +11,9 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import { Picker } from '@react-native-picker/picker'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
-import useTipoGasto from '../../../hooks/useTipoGasto';
-import useMonedaIngreso from '../../../hooks/useMonedaIngreso';
-import useGetKeys from '../../../hooks/useGetKeys.js';
+import useTipoGasto from '../../hooks/useTipoGasto';
+import useMonedaIngreso from '../../hooks/useMonedaIngreso';
+import useGetKeys from '../../hooks/useGetKeys.js';
 import {styleEntidades} from '../../styles/styles.js';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 

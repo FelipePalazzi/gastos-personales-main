@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import {pagina,symbols ,alerts } from '../constants'
+import { pagina, symbols, alerts } from '../../constants';
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;

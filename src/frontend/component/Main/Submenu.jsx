@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, ScrollView, Text } from 'react-native';
 import { DrawerItem } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
-import theme from '../theme/theme';
-import { styleForm } from '../styles/styles';
+import theme from '../../theme/theme';
+import { styleForm } from '../../styles/styles';
 
 const Submenu = ({ label, iconName, submenutype, navigation, keyId, menuItems,}) => {
   const [isSubmenuVisible, setIsSubmenuVisible] = useState(false);

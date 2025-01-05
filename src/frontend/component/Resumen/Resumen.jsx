@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View,Text , ScrollView } from 'react-native';
 import { styleLista, styleResumen } from '../../styles/styles.js';
-import useResumen from '../../../hooks/useResumen.js';
+import useResumen from '../../hooks/useResumen.js';
 import MonedaSelector from './MonedaSelector.jsx';
 import IngrGastDiaMes from './IngrGastDiaMes.jsx';
 import IngrGastResponsable from './IngrGastResponsable.jsx';

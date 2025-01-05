@@ -83,6 +83,7 @@ const pagina = {
     pagina_invitaciones:'invitaciones',
     pagina_metodopago:'metodopago',
     pagina_submetodopago:'submetodopago',
+    pagina_cambio:'cambio',
 
   }
   const months = {

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Button, Alert, Text } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Keychain from 'react-native-keychain';
 import { alerts, button_text, atributos, symbols, pagina } from '../../../constants.js';
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
 import * as LocalAuthentication from 'expo-local-authentication';
@@ -10,8 +8,9 @@ import { ActivityIndicator, Dialog, Portal, TextInput, } from 'react-native-pape
 import { styleForm } from '../../styles/styles.js';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import theme from '../../theme/theme.js';
-import Register from './Register.jsx';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
+import { useAuth } from '../../helpers/AuthContext.js';
+import * as Keychain from 'react-native-keychain';
 
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
@@ -24,6 +23,8 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const [registrarse, setRegistrarse] = useState(false);
   const [nombreUsuario, setNombreUsuario] = useState([]);
+  const navigation = useNavigation();
+  const { saveTokensAndUser, clearTokensAndUser, getSavedUser} = useAuth();
 
   const handleLogin = async () => {
     try {
@@ -36,8 +37,8 @@ const LoginScreen = () => {
         body: JSON.stringify({ username, password }),
       });
       if (response.ok) {
-        const data = await response.json();
-        await storeTokenSecurely(data.token, username);
+        const { accessToken, refreshToken } = await response.json();
+        saveTokensAndUser(accessToken, refreshToken, username);
         setNombreUsuario(username)
         setvisibleOK(true)
         setFingertip(true)
@@ -56,26 +57,11 @@ const LoginScreen = () => {
       console.error(error);
     }
   };
-  const navigation = useNavigation();
-  const storeTokenSecurely = async (token, username) => {
-    try {
-      await Keychain.setGenericPassword(username, token, {
-        accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-        authenticationPrompt: {
-          title: 'Autenticación requerida',
-          subtitle: 'Inicia sesión usando tu biometría',
-        },
-      });
-      await AsyncStorage.setItem('userToken', token);
-    } catch (e) {
-      console.error("Error al almacenar el token en Keychain", e);
-    }
-  };
+
   const logout = async () => {
     try {
       setLoading(true)
-      await Keychain.resetGenericPassword();
-      await AsyncStorage.removeItem('userToken');
+      clearTokensAndUser()
       setVisibleLogout(true)
       setFingertip(false)
       setLoading(false)
@@ -92,37 +78,51 @@ const LoginScreen = () => {
   }, []);
 
   const handleAuthentication = async () => {
-    const credentials = await Keychain.getGenericPassword();
-    setLoading(true)
-    setRegistrarse(true)
-    if (credentials) {
-      const biometricSupported = await LocalAuthentication.hasHardwareAsync();
-      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-      setUsername('')
-      setPassword('')
-      setFingertip(true)
-      setNombreUsuario(credentials.username);
-      setRegistrarse(false)
-      if (biometricSupported && isEnrolled) {
-        const result = await LocalAuthentication.authenticateAsync({
-          promptMessage: 'Autenticarse con huella dactilar',
-          fallbackLabel: 'Usar contraseña',
-        });
+  setLoading(true);
+  setRegistrarse(true);
 
-        if (result.success) {
-          setLoading(false)
-          navigation.navigate(`Drawer`)
-        } else {
-          setLoading(false)
-        }
-      } else {
-        Alert.alert('Error', 'La biometría no está soportada o no hay huellas registradas');
-      }
+  const credentials = await Keychain.getGenericPassword();
+  const username = await getSavedUser();
+
+  if (!credentials || !username) {
+    setLoading(false);
+    setFingertip(false);
+    setRegistrarse(true); // Muestra la opción de login
+    console.log('No se encontró refresh token o usuario almacenado.');
+    return;
+  }
+
+  const { password: refreshToken } = credentials;
+
+  const biometricSupported = await LocalAuthentication.hasHardwareAsync();
+  const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+  setUsername('');
+  setPassword('');
+  setFingertip(true);
+  setNombreUsuario(username);
+  setRegistrarse(false);
+
+  if (biometricSupported && isEnrolled) {
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Autenticarse con huella dactilar',
+      fallbackLabel: 'Usar contraseña',
+    });
+
+    if (result.success) {
+      setLoading(false);
+      navigation.navigate('Drawer');
     } else {
-      setLoading(false)
-      setFingertip(false)
+      setLoading(false);
+      Alert.alert('Error', 'Autenticación fallida.');
     }
-  };
+  } else {
+    Alert.alert('Error', 'La biometría no está soportada o no hay huellas registradas');
+    setLoading(false);
+    setFingertip(false);
+  }
+};
+
 
   return (
     <View style={{ backgroundColor: theme.colors.pieBackground, flex: 1 }}>
