@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useCallback } from 'react';
 import * as Keychain from 'react-native-keychain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
+import { PAGINA_URL } from '@env';
 
 const AuthContext = createContext();
 
@@ -55,46 +55,44 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const refreshAccessToken = useCallback(async () => {
+  const refreshAccessToken = async () => {
     try {
       const credentials = await Keychain.getGenericPassword();
-      if (!credentials) {
+  
+      if (!credentials || !credentials.password) {
         console.error('No refresh token found');
         return false; 
       }
   
       const refreshToken = credentials.password;
   
-      const response = await fetch(`${PAGINA_URL_ENV}/refreshTokens`, {
+      const response = await globalThis.fetch(`${PAGINA_URL}/refreshTokens`, {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json', 
-          'refresh-token': refreshToken 
+          'refresh-token': refreshToken,
         },
       });
-  console.log(response)
+  
       if (!response.ok) {
         console.error('Error refreshing access token');
         return false;
       }
   
-      // Obtener la respuesta como JSON, que ya contiene los tokens
       const data = await response.json();
-  
       if (data.error) {
         console.error('Error: ', data.error);
         return false;
       }
-  
-      setAccessToken(data.accessToken); 
-      setRefreshToken(data.refreshToken); 
+      const user = await getSavedUser()
+      await saveTokensAndUser(data.accessToken, data.refreshToken, user);
       return true; 
   
     } catch (error) {
       console.error('Error during token refresh:', error);
       return false; 
     }
-  }, []);
+  };
+  
 
   
   return (

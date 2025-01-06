@@ -14,7 +14,6 @@ function CustomDrawerContent({ keyId, setKeyId, keys }) {
       setKeyId(itemValue); // Establece keyId en el estado
       navigation.setParams({ keyId: itemValue }); // Asegúrate de que se actualice el parámetro
     };
-  
     const truncateLabel = (name, description, maxLength) => {
       const combined = `${name} - ${description}`;
       if (combined.length > maxLength) {

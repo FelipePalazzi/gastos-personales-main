@@ -24,8 +24,7 @@ const LoginScreen = () => {
   const [registrarse, setRegistrarse] = useState(false);
   const [nombreUsuario, setNombreUsuario] = useState([]);
   const navigation = useNavigation();
-  const { saveTokensAndUser, clearTokensAndUser, getSavedUser} = useAuth();
-
+  const { accessToken, refreshAccessToken,saveTokensAndUser, clearTokensAndUser, getSavedUser} = useAuth();
   const handleLogin = async () => {
     try {
       setLoading(true)
@@ -110,6 +109,12 @@ const LoginScreen = () => {
     });
 
     if (result.success) {
+      if (!accessToken) {
+        const refreshed = await refreshAccessToken();
+        if (!refreshed) {
+          throw new Error('No se pudo obtener el nuevo accessToken');
+        }
+      }
       setLoading(false);
       navigation.navigate('Drawer');
     } else {

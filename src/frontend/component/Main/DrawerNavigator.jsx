@@ -16,7 +16,6 @@ function DrawerNavigator() {
       };
       loadKeys();
     }, []);
-  
     useEffect(() => {
       if (getkeys.length > 0) {
         setKeyId(getkeys[0].id_key);
