@@ -1,6 +1,7 @@
 import { Dimensions, StyleSheet } from 'react-native';
 import theme from '../../theme/theme.js';
 const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
 
 const styleComun = StyleSheet.create({
     container: {
@@ -25,7 +26,22 @@ const styleComun = StyleSheet.create({
         borderRadius:6,
         overflow: 'hidden',
         marginRight: 8,
-        marginLeft: 15
+        marginLeft: 15,
+      },
+      title:{
+        padding: 10,
+        fontSize: theme.fontSizes.body,
+        fontWeight:theme.fontWeights.bold,
+        color: theme.colors.white,
+        marginVertical: 2,
+        textAlign:'center',
+      },
+      subtitle:{
+        padding: 5,
+        fontSize: theme.fontSizes.ingresar,
+        fontWeight:theme.fontWeights.bold,
+        color: theme.colors.white,
+        textAlign:'center',
       },
       backgroundContainer:{
         backgroundColor: theme.colors.table,
@@ -67,6 +83,15 @@ const styleComun = StyleSheet.create({
         marginTop:20,
         marginBottom:20,
         alignItems: 'center',
+    },
+    fab: {
+      position: 'absolute',
+      margin: 8,
+      right: 0,
+      bottom: 0,
+      borderRadius: 20,
+      borderWidth: 4,
+      borderColor: theme.colors.primary,
     },
 })
 

@@ -4,11 +4,10 @@ const screenWidth = Dimensions.get('window').width;
 
 const styleLista = StyleSheet.create({
     container: {
-      marginBottom:7,
       marginHorizontal:10,
       borderRadius:5,
       overflow:'hidden',
-      width:screenWidth-20, 
+      width:screenWidth-20,
   },
     row: {
       paddingHorizontal:1,

@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { pagina, symbols, alerts } from '../../constants';
-import { PAGINA_URL} from '@env';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { decodeTokenUserId } from "../utils";
+import { pagina, symbols, alerts, atributos } from '../../constants';
 import { useAuth } from "../helpers/AuthContext";
+import { PAGINA_URL } from '@env';
+import { decodeTokenUserId } from "../utils";
+
 
 const useGetKeys = () => {
   const [getkeys, setGetkeys] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { accessToken,refreshToken } = useAuth();
+  const { accessToken, refreshToken } = useAuth();
   const fetchGetKeys = async () => {
     try {
       const userId = decodeTokenUserId(accessToken)
@@ -16,7 +16,7 @@ const useGetKeys = () => {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          "refresh-token": refreshToken,
+          "refresh-token": `${refreshToken}`,
         }
       });
       const json = await response.json();

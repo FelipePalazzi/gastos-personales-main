@@ -1,77 +1,66 @@
 import React, { useState,useCallback, useMemo, useEffect,useRef} from 'react'
 import { View, Text, ScrollView, RefreshControl, BackHandler} from 'react-native'
+import { useFocusEffect , useNavigation, useRoute} from '@react-navigation/native';
 import theme from '../../theme/theme.js'
 import moment from 'moment'
 import { Feather } from '@expo/vector-icons'
-import {useNavigate} from 'react-router-native'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { DataTable,Searchbar, ActivityIndicator,Card } from 'react-native-paper'
 import  {filterData,  sortData, getSortIcon} from '../../utils.js'
 import { alerts,button_text, atributos, symbols,pagina } from '../../../constants.js'
 import {styleLista} from '../../styles/styles.js';
-import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
-const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
-
-const useFetchIngresos = () => {
-  const [ingresos, setIngresos] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  const fetchIngresos = async () => {
-    try {
-      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_ingreso}`)
-      const json = await response.json()
-      setIngresos(json)
-      setLoading(false)
-    } catch (error) {
-      console.error(`${alerts.error_ocurrido}${atributos.ingreso}`, error)
-      setLoading(false)
-    }
-  }
-
-  return { ingresos, loading, fetchIngresos }
-}
+import useIngresos from '../../hooks/useIngresos.js'
 
 const numberOfItemsPerPageList = [5,6,7,8,9,10];
 
-const IngresoList = () => {
-
+const IngresoList = ({keyId}) => {
+  const navigation = useNavigation();
+  const route = useRoute();
   const [orden, setOrden] = useState('asc')
   const [columna, setColumna] = useState('id')
-  const navigate = useNavigate()
-  const [ingreso, setIngresos] = useState({})
   const [search, setSearch] = useState('')
   const [refreshing, setRefreshing] = useState(false)
-  const { ingresos, loading, fetchIngresos } = useFetchIngresos()
+  const { ingresos, loading, fetchIngresos } = useIngresos(keyId)
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(7);
   const [numberOfItemsPerPage, onItemsPerPageChange] = useState(7);
   const [expanded, setExpanded] = useState({});
+  const [ingreso, setIngreso] = useState({});
 
+  useEffect(() => {
+    if (route.params?.refresh) {
+      onRefresh(); 
+      navigation.setParams({ refresh: false });
+    }
+  }, [route.params]);
+  
   const handlePressIngreso = useCallback((ingresoId, index) => {
     setExpanded((prevExpanded) => ({ ...prevExpanded, [ingresoId]: !prevExpanded[ingresoId] }));
   }, []);
 
   const onRefresh = async () => {
-    setRefreshing(true)
-    await fetchIngresos()
-    setRefreshing(false)
-  }
-  useEffect(() => {
-    fetchIngresos()
-  }, [])
+    setRefreshing(true);
+    await fetchIngresos();
+    setRefreshing(false);
+  };
 
-  const handleSort = useCallback((columna) => {
-    setColumna(columna);
-    const ordenInverso = (orden === 'asc'? 'desc' : orden === 'desc'? 'no orden' : 'asc');
-    setOrden(ordenInverso);
-  }, [orden]);
+  useFocusEffect(
+    useCallback(() => {
+      if (keyId && keyId !== previousKeyId.current) {
+        previousKeyId.current = keyId;
+        fetchIngresos();
+      }
+    }, [keyId, fetchIngresos])
+  );
+
+  const previousKeyId = useRef(keyId); 
 
   const filteredData = filterData(ingresos, search, ['moneda'], 'fecha','fecha');
-  
+
   const sortedData = useMemo(() => {
     return sortData(filteredData, orden, columna);
   }, [orden, columna, filteredData]);
-  
+
   const scrollViewRef = useRef(null)
 
   const [contentOffset, setContentOffset] = useState({ y: 0 })
@@ -79,6 +68,11 @@ const IngresoList = () => {
   const handleScroll = (event) => {
     setContentOffset(event.nativeEvent.contentOffset)
   }
+  const handleSort = useCallback((columna) => {
+    setColumna(columna);
+    const ordenInverso = (orden === 'asc'? 'desc' : orden === 'desc'? 'no orden' : 'asc');
+    setOrden(ordenInverso);
+  }, [orden]);
 
   const getIcon = (columna) => {
     return getSortIcon(columna, orden, columna);
@@ -95,21 +89,21 @@ const IngresoList = () => {
   };
 
   const handleSubmit = async (ingreso) => {
-    navigate(`${symbols.barra}${pagina.pagina_ingreso}${symbols.barra}${pagina.pagina_new}`, { replace: true })
+    navigation.navigate(`IngresoForm`,{ingresoParam:ingreso, deleteMode:false, keyid:keyId, labelHeader: "Nuevo Ingreso"}) 
     await createIngreso(ingreso)
   }
 
-  const onEdit = async (updatedIngreso) => {
-    navigate(`${symbols.barra}${pagina.pagina_ingreso}${symbols.barra}${updatedIngreso.id}`, { replace: true })
-    await updateIngreso(updatedIngreso)
+  const onEdit = async (ingreso) => {
+    navigation.navigate(`IngresoForm`,{ingresoParam:ingreso, deleteMode:false, keyid:keyId, labelHeader: "Nuevo Ingreso"}) 
+    await updateIngreso(ingreso)
   }
 
-const onDelete = async (id) => {
-  navigate(`${symbols.barra}${pagina.pagina_ingreso}${symbols.barra}${id}`, { state: { deleteMode: true } })
-  await deleteIngreso(id)
+const onDelete = async (ingreso) => {
+  navigation.navigate(`IngresoForm`,{ingresoParam:ingreso, deleteMode:true, keyid:keyId, labelHeader: "Nuevo Ingreso"}) 
+  await deleteIngreso(ingreso.id)
 }
 
-useEffect(() => {
+{/*useEffect(() => {
   const backAction = () => {
     navigate(`${symbols.barra}`, { replace: true }) 
     return true;
@@ -122,6 +116,7 @@ useEffect(() => {
 
   return () => backHandler.remove();
 }, []);
+*/}
 
 return (
   <ScrollView  showsVerticalScrollIndicator={true}

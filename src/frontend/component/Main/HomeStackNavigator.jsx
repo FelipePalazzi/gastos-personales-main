@@ -17,24 +17,37 @@ const HomeStackNavigator = () => {
       <HomeStack.Screen
         name="Login"
         component={LoginScreen}
-        options={{ headerShown: false }}
+        options={{
+          animation: "slide_from_left",
+          headerShown: false,
+        }}
       />
       <HomeStack.Screen
         name="Drawer"
         component={DrawerNavigator}
-        options={{ headerShown: false }}
+        options={{
+          animation: "slide_from_right",
+          headerShown: false,
+        }}
       />
       <HomeStack.Screen name="GastoForm" component={AgregarGasto} options={({ route }) => ({
         headerTitle: route.params?.labelHeader
           ? route.params.labelHeader
           : 'Creación de Entidades',
+        animation: "slide_from_bottom"
       })} />
-      <HomeStack.Screen name="IngresoForm" component={AgregarIngreso} />
+      <HomeStack.Screen name="IngresoForm" component={AgregarIngreso} options={({ route }) => ({
+        headerTitle: route.params?.labelHeader
+          ? route.params.labelHeader
+          : 'Creación de Entidades',
+        animation: "slide_from_bottom"
+      })} />
       <HomeStack.Screen name="Register" component={Register} />
       <HomeStack.Screen name="CreacionEntidades" component={CreacionEntidades} options={({ route }) => ({
         headerTitle: route.params?.labelHeader
           ? route.params.labelHeader
           : 'Creación de Entidades',
+        animation: "slide_from_bottom"
       })} />
     </HomeStack.Navigator>
   );

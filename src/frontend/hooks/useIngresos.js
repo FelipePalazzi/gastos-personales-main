@@ -1,42 +1,41 @@
 import { useState, useEffect } from "react";
-import { pagina, symbols, alerts } from '../../constants';
-import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
+import { pagina, symbols, alerts, atributos } from '../../constants';
+import { useAuth } from "../helpers/AuthContext";
+import * as Keychain from 'react-native-keychain';
+import { PAGINA_URL } from '@env';
 
-const useIngresos = () => {
+const useIngresos = (keyId) => {
+  const { accessToken, refreshToken } = useAuth();
   const [ingresos, setIngresos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchIngresos = async () => {
+  const fetchIngresos = async (query = '') => {
     try {
-      const token = await AsyncStorage.getItem('userToken');
-      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_ingreso}`, {
+      setLoading(true)
+      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_ingreso}${symbols.barra}${keyId}?${query}`, {
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
+          "refresh-token": `${refreshToken}`,
         },
       });
-
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+        throw new Error('Error en la solicitud de los ingresos');
       }
       const json = await response.json();
       setIngresos(json);
-      setTimeout(() => {
-        setLoading(false);
-      }, 500); 
+      setLoading(false);
     } catch (error) {
-      console.error(`${alerts.error_ocurrido}${pagina.pagina_ingreso}`, error);
+      console.error(`${alerts.error_ocurrido}${atributos.ingreso}`, error);
       setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchIngresos();
-  }, []);
+  }, [accessToken, keyId]);
 
-  return { ingresos, loading };
+  return { ingresos, loading, fetchIngresos };
 };
 
 export default useIngresos;

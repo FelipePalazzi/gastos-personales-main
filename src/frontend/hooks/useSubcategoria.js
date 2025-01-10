@@ -3,38 +3,36 @@ import { pagina, symbols, alerts, atributos } from '../../constants';
 import { useAuth } from "../helpers/AuthContext";
 import { PAGINA_URL } from '@env';
 
-const useGastos = (keyId) => {
+const useSubcategoria = (keyId) => {
+  const [subcategoria, setSubcategoria] = useState([]);
   const { accessToken, refreshToken } = useAuth();
-  const [gastos, setGastos] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  const fetchGastos = async (query = '') => {
+  const fetchSubcategoria = async () => {
     try {
-      setLoading(true)
-      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${keyId}?${query}`, {
+      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_subcategoria}${symbols.barra}${keyId}?activo=null`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "refresh-token": `${refreshToken}`,
         },
       });
+
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
+
       const json = await response.json();
-      setGastos(json);
-      setLoading(false);
+      setSubcategoria(json);
     } catch (error) {
-      console.error(`${alerts.error_ocurrido}${atributos.gasto}`, error);
-      setLoading(false);
+      console.error(`${alerts.error_ocurrido}${pagina.pagina_subcategoria}`, error);
     }
   };
 
   useEffect(() => {
-    fetchGastos();
+    fetchSubcategoria();
   }, [accessToken, keyId]);
 
-  return { gastos, loading, fetchGastos };
+  return { subcategoria };
 };
 
-export default useGastos;
+export default useSubcategoria;

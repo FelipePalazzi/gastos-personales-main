@@ -58,26 +58,24 @@ export const AuthProvider = ({ children }) => {
   const refreshAccessToken = async () => {
     try {
       const credentials = await Keychain.getGenericPassword();
-  
-      if (!credentials || !credentials.password) {
+
+      if (!credentials.password) {
         console.error('No refresh token found');
-        return false; 
+        return false;
       }
-  
-      const refreshToken = credentials.password;
-  
+
       const response = await globalThis.fetch(`${PAGINA_URL}/refreshTokens`, {
         method: 'POST',
-        headers: { 
-          'refresh-token': refreshToken,
+        headers: {
+          'refresh-token': credentials.password,
         },
       });
-  
+
       if (!response.ok) {
         console.error('Error refreshing access token');
         return false;
       }
-  
+
       const data = await response.json();
       if (data.error) {
         console.error('Error: ', data.error);
@@ -85,16 +83,16 @@ export const AuthProvider = ({ children }) => {
       }
       const user = await getSavedUser()
       await saveTokensAndUser(data.accessToken, data.refreshToken, user);
-      return true; 
-  
+      return true;
+
     } catch (error) {
       console.error('Error during token refresh:', error);
-      return false; 
+      return false;
     }
   };
-  
 
-  
+
+
   return (
     <AuthContext.Provider
       value={{

@@ -5,12 +5,13 @@ import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useNavigation } from '@react-navigation/native';
 import { ActivityIndicator, Dialog, Portal, TextInput, } from 'react-native-paper'
-import { styleForm } from '../../styles/styles.js';
+import { styleComun, styleForm } from '../../styles/styles.js';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import theme from '../../theme/theme.js';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 import { useAuth } from '../../helpers/AuthContext.js';
 import * as Keychain from 'react-native-keychain';
+import LoadingScreen from '../Loading/LoadingScreen.jsx';
 
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
@@ -24,7 +25,8 @@ const LoginScreen = () => {
   const [registrarse, setRegistrarse] = useState(false);
   const [nombreUsuario, setNombreUsuario] = useState([]);
   const navigation = useNavigation();
-  const { accessToken, refreshAccessToken,saveTokensAndUser, clearTokensAndUser, getSavedUser} = useAuth();
+  const { accessToken, refreshAccessToken, saveTokensAndUser, clearTokensAndUser, getSavedUser } = useAuth();
+
   const handleLogin = async () => {
     try {
       setLoading(true)
@@ -41,8 +43,8 @@ const LoginScreen = () => {
         setNombreUsuario(username)
         setvisibleOK(true)
         setFingertip(true)
-        setLoading(false)
         setRegistrarse(false)
+        setLoading(false)
         setUsername('')
         setPassword('')
       } else {
@@ -52,7 +54,7 @@ const LoginScreen = () => {
         setLoading(false)
       }
     } catch (error) {
-      Alert.alert('Error', 'Hubo un problema al iniciar sesión');
+      setVisibleError(true)
       console.error(error);
     }
   };
@@ -66,8 +68,7 @@ const LoginScreen = () => {
       setLoading(false)
       setRegistrarse(true)
     } catch (error) {
-      console.error("Error al cerrar sesión", error);
-      Alert.alert('Error', 'No se pudo cerrar la sesión');
+      setVisibleError(true)
     }
   };
 
@@ -77,88 +78,79 @@ const LoginScreen = () => {
   }, []);
 
   const handleAuthentication = async () => {
-  setLoading(true);
-  setRegistrarse(true);
+    setLoading(true);
+    setRegistrarse(true);
 
-  const credentials = await Keychain.getGenericPassword();
-  const username = await getSavedUser();
+    const credentials = await Keychain.getGenericPassword();
+    const username = await getSavedUser();
 
-  if (!credentials || !username) {
-    setLoading(false);
-    setFingertip(false);
-    setRegistrarse(true); // Muestra la opción de login
-    console.log('No se encontró refresh token o usuario almacenado.');
-    return;
-  }
-
-  const { password: refreshToken } = credentials;
-
-  const biometricSupported = await LocalAuthentication.hasHardwareAsync();
-  const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-
-  setUsername('');
-  setPassword('');
-  setFingertip(true);
-  setNombreUsuario(username);
-  setRegistrarse(false);
-
-  if (biometricSupported && isEnrolled) {
-    const result = await LocalAuthentication.authenticateAsync({
-      promptMessage: 'Autenticarse con huella dactilar',
-      fallbackLabel: 'Usar contraseña',
-    });
-
-    if (result.success) {
-      if (!accessToken) {
-        const refreshed = await refreshAccessToken();
-        if (!refreshed) {
-          throw new Error('No se pudo obtener el nuevo accessToken');
-        }
-      }
+    if (!credentials || !username) {
+      setFingertip(false);
+      setRegistrarse(true);
       setLoading(false);
-      navigation.navigate('Drawer');
+      return;
+    }
+
+    const { password: refreshToken } = credentials;
+
+    const biometricSupported = await LocalAuthentication.hasHardwareAsync();
+    const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+    setUsername('');
+    setPassword('');
+    setFingertip(true);
+    setNombreUsuario(username);
+    setRegistrarse(false);
+
+    if (biometricSupported && isEnrolled) {
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Autenticarse con huella dactilar',
+        fallbackLabel: 'Usar contraseña',
+      });
+
+      if (result.success) {
+        if (!accessToken) {
+          const refreshed = await refreshAccessToken();
+        }
+        setLoading(false);
+        navigation.navigate('Drawer');
+      } else {
+        setLoading(false);
+        setVisibleError(true)
+      }
     } else {
       setLoading(false);
-      Alert.alert('Error', 'Autenticación fallida.');
+      setVisibleError(true)
+      setFingertip(false);
     }
-  } else {
-    Alert.alert('Error', 'La biometría no está soportada o no hay huellas registradas');
-    setLoading(false);
-    setFingertip(false);
-  }
-};
+  };
 
 
   return (
     <View style={{ backgroundColor: theme.colors.pieBackground, flex: 1 }}>
       {loading ? (
-        <View style={{ marginTop: 160, marginHorizontal: 10, backgroundColor: theme.colors.disabled, borderColor: theme.colors.gray, borderRadius: 5, borderWidth: 2, paddingBottom: 170 }}>
-          <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 160 }}>
-            <ActivityIndicator animating={true} color={theme.colors.primary} size={theme.icons.big} />
-            <Text style={styleForm.loadingText}>{alerts.cargando}</Text>
-          </View>
-        </View>
+        <LoadingScreen Nombre={"Login"} />
       ) : (
         <View style={{ marginTop: 160, marginHorizontal: 10, backgroundColor: theme.colors.disabled, borderColor: theme.colors.gray, borderRadius: 5, borderWidth: 2 }}>
 
           <View style={{ justifyContent: 'center', paddingHorizontal: 161, marginTop: 10 }}>
             <Icon.Button backgroundColor={theme.colors.transparente} name={'account-circle'} size={30} color={theme.colors.textSecondary} iconStyle={{ marginRight: 0 }} />
           </View>
-          {fingertip && (<View style={[styleForm.loadingContainer, { padding: 0, marginBottom: 15 }]}>
-            <Text style={[styleForm.loadingText, { color: theme.colors.textSecondary }]}>{`Bienvenido de vuelta`}</Text>
-            <Text style={[styleForm.loadingText, { color: theme.colors.textSecondary }]}>{`${nombreUsuario}`}</Text>
+          {fingertip && (<View style={{ justifyContent: 'center', alignItems: 'center', padding: 20, padding: 0, marginBottom: 15 }}>
+            <Text style={{ fontSize: theme.fontSizes.body, fontWeight: theme.fontWeights.bold, color: theme.colors.textSecondary }}>{`Bienvenido de vuelta`}</Text>
+            <Text style={{ fontSize: theme.fontSizes.body, fontWeight: theme.fontWeights.bold, color: theme.colors.textSecondary }}>{`${nombreUsuario}`}</Text>
           </View>)}
-          {!fingertip && (<View style={[styleForm.loadingContainer, { padding: 0, marginBottom: 15 }]}>
-            <Text style={[styleForm.loadingText, { color: theme.colors.textSecondary }]}>{`Inicio de Sesion`}</Text>
+          {!fingertip && (<View style={{ justifyContent: 'center', alignItems: 'center', padding: 20, padding: 0, marginBottom: 15 }}>
+            <Text style={{ fontSize: theme.fontSizes.body, fontWeight: theme.fontWeights.bold, color: theme.colors.textSecondary }}>{`Inicio de Sesion`}</Text>
           </View>)}
-          
+
           <View style={[styleForm.rowContainer, { paddingHorizontal: 10 }]}>
             <TextInput
               mode='outlined'
               value={username}
               onChangeText={setUsername}
               placeholder={"Nombre de usuario"}
-              style={styleForm.text_input}
+              style={styleComun.text_input}
             />
           </View>
           <View style={[styleForm.rowContainer, { paddingHorizontal: 10 }]}>
@@ -168,7 +160,7 @@ const LoginScreen = () => {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
-              style={styleForm.text_input}
+              style={styleComun.text_input}
             />
           </View>
           <View style={{ paddingHorizontal: 10, marginBottom: 20, justifyContent: 'center' }}>

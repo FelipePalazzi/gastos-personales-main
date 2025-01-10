@@ -7,7 +7,7 @@ import { LineChartBicolor } from 'react-native-gifted-charts';
 import theme from '../../theme/theme.js';
 import { lineChart, pointerConfig, alerts, atributos, symbols} from '../../../constants.js';
 import { SegmentedButtons, Card, Icon } from 'react-native-paper';
-import useResponsableIngreso from '../../hooks/useResponsableIngreso.js';
+import useResponsableIngreso from '../../hooks/useResponsable.js';
 
 const BalanceResponsable = ({ resumen, selectedMoneda }) => {
   const [areaChartData, setAreaChartData] = useState(null);

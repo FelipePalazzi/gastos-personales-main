@@ -3,38 +3,35 @@ import { pagina, symbols, alerts, atributos } from '../../constants';
 import { useAuth } from "../helpers/AuthContext";
 import { PAGINA_URL } from '@env';
 
-const useGastos = (keyId) => {
+const useMoneda = (keyId) => {
+  const [moneda, setmoneda] = useState([]);
   const { accessToken, refreshToken } = useAuth();
-  const [gastos, setGastos] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  const fetchGastos = async (query = '') => {
+  const fetchmoneda = async () => {
     try {
-      setLoading(true)
-      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${keyId}?${query}`, {
+      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_moneda}${symbols.barra}todas${symbols.barra}${keyId}?activo=null`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "refresh-token": `${refreshToken}`,
         },
       });
+
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
       const json = await response.json();
-      setGastos(json);
-      setLoading(false);
+      setmoneda(json);
     } catch (error) {
-      console.error(`${alerts.error_ocurrido}${atributos.gasto}`, error);
-      setLoading(false);
+      console.error(`${alerts.error_ocurrido}${pagina.pagina_moneda}`, error);
     }
   };
 
   useEffect(() => {
-    fetchGastos();
+    fetchmoneda();
   }, [accessToken, keyId]);
 
-  return { gastos, loading, fetchGastos };
+  return { moneda };
 };
 
-export default useGastos;
+export default useMoneda;

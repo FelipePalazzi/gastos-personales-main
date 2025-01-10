@@ -3,15 +3,13 @@ import { pagina, symbols, alerts, atributos } from '../../constants';
 import { useAuth } from "../helpers/AuthContext";
 import { PAGINA_URL } from '@env';
 
-const useGastos = (keyId) => {
+const useResponsable = (keyId) => {
+  const [responsable, setresponsable] = useState([]);
   const { accessToken, refreshToken } = useAuth();
-  const [gastos, setGastos] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  const fetchGastos = async (query = '') => {
+  const fetchresponsable = async () => {
     try {
-      setLoading(true)
-      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${keyId}?${query}`, {
+      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_responsable}${symbols.barra}${keyId}?activo=null`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -22,19 +20,17 @@ const useGastos = (keyId) => {
         throw new Error(`Error: ${response.status}`);
       }
       const json = await response.json();
-      setGastos(json);
-      setLoading(false);
+      setresponsable(json);
     } catch (error) {
-      console.error(`${alerts.error_ocurrido}${atributos.gasto}`, error);
-      setLoading(false);
+      console.error(`${alerts.error_ocurrido}${pagina.pagina_responsable}`, error);
     }
   };
 
   useEffect(() => {
-    fetchGastos();
+    fetchresponsable();
   }, [accessToken, keyId]);
 
-  return { gastos, loading, fetchGastos };
+  return { responsable };
 };
 
-export default useGastos;
+export default useResponsable;

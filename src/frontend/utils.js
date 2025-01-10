@@ -3,6 +3,7 @@ import theme from './theme/theme'
 import { symbols, predefinedColors } from '../constants';
 import chroma from 'chroma-js';
 import { jwtDecode } from "jwt-decode";
+import {Animated} from 'react-native';
 
 export const filterData = (data, search, monedaProp, fechaProp, yearProp) => {
   if (!search) {
@@ -181,3 +182,21 @@ export const filterData = (data, search, monedaProp, fechaProp, yearProp) => {
         return null;
     }
   }
+
+  export const createColorTransition = (colors, duration = 300) => {
+    const colorAnimation = new Animated.Value(1);
+  
+    const animateTo = (toValue) => {
+      Animated.timing(colorAnimation, {
+        toValue,
+        duration,
+        useNativeDriver: true, 
+      }).start();
+    };
+    const interpolatedColor = colorAnimation.interpolate({
+      inputRange: [0, 1, 2],
+      outputRange: colors, 
+    });
+  
+    return { animateTo, interpolatedColor };
+  };

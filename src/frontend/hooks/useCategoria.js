@@ -1,25 +1,22 @@
-import { useState, useEffect, useCallback } from "react";
-import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { pagina, symbols, alerts } from '../../constants';
-const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
+import { useState, useEffect } from "react";
+import { pagina, symbols, alerts, atributos } from '../../constants';
+import { useAuth } from "../helpers/AuthContext";
+import { PAGINA_URL } from '@env';
 
 const useCategoria = (keyId) => {
   const [categoria, setCategoria] = useState([]);
+  const { accessToken, refreshToken } = useAuth();
 
-  const fetchCategoria = useCallback(async () => {
-    if (!keyId) return; 
+  const fetchCategoria = async () => {
     try {
-      const token = await AsyncStorage.getItem('userToken');
-      const refreshToken = await AsyncStorage.getItem('refreshToken')
-      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_categoria_gasto}${symbols.barra}${keyId}`
+      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_categoria}${symbols.barra}${keyId}?activo=null`
         , {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "refresh-token": refreshToken
-        },
-      });
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "refresh-token": `${refreshToken}`
+          },
+        });
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
@@ -28,13 +25,13 @@ const useCategoria = (keyId) => {
       const json = await response.json();
       setCategoria(json);
     } catch (error) {
-      console.error(`${alerts.error_ocurrido}${pagina.pagina_categoria_gasto}`, error);
+      console.error(`${alerts.error_ocurrido}${pagina.pagina_categoria}`, error);
     }
-  }, []);
+  };
 
   useEffect(() => {
     fetchCategoria();
-  }, [fetchCategoria]);
+  }, [accessToken, keyId]);
 
   return { categoria };
 };

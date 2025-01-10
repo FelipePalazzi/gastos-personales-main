@@ -14,7 +14,7 @@ const alerts = {
     delete_exito: 'Se elimino con éxito',
     error_ocurrido: 'Ocurrió un error',
     delete_question: '¿Estás seguro de eliminar este gasto?',
-    cargando: 'Cargando...',
+    cargando: 'Cargando',
     noData:'No hay datos registrado',
     regresar:'Estas seguro de volver?',
     cantidad:'Cant.',
@@ -48,6 +48,8 @@ const button_text = {
 const atributos = {
     gasto: 'Gasto',
     ingreso:'Ingreso',
+    salidas: 'Gasto',
+    entradas:'Ingreso',
     tipo: 'Tipo',
     ar: 'ARG',
     uy: 'UYU',
@@ -145,27 +147,27 @@ const pieChart={
 }
 
 const clasesEntidad = {
-  categoriagasto: {
+  categoria: {
     title: "Categoría",
     fields: [
-      { name: "descripcion", label: "Descripción", type: "textarea" },
+      { name: "categoria", label: "Descripción", type: "textarea" },
     ],
   },
-  tipogasto: {
+  subcategoria: {
     title: "Tipo de Categoría",
     fields: [
       { name: "descripcion", label: "Descripción", type: "textarea" },
-      { name: "categoria", label: "Categoría", type: "picker", pickerDataHook: "useCategoriaGasto" }, 
-      { name: "responsable", label: "Responsable", type: "picker", pickerDataHook: "useResponsableIngreso" }, 
+      { name: "categoria", label: "Categoría", type: "picker", pickerDataHook: "useCategoria" }, 
+      { name: "responsable", label: "Responsable", type: "picker", pickerDataHook: "useResponsable" }, 
     ],
   },
-  responsableIngreso: {
+  responsable: {
     title: "Responsable",
     fields: [
       { name: "nombre", label: "Nombre", type: "textarea" },
     ],
   },
-  monedaingreso: {
+  moneda: {
     title: "Moneda",
     fields: [
       { name: "descripcion", label: "Descripción", type: "text" },

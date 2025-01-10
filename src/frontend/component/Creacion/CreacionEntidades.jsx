@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text } from 'react-native';
 import { TextInput, ActivityIndicator } from 'react-native-paper';
 import { useRoute } from '@react-navigation/native';
-import useCategoriaGasto from '../../hooks/useCategoria';
-import useResponsableIngreso from '../../hooks/useResponsableIngreso';
+import useCategoria from '../../hooks/useCategoria';
+import useResponsable from '../../hooks/useResponsable';
 import { symbols, clasesEntidad, button_text } from '../../../constants';
 import { styleForm, } from '../../styles/styles';
 import theme from '../../theme/theme'
@@ -11,22 +11,22 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import { Picker } from '@react-native-picker/picker'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
-import useTipoGasto from '../../hooks/useTipoGasto';
-import useMonedaIngreso from '../../hooks/useMonedaIngreso';
+import useSubcategoria from '../../hooks/useSubcategoria';
+import useMoneda from '../../hooks/useMoneda';
 import useGetKeys from '../../hooks/useGetKeys.js';
-import {styleEntidades} from '../../styles/styles.js';
+import { styleEntidades } from '../../styles/styles.js';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
 const pickerDataHooks = {
-  useCategoriaGasto: useCategoriaGasto,
-  useResponsableIngreso: useResponsableIngreso,
+  useCategoria: useCategoria,
+  useResponsable: useResponsable,
 };
 
 const pickerDataModifyDelete = {
-  categoriagasto: useCategoriaGasto,
-  responsableIngreso: useResponsableIngreso,
-  tipogasto: useTipoGasto,
-  monedaingreso: useMonedaIngreso,
+  categoriagasto: useCategoria,
+  responsableIngreso: useResponsable,
+  tipogasto: useSubcategoria,
+  monedaingreso: useMoneda,
   getkeys: useGetKeys,
 };
 
@@ -38,10 +38,10 @@ const CreacionEntidades = ({ navigation }) => {
   const [pickerData, setPickerData] = useState({});
   const [pickerDataModifyDeleteState, setPickerDataModifyDeleteState] = useState({});
   const [loading, setLoading] = useState(true);
-  const { categoriaGastos } = useCategoriaGasto(keyid);
-  const { responsableIngresos } = useResponsableIngreso(keyid);
-  const { tipogastos } = useTipoGasto(keyid);
-  const { monedaIngresos } = useMonedaIngreso(keyid);
+  const { categoria } = useCategoria(keyid);
+  const { responsable } = useResponsable(keyid);
+  const { subcategoria } = useSubcategoria(keyid);
+  const { moneda } = useMoneda(keyid);
   const { getkeys, loadings, fetchGetKeys } = useGetKeys();
   const [selectedItem, setSelectedItem] = useState(null);
   useEffect(() => {
@@ -50,7 +50,6 @@ const CreacionEntidades = ({ navigation }) => {
     };
     loadKeys();
   }, []);
-
   useEffect(() => {
     if (getkeys.length > 0) {
       const newPickerData = { ...pickerDataModifyDelete };
@@ -68,14 +67,14 @@ const CreacionEntidades = ({ navigation }) => {
           const fetchHook = pickerDataHooks[field.pickerDataHook];
           if (fetchHook) {
             try {
-              if (field.pickerDataHook === "useCategoriaGasto") {
-                newPickerData[field.name] = categoriaGastos;
-              } else if (field.pickerDataHook === "useResponsableIngreso") {
-                newPickerData[field.name] = responsableIngresos;
-              } else if (field.pickerDataHook === "useTipoGasto") {
-                newPickerData[field.name] = tipogastos;
-              } else if (field.pickerDataHook === "useMonedaIngreso") {
-                newPickerData[field.name] = monedaIngresos;
+              if (field.pickerDataHook === "useCategoria") {
+                newPickerData[field.name] = categoria;
+              } else if (field.pickerDataHook === "useResponsable") {
+                newPickerData[field.name] = responsable;
+              } else if (field.pickerDataHook === "useSubcategoria") {
+                newPickerData[field.name] = subcategoria;
+              } else if (field.pickerDataHook === "useMoneda") {
+                newPickerData[field.name] = moneda;
               } else if (field.pickerDataHook === "useGetKeys") {
                 newPickerData[field.name] = getkeys;
               }
@@ -92,14 +91,14 @@ const CreacionEntidades = ({ navigation }) => {
       if (modificar || eliminar) {
         const newPickerModifyDelete = {};
         try {
-          if (entityType === "categoriagasto") {
-            newPickerModifyDelete["categoriagasto"] = categoriaGastos;
-          } else if (entityType === "responsableIngreso") {
-            newPickerModifyDelete["responsableIngreso"] = responsableIngresos;
-          } else if (entityType === "tipogasto") {
-            newPickerModifyDelete["tipogasto"] = tipogastos;
-          } else if (entityType === "monedaingreso") {
-            newPickerModifyDelete["monedaingreso"] = monedaIngresos;
+          if (entityType === "categoria") {
+            newPickerModifyDelete["categoria"] = categoria;
+          } else if (entityType === "responsable") {
+            newPickerModifyDelete["responsable"] = responsable;
+          } else if (entityType === "subcategoria") {
+            newPickerModifyDelete["subcategoria"] = subcategoria;
+          } else if (entityType === "moneda") {
+            newPickerModifyDelete["moneda"] = moneda;
           } else if (entityType === "keys") {
             newPickerModifyDelete["keys"] = getkeys;
           } else {
@@ -118,10 +117,10 @@ const CreacionEntidades = ({ navigation }) => {
     fetchPickerData();
 
   }, [
-    categoriaGastos,
-    responsableIngresos,
-    tipogastos,
-    monedaIngresos,
+    categoria,
+    responsable,
+    subcategoria,
+    moneda,
     getkeys,
     schema.fields,
     keyid,
@@ -186,7 +185,7 @@ const CreacionEntidades = ({ navigation }) => {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData), 
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
@@ -244,7 +243,7 @@ const CreacionEntidades = ({ navigation }) => {
 
   return (
     <View style={styleEntidades.scroll}>
-      <View style={[styleEntidades.backgroundContainer, {marginTop:10}]}>
+      <View style={[styleEntidades.backgroundContainer, { marginTop: 10 }]}>
         {(modificar || eliminar) && (
           <View style={styleEntidades.container}>
             <View style={styleEntidades.rowContainer}>
@@ -261,13 +260,13 @@ const CreacionEntidades = ({ navigation }) => {
                   if (Array.isArray(items) && items.length > 0) {
                     return items.map((item) => (
                       <Picker.Item
-                        key={item.id || item.key_id}
-                        label={item.Nombre || item.descripcion || item.nombre}
-                        value={item.id || item.key_id}
+                        key={item[`id_${entityType}`] || item.key_id}
+                        label={item.Nombre || item.descripcion || item.nombre || item[entityType]}
+                        value={item[`id_${entityType}`] || item.key_id}
                       />
                     ));
                   }
-                  return null; 
+                  return null;
                 })}
               </Picker>
             </View>
@@ -300,10 +299,10 @@ const CreacionEntidades = ({ navigation }) => {
                     dropdownIconColor={theme.colors.textSecondary}
                   >
                     {pickerData[field.name]?.map((item) => (
-                      <Picker.Item 
-                      key={item.id}
-                      label={field.pickerDataHook === 'useCategoriaGasto' ? item.descripcion : item.nombre}
-                      value={item.id} />
+                      <Picker.Item
+                        key={item[`id_${field.name}`]}
+                        label={item[field.name]}
+                        value={item[`id_${field.name}`]} />
                     ))}
                   </Picker>
                 </View>
