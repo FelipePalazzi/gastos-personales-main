@@ -6,14 +6,13 @@ import { atributos, symbols } from '../../../constants.js';
 import { filterData, sortData, getSortIcon } from '../../utils.js';
 import useGastos from '../../hooks/useGastos.js';
 import useIngresos from '../../hooks/useIngresos.js';
-import BusquedaAvanzada from './BusquedaAvanzada.jsx';
+import BusquedaAvanzada from '../Comunes/Busqueda/BusquedaAvanzada.jsx';
 import Header from './DataTable/Header.jsx';
 import Rows from './DataTable/Rows.jsx';
 import Pagination from './DataTable/Pagination.jsx';
-import { styleGasto, styleIngreso } from '../../styles/styles.js';
-import useCategoria from '../../hooks/useCategoria.js';
-import useSubcategoria from '../../hooks/useSubcategoria.js';
-import useResponsable from '../../hooks/useResponsable.js';
+import { styleMovimiento } from '../../styles/styles.js';
+import useCombinedData from '../../hooks/useCombinedData.js';
+import { getColumns, getCardRows, getAtributosSearch } from './listConfig.js';
 
 const MovimientoList = ({ keyId, routeParams }) => {
     const navigation = useNavigation();
@@ -30,6 +29,8 @@ const MovimientoList = ({ keyId, routeParams }) => {
     const tipo = routeParams?.tipo || route.params?.tipo;
     const esEntrada = tipo === 'entradas';
     const esSalida = tipo === 'salidas';
+    const MovimientoForm = esEntrada ? 'IngresoForm' : 'GastoForm';
+    const MovimientoLabelForm = esEntrada ? 'Nuevo Ingreso' : 'Nuevo Gasto'
 
     const { gastos, loading, fetchGastos } = useGastos(keyId);
     const { ingresos, loadingIngreso, fetchIngresos } = useIngresos(keyId);
@@ -78,12 +79,6 @@ const MovimientoList = ({ keyId, routeParams }) => {
     );
     const previousKeyId = useRef(keyId);
 
-    const filteredData = filterData(data, search, ['totalar', 'total'], 'fecha', 'fecha');
-
-    const sortedData = useMemo(() => {
-        return sortData(filteredData, orden, columna);
-    }, [orden, columna, filteredData]);
-
     const handleSort = useCallback((columna) => {
         setColumna(columna);
         const ordenInverso = (orden === 'asc' ? 'desc' : orden === 'desc' ? 'no orden' : 'asc');
@@ -104,109 +99,60 @@ const MovimientoList = ({ keyId, routeParams }) => {
         onItemsPerPageChange(value);
     };
 
-    const handleSubmit = async (data) => {
-        navigation.navigate(`GastoForm`, { gastoParam: data, deleteMode: false, keyid: keyId, labelHeader: "Nuevo Gasto" })
+    const handleSubmit = async () => {
+        navigation.navigate(MovimientoForm, { deleteMode: false, keyId: keyId, labelHeader: MovimientoLabelForm })
         await createGasto(data)
     }
-    const onEdit = async (gasto) => {
-        navigation.navigate(`GastoForm`, { gastoParam: gasto, deleteMode: false, keyid: keyId, labelHeader: "Nuevo Gasto" })
-        await updateGasto(gasto)
+    const onEdit = async (item) => {
+        navigation.navigate(MovimientoForm, { itemParam: item, deleteMode: false, keyId: keyId, labelHeader: MovimientoLabelForm })
+        await updateGasto(item)
     }
 
-    const onDelete = async (gasto) => {
-        navigation.navigate(`GastoForm`, { gastoParam: gasto, deleteMode: true, keyid: keyId, labelHeader: "Nuevo Gasto" })
-        await deleteGasto(gasto.id)
+    const onDelete = async (item) => {
+        navigation.navigate(MovimientoForm, { itemParam: item, deleteMode: true, keyId: keyId, labelHeader: MovimientoLabelForm })
+        await deleteGasto(item.id)
     }
-    const columns = useMemo(() => {
-        if (esEntrada) {
-            return [
-                { key: 'fecha', label: atributos.fecha, sortable: true, render: (value) => moment.utc(value).format('DD/MM/YY'), },
-                { key: 'importe', label: 'Importe', sortable: true, render: (value) => Number(value).toFixed(0), },
-                { key: 'monedamonto', label: `Moneda`, sortable: true },
-                { key: 'responsable', label: atributos.responsable, sortable: true },
 
-            ];
-        } else {
-            return [
-                { key: 'fecha', label: atributos.fecha, sortable: true, render: (value) => moment.utc(value).format('DD/MM/YY'), },
-                { key: 'subcategoria', label: atributos.tipo, sortable: true },
-                { key: 'importe', label: 'Importe', sortable: true, render: (value) => Number(value).toFixed(0), },
-                { key: 'monedamonto', label: `Moneda`, sortable: true },
-            ];
-        }
-    }, []);
+    const columns = useMemo(() => getColumns(esEntrada, atributos), [esEntrada, atributos]);
 
-    const cardrows = useMemo(() => {
-        if (esEntrada) {
-            return [
-                { key: 'responsable', label: `${atributos.responsable}${symbols.colon}` },
-                { key: `cambio_arg`, label: `Cambio ARG${symbols.colon}` },
-                { key: `cambio_uyu`, label: `Cambio UYU${symbols.colon}` },
-                { key: `cambio_usd`, label: `Cambio USD${symbols.colon}` },
-                { key: 'ARG', label: `${symbols.peso}${atributos.ar}`, sortable: true, render: (value) => Number(value).toFixed(2), },
-                { key: 'UYU', label: `${symbols.peso}${atributos.uy}`, sortable: true, render: (value) => Number(value).toFixed(2), },
-                { key: 'USD', label: `${symbols.peso}${atributos.usd}`, sortable: true, render: (value) => Number(value).toFixed(2), },
-                { key: 'comentario', label: `${atributos.descripcion}${symbols.colon}` },
-                { key: 'metodopago', label: `Metodo de pago:` },
-                { key: 'submetodopago', label: `Submetodo de pago:` },
-            ];
-        } else {
-            return [
-                { key: 'responsable', label: `${atributos.responsable}${symbols.colon}` },
-                { key: 'categoria', label: `${atributos.categoria}${symbols.colon}` },
-                { key: `cambio_arg`, label: `Cambio ARG${symbols.colon}`, render: (value) => Number(value).toFixed(4), },
-                { key: `cambio_uyu`, label: `Cambio UYU${symbols.colon}`, render: (value) => Number(value).toFixed(4), },
-                { key: `cambio_usd`, label: `Cambio USD${symbols.colon}`, render: (value) => Number(value).toFixed(4), },
-                { key: 'ARG', label: `${atributos.ar} ${symbols.peso}`, sortable: true, render: (value) => Number(value).toFixed(2), },
-                { key: 'UYU', label: `${atributos.uy} ${symbols.peso}`, sortable: true, render: (value) => Number(value).toFixed(2), },
-                { key: 'USD', label: `${atributos.usd} ${symbols.peso}`, sortable: true, render: (value) => Number(value).toFixed(2), },
-                { key: 'comentario', label: `${atributos.descripcion}${symbols.colon}` },
-                { key: 'metodopago', label: `Metodo de pago:` },
-                { key: 'submetodopago', label: `Submetodo de pago:` },
-            ];
-        }
-    }, []);
+    const cardrows = useMemo(() => getCardRows(esEntrada, atributos, symbols), [esEntrada, atributos, symbols]);
 
-    const numberOfPages = Math.ceil(sortedData.length / pageSize)
+    const numberOfPages = Math.ceil(data.length / pageSize)
     const numberOfItemsPerPageList = [9, 10, 15, 20];
 
     const [appliedFilters, setAppliedFilters] = useState({});
 
-    const { categoria } = useCategoria(keyId);
-    const { subcategoria } = useSubcategoria(keyId);
-    const { responsable } = useResponsable(keyId);
+    const { categoria, subcategoria, responsable, moneda, metodopago, submetodopago } = useCombinedData(keyId);
 
     const [categorias, setCategorias] = React.useState([]);
     const [subcategorias, setSubcategorias] = React.useState([]);
     const [responsables, setResponsables] = React.useState([]);
+    const [monedas, setMonedas] = React.useState([]);
+    const [metodopagos, setMetodopagos] = React.useState([]);
+    const [submetodopagos, setSubmetodopagos] = React.useState([]);
 
     React.useEffect(() => {
         setCategorias(categoria.map(item => item.categoria));
         setSubcategorias(subcategoria.map(item => item.subcategoria));
         setResponsables(responsable.map(item => item.responsable));
-    }, [keyId, categoria, subcategoria, responsable]);
+        setMonedas(moneda.map(item => item.codigo_moneda));
+        setMetodopagos(metodopago.map(item => item.metodopago));
+        setSubmetodopagos(submetodopago.map(item => item.submetodo_pago));
+    }, [keyId, categoria, subcategoria, responsable, moneda, metodopago, submetodopago]);
 
-    const atributosSearch = useMemo(() => {
-        if (esEntrada) {
-            return [
-                { key: 'responsable', label: `Responsable`, renderType: 'searchDropdown', data: responsables },
-            ];
-        } else {
-            return [
-                { key: 'estado', label: 'Estado', renderType: 'searchDropdown', data: ['activo', 'historico', 'pendiente'] },
-                { key: 'categoria', label: 'Categoría', renderType: 'searchDropdown', data: categorias },
-                { key: 'subcategoria', label: 'Subcategoría', renderType: 'searchDropdown', data: subcategorias },
-                { key: 'responsable', label: 'Responsable', renderType: 'searchDropdown', data: responsables },
-                { key: 'comentario', label: 'Comentario', renderType: 'textInput' },
-                { key: 'fechaDesde', label: 'Fecha Desde', renderType: 'datePicker' },
-                { key: 'fechaHasta', label: 'Fecha Hasta', renderType: 'datePicker' },
-            ];
-        }
-    }, [categorias, subcategorias, responsables]);
+    const atributosSearch = useMemo(() => getAtributosSearch(esEntrada, { categorias, subcategorias, responsables, monedas, metodopagos, submetodopagos }), [
+        esEntrada,
+        categorias,
+        subcategorias,
+        responsables,
+        monedas,
+        metodopagos,
+        submetodopagos,
+    ]);
 
     return (
         <>
-            <View style={{ backgroundColor: esEntrada ? styleIngreso.colorBackground : styleGasto.colorBackground }}>
+            <View style={{ backgroundColor: styleMovimiento.colorBackground }}>
 
                 <BusquedaAvanzada
                     onApplyFilters={handleApplyFilters}
@@ -219,13 +165,13 @@ const MovimientoList = ({ keyId, routeParams }) => {
                     columns={columns}
                     handleSort={handleSort}
                     getIcon={getIcon}
-                    style={esEntrada ? styleIngreso : styleGasto}
+                    style={styleMovimiento}
                 />
 
             </View>
             <Rows
                 expanded={expanded}
-                sortedData={sortedData}
+                data={data}
                 onRowClick={handlePressGasto}
                 columns={columns}
                 Cardrows={cardrows}
@@ -236,7 +182,8 @@ const MovimientoList = ({ keyId, routeParams }) => {
                 loading={isLoading}
                 page={page}
                 pageSize={pageSize}
-                style={esEntrada ? styleIngreso : styleGasto}
+                style={styleMovimiento}
+                tipoMovimiento={tipo}
             />
 
             <Pagination
@@ -249,7 +196,9 @@ const MovimientoList = ({ keyId, routeParams }) => {
                 handleSubmit={handleSubmit}
                 onItemsPerPageChange={handleItemsPerPageChange}
                 tipo={tipo}
-                style={esEntrada ? styleIngreso : styleGasto}
+                style={styleMovimiento}
+                navigation={navigation}
+                keyId={keyId}
             />
 
         </>

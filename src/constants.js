@@ -11,9 +11,12 @@ const alerts = {
     completado_exito: 'Se completo con éxito',
     guardado_exito: 'Se guardó con éxito',
     actualizado_exito: 'Se actualizó con éxito',
-    delete_exito: 'Se elimino con éxito',
+    archivado_exito: 'Se archivo con éxito',
+    desarchivado_exito: 'Se archivo con éxito',
     error_ocurrido: 'Ocurrió un error',
-    delete_question: '¿Estás seguro de eliminar este gasto?',
+    delete_question: '¿Estás seguro de archivar este gasto?',
+    archivar_question: '¿Estás seguro de archivarlo?',
+    desarchivar_question: '¿Estás seguro de desarchivarlo?',
     cargando: 'Cargando',
     noData:'No hay datos registrado',
     regresar:'Estas seguro de volver?',
@@ -34,7 +37,10 @@ const button_text = {
     ok: 'OK',
     sumbit: 'Guardar',
     cancel: 'Cancelar',
+    close:'Cerrar',
     delete: 'Eliminar',
+    archivar: 'Archivar',
+    desarchivar: 'Desarchivar',
     edit:'Editar',
     select: 'Seleccione',
     ingresar: 'Ingresar',
@@ -48,8 +54,8 @@ const button_text = {
 const atributos = {
     gasto: 'Gasto',
     ingreso:'Ingreso',
-    salidas: 'Gasto',
-    entradas:'Ingreso',
+    salidas: 'Salidas',
+    entradas:'Entradas',
     tipo: 'Tipo',
     ar: 'ARG',
     uy: 'UYU',
@@ -73,6 +79,8 @@ const pagina = {
     nombre:'Página',
     mensaje:'Gastos Personales',
     pagina_gasto:'gasto',
+    pagina_salidas: 'gasto',
+    pagina_entradas:'ingreso',
     pagina_ingreso: 'ingreso',
     pagina_new:'new',
     pagina_resumen:'resumen',
@@ -146,44 +154,7 @@ const pieChart={
   innerRadius:60,
 }
 
-const clasesEntidad = {
-  categoria: {
-    title: "Categoría",
-    fields: [
-      { name: "categoria", label: "Descripción", type: "textarea" },
-    ],
-  },
-  subcategoria: {
-    title: "Tipo de Categoría",
-    fields: [
-      { name: "descripcion", label: "Descripción", type: "textarea" },
-      { name: "categoria", label: "Categoría", type: "picker", pickerDataHook: "useCategoria" }, 
-      { name: "responsable", label: "Responsable", type: "picker", pickerDataHook: "useResponsable" }, 
-    ],
-  },
-  responsable: {
-    title: "Responsable",
-    fields: [
-      { name: "nombre", label: "Nombre", type: "textarea" },
-    ],
-  },
-  moneda: {
-    title: "Moneda",
-    fields: [
-      { name: "descripcion", label: "Descripción", type: "text" },
-    ],
-  },
-  keys: {
-    title: "Categoria de Entrada y Salidas",
-    fields: [
-      { name: "key_name", label: "Nombre", type: "text" },
-      { name: "description", label: "Descripción", type: "textarea" },
-    ],
-  },
-};
-
-
-  module.exports = {
+ export {
     predefinedColors,
     alerts,
     symbols,
@@ -196,5 +167,4 @@ const clasesEntidad = {
     pointerConfig,
     barChart,
     pieChart,
-    clasesEntidad,
   };

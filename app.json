@@ -1,34 +1,70 @@
 {
   "expo": {
-    "name": "Gastos Felipe",
-    "slug": "gastos-personales",
-    "version": "1.0.0",
+    "name": "Expenzzi",
+    "slug": "expenzzi",
+    "version": "2.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon.jpg",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash.jpg",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#e3e7e8"
     },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "package": "Gastos Felipe",
-        "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#ffffff"
+        "package": "Expenzzi",
+        "foregroundImage": "./assets/icon.jpg",
+        "backgroundColor": "#e3e7e8"
       },
-      "package": "com.felipepalazzi.gastospersonales"
+      "package": "com.felipepalazzi.expenzzi"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.jpg"
     },
     "extra": {
       "eas": {
-        "projectId": "5effc497-52ef-45c5-97a4-25961ad79122"
+        "projectId": "a85bad33-4b82-467d-800e-6649c9af62ca"
       }
-    }
+    },
+    "plugins": [
+      [
+        "@react-native-community/datetimepicker",
+        {
+          "android": {
+            "datePicker": {
+              "colorAccent": {
+                "light": "#242F5C"
+              },
+              "colorControlActivated": {
+                "light": "#242F5C"
+              },
+              "textColorPrimary": {
+                "light": "#242F5C"
+              },
+              "textColorSecondary": {
+                "light": "#242F5C"
+              },
+              "textColor": {
+                "light": "#242F5C"
+              },
+              "textColorSecondaryInverse": {
+                "light": "#e3e7e8"
+              },
+              "textColorPrimaryInverse": {
+                "light": "#e3e7e8"
+              },
+              "windowBackground": {
+                "light": "#e3e7e8"
+              }
+            }
+          }
+        }
+      ]
+    ],
+    "owner": "felipepalazzi"
   }
 }

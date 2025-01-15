@@ -1,14 +1,17 @@
 import React from 'react';
-import { View, Text, Modal, TextInput, Pressable } from 'react-native';
-import theme from '../../theme/theme.js';
+import { View, Text, Modal, TextInput, Pressable, ScrollView } from 'react-native';
+import theme from '../../../theme/theme.js';
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { BlurView } from '@react-native-community/blur';
-import { styleBusquedaAvanzada, styleComun } from '../../styles/styles.js';
+import { styleBusquedaAvanzada, styleComun } from '../../../styles/styles.js';
 import SearchDropdown from './SearchDropdown.jsx';
-
+import DateTimePickerModal from "react-native-modal-datetime-picker"
+import moment from 'moment'
+import 'moment/locale/es'
 
 const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, keyId }) => {
   const [modalVisible, setModalVisible] = React.useState(false);
+  const [datePickerVisible, setDatePickerVisible] = React.useState(false);
 
   const [filters, setFilters] = React.useState({});
 
@@ -22,7 +25,6 @@ const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, key
   };
   React.useEffect(() => {
     if (keyId && appliedFilters) {
-      // Itera sobre los filtros aplicados y actualiza el estado dinámicamente
       Object.keys(appliedFilters).forEach((key) => {
         if (appliedFilters[key]) {
           handleInputChange(key, appliedFilters[key]);
@@ -74,11 +76,28 @@ const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, key
         return (
           <View key={key} style={{ marginBottom: 10 }}>
             <Text>{label}</Text>
-            <TextInput
-              placeholder="Seleccionar fecha"
-              value={filters[key] || ''}
-              onFocus={() => console.log(`Abrir datePicker para ${key}`)} // Aquí puedes usar una librería de date pickers
-              style={{ padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}
+            <Pressable
+              onPress={() => setDatePickerVisible(true)}
+              style={{
+                padding: 10,
+                borderWidth: 1,
+                borderColor: '#ccc',
+                borderRadius: 5,
+                justifyContent: 'center',
+              }}
+            >
+              <Text style={{ color: filters[key] ? '#000' : '#aaa' }}>
+                {filters[key] ? moment(filters[key]).format('LL') : 'Seleccionar fecha'}
+              </Text>
+            </Pressable>
+            <DateTimePickerModal
+              isVisible={datePickerVisible}
+              mode="date"
+              onConfirm={(date) => {
+                handleInputChange(key, date.toISOString());
+                setDatePickerVisible(false);
+              }}
+              onCancel={() => setDatePickerVisible(false)}
             />
           </View>
         );
@@ -89,16 +108,23 @@ const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, key
 
   return (
     <>
-      <View style={styleBusquedaAvanzada.container}>
-        <Icon.Button
-          backgroundColor={theme.colors.busqueda_avanzada}
-          name={'search'}
-          onPress={() => setModalVisible(true)}
-          style={{ paddingHorizontal: 50 }}
-        >
-          Busqueda Avanzada
-        </Icon.Button>
-      </View>
+<View style={styleBusquedaAvanzada.container}>
+  <Icon.Button
+    backgroundColor={theme.colors.white}
+    name={'search'}
+    onPress={() => setModalVisible(true)}
+    style={{
+      paddingHorizontal: 50,
+    }}
+    color={theme.colors.primary}
+    iconStyle={{ marginRight: 10 }} // Ajusta el margen del ícono
+  >
+    <Text style={{ fontSize: theme.fontSizes.busqueda_avanzada, fontWeight: 'bold', color: theme.colors.primary }}>
+      Busqueda Avanzada
+    </Text>
+  </Icon.Button>
+</View>
+
       <Modal
         visible={modalVisible}
         animationType="fade"
@@ -114,7 +140,14 @@ const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, key
 
             <View style={styleBusquedaAvanzada.modalContent}>
               <Text style={styleBusquedaAvanzada.title}>Búsqueda Avanzada</Text>
-              {atributosSearch.map((atributo) => renderInput(atributo))}
+                <ScrollView
+                style={{flex:1}}
+                  contentContainerStyle={styleBusquedaAvanzada.scrollContainer}
+                  nestedScrollEnabled={true}
+                >
+                  {atributosSearch.map((atributo) => renderInput(atributo))}
+                </ScrollView>
+              <View style={styleBusquedaAvanzada.buttonRow}>
               <Pressable
                 style={styleBusquedaAvanzada.applyButton}
                 onPress={handleApplyFilters}
@@ -133,6 +166,7 @@ const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, key
               >
                 <Text style={styleBusquedaAvanzada.closeButtonText}>Borrar Filtros</Text>
               </Pressable>
+              </View>
             </View>
           </View>
         </BlurView>

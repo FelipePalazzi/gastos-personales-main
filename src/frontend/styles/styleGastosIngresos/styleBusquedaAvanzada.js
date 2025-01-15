@@ -1,11 +1,13 @@
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from 'react-native';
 import theme from '../../theme/theme.js';
+const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
 
 const styleBusquedaAvanzada = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 10,
+    margin: 5,
     marginHorizontal: 23,
   },
   overlay: {
@@ -17,23 +19,23 @@ const styleBusquedaAvanzada = StyleSheet.create({
   blurView: {
     flex: 1,
     position: 'absolute',
-    width: '100%',
-    height: '100%',
+    width: screenWidth,
+    height: screenHeight,
   },
   modalContent: {
     flex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.85)', // Fondo blanco semi-transparente
     borderRadius: 15,
     padding: 20,
-    marginHorizontal: 20, // Márgenes laterales
+    marginHorizontal: 10, // Márgenes laterales
     marginVertical: 40, // Márgenes superior/inferior
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
-    width: '80%',
-    height: '80%',
+    width: '90%',
+    height: '85%',
   },
   title: {
     fontSize: 20,
@@ -52,7 +54,7 @@ const styleBusquedaAvanzada = StyleSheet.create({
     backgroundColor: '#fff',
   },
   closeButton: {
-    backgroundColor: '#FF6F61',
+    backgroundColor: theme.colors.transparente,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 10,
@@ -60,12 +62,12 @@ const styleBusquedaAvanzada = StyleSheet.create({
     marginTop: 20,
   },
   closeButtonText: {
-    color: '#fff',
+    color:theme.colors.primary,
     fontSize: 16,
     fontWeight: 'bold',
   },
   applyButton: {
-    backgroundColor: theme.colors.agregar,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 10,
@@ -73,9 +75,14 @@ const styleBusquedaAvanzada = StyleSheet.create({
     marginTop: 20,
   },
   applyButtonText: {
-    color: '#fff',
+    color: theme.colors.white,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
   },
 });
 export default styleBusquedaAvanzada

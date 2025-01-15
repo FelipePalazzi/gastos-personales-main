@@ -1,163 +1,178 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, Text, FlatList } from 'react-native';
 import { TextInput, ActivityIndicator } from 'react-native-paper';
 import { useRoute } from '@react-navigation/native';
-import useCategoria from '../../hooks/useCategoria';
-import useResponsable from '../../hooks/useResponsable';
-import { symbols, clasesEntidad, button_text } from '../../../constants';
+import { symbols, clasesEntidad, button_text, alerts } from '../../../constants';
 import { styleForm, } from '../../styles/styles';
 import theme from '../../theme/theme'
-import Icon from 'react-native-vector-icons/FontAwesome'
-import { Picker } from '@react-native-picker/picker'
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
-import useSubcategoria from '../../hooks/useSubcategoria';
-import useMoneda from '../../hooks/useMoneda';
-import useGetKeys from '../../hooks/useGetKeys.js';
-import { styleEntidades } from '../../styles/styles.js';
+import { styleEntidades, styleComun, styleLoading, styleBusquedaAvanzada, screenWidth } from '../../styles/styles.js';
+import { getEntidades } from './entidadesConfig';
+import { useAuth } from '../../helpers/AuthContext';
+import useCombinedData from '../../hooks/useCombinedData';
+import FaltanDatos from '../Comunes/Dialogs/FaltanDatos.jsx';
+import Correcto from '../Comunes/Dialogs/Correcto.jsx';
+import Delete from '../Comunes/Dialogs/Delete.jsx';
+import SearchDropdown from '../Comunes/Busqueda/SearchDropdown';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
-
-const pickerDataHooks = {
-  useCategoria: useCategoria,
-  useResponsable: useResponsable,
-};
-
-const pickerDataModifyDelete = {
-  categoriagasto: useCategoria,
-  responsableIngreso: useResponsable,
-  tipogasto: useSubcategoria,
-  monedaingreso: useMoneda,
-  getkeys: useGetKeys,
-};
 
 const CreacionEntidades = ({ navigation }) => {
   const route = useRoute();
-  const { labelHeader, entityType, keyid, modificar, eliminar } = route.params;
-  const schema = clasesEntidad[entityType];
-  const [formData, setFormData] = useState({ keyid });
-  const [pickerData, setPickerData] = useState({});
-  const [pickerDataModifyDeleteState, setPickerDataModifyDeleteState] = useState({});
+  const { labelHeader, entityType, keyId, modificar, eliminar, routeName } = route.params;
+  const { accessToken, refreshToken } = useAuth()
+  const [item, setItem] = useState({ activo: true });
+  const [itemid, setItemid] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { categoria } = useCategoria(keyid);
-  const { responsable } = useResponsable(keyid);
-  const { subcategoria } = useSubcategoria(keyid);
-  const { moneda } = useMoneda(keyid);
-  const { getkeys, loadings, fetchGetKeys } = useGetKeys();
-  const [selectedItem, setSelectedItem] = useState(null);
-  useEffect(() => {
-    const loadKeys = async () => {
-      await fetchGetKeys();
-    };
-    loadKeys();
-  }, []);
-  useEffect(() => {
-    if (getkeys.length > 0) {
-      const newPickerData = { ...pickerDataModifyDelete };
-      newPickerData['keys'] = getkeys;
-      setPickerDataModifyDeleteState(newPickerData);
-    }
-  }, [getkeys]);
+  const [selectedItem, setSelectedItem] = useState(false);
+  const [changeItem, setChangeItem] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [visibleOK, setvisibleOK] = useState(false);
+  const [visibleDelete, setvisibleDelete] = useState(false);
+  const [visibleOKDelete, setvisibleOKDelete] = useState(false);
+  const [message, setMessage] = useState([]);
+  const { categoria, subcategoria, responsable, moneda, metodopago, submetodopago } = useCombinedData(keyId);
+  const [categorias, setCategorias] = React.useState([]);
+  const [subcategorias, setSubcategorias] = React.useState([]);
+  const [responsables, setResponsables] = React.useState([]);
+  const [monedas, setMonedas] = React.useState([]);
+  const [metodopagos, setMetodopagos] = React.useState([]);
+  const [submetodopagos, setSubmetodopagos] = React.useState([]);
 
-  useEffect(() => {
-    const fetchPickerData = async () => {
-      const newPickerData = {};
+  React.useEffect(() => {
+    setCategorias(categoria.map(item => ({ id: item.id_categoria, nombre: item.categoria, activo:item.categoria_activo })));
+    setSubcategorias(subcategoria.map(item => ({
+      id: item.id_subcategoria,
+      nombre: item.subcategoria,
+      id_categoria: item.id_categoria,
+      id_responsable: item.id_responsable,
+      activo:item.subcategoria_activo
+    })));
+    setResponsables(responsable.map(item => ({ id: item.id_responsable, nombre: item.responsable, activo:item.responsable_activo })));
+    setMonedas(moneda.map(item => ({ id: item.id_moneda, nombre: item.codigo_moneda, activo:item.activo })));
+    setMetodopagos(metodopago.map(item => ({ id: item.id_metodopago, nombre: item.metodopago, activo:item.activo })));
+    setSubmetodopagos(submetodopago.map(item => ({
+      id: item.id_submetodo_pago,
+      nombre: item.submetodo_pago,
+      id_metodopago: item.id_metodopago, activo:item.activo
+    })));
+  }, [keyId, categoria, subcategoria, responsable, moneda, metodopago, submetodopago]);
 
-      for (const field of schema.fields) {
-        if (field.type === "picker" && field.pickerDataHook) {
-          const fetchHook = pickerDataHooks[field.pickerDataHook];
-          if (fetchHook) {
-            try {
-              if (field.pickerDataHook === "useCategoria") {
-                newPickerData[field.name] = categoria;
-              } else if (field.pickerDataHook === "useResponsable") {
-                newPickerData[field.name] = responsable;
-              } else if (field.pickerDataHook === "useSubcategoria") {
-                newPickerData[field.name] = subcategoria;
-              } else if (field.pickerDataHook === "useMoneda") {
-                newPickerData[field.name] = moneda;
-              } else if (field.pickerDataHook === "useGetKeys") {
-                newPickerData[field.name] = getkeys;
-              }
-            } catch (error) {
-              console.error(`Error en fetchHook para ${field.name}:`, error);
-              newPickerData[field.name] = [];
-            }
-          }
-        }
-      }
-
-      setPickerData(newPickerData);
-
-      if (modificar || eliminar) {
-        const newPickerModifyDelete = {};
-        try {
-          if (entityType === "categoria") {
-            newPickerModifyDelete["categoria"] = categoria;
-          } else if (entityType === "responsable") {
-            newPickerModifyDelete["responsable"] = responsable;
-          } else if (entityType === "subcategoria") {
-            newPickerModifyDelete["subcategoria"] = subcategoria;
-          } else if (entityType === "moneda") {
-            newPickerModifyDelete["moneda"] = moneda;
-          } else if (entityType === "keys") {
-            newPickerModifyDelete["keys"] = getkeys;
-          } else {
-          }
-        } catch (error) {
-          console.error(`Error en fetchHook para ${field.name}:`, error);
-          newPickerModifyDelete[field.name] = [];
-        }
-        setPickerDataModifyDeleteState(newPickerModifyDelete);
-
-      }
-
-      setLoading(false);
-    };
-
-    fetchPickerData();
-
-  }, [
-    categoria,
-    responsable,
-    subcategoria,
-    moneda,
-    getkeys,
-    schema.fields,
-    keyid,
-    modificar,
-    eliminar,
-    entityType
+  const entidades = useMemo(() => getEntidades({ categorias, subcategorias, responsables, monedas, metodopagos, submetodopagos }), [
+    categorias,
+    subcategorias,
+    responsables,
+    monedas,
+    metodopagos,
+    submetodopagos,
   ]);
 
-  useEffect(() => {
-    if (pickerDataModifyDeleteState?.keys && pickerDataModifyDeleteState.keys.length > 0) {
-      setSelectedItem(pickerDataModifyDeleteState.keys[0].key_id);
+  React.useEffect(() => {
+    if (item.subcategoria) {
+      const selectedSub = subcategorias.find(sub => sub.id === item.subcategoria);
+      if (selectedSub) {
+        updateItemProperty('categoria', selectedSub.id_categoria);
+        updateItemProperty('responsable', selectedSub.id_responsable);
+      }
     }
-  }, [pickerDataModifyDeleteState]);
+  }, [item.subcategoria]);
+
+  React.useEffect(() => {
+    if (item.submetodopago) {
+      const selectedSub = submetodopagos.find(sub => sub.id === item.submetodopago);
+      if (selectedSub) {
+        updateItemProperty('metodopago', selectedSub.id_metodopago);
+      }
+    }
+  }, [item.submetodopago]);
+
 
   const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setItem((prev) => ({ ...prev, [field]: value }))
+    setSelectedItem(true);
   };
 
-  const handleSubmit = async () => {
-    try {
-      const token = await AsyncStorage.getItem('userToken');
-      const url = entityType === "keys"
-        ? `${PAGINA_URL}${symbols.barra}${entityType}`
-        : `${PAGINA_URL}${symbols.barra}${entityType}${symbols.barra}${keyid}`;
+  const updateItemProperty = (key, value) => {
+    setItem(prevItem => ({
+      ...prevItem,
+      [key]: value,
+    }));
+    setChangeItem(true);
+  };
+  const renderEntity = (atributo) => {
+    const { key, label, data } = atributo;
+    if (key === entityType) {
+      return (
+        <View key={key}>
+          {(modificar || eliminar) &&
+            <SearchDropdown
+            options={data
+              .filter(option => eliminar || option.activo)
+              .map(option => option.nombre)}   
+              placeholder={label}
+              value={data.find(option => option.id === item.categoria)?.nombre}
+              onSelect={(selectedName) => {
+                const selectedOption = data.find(option => option.nombre === selectedName);
+                if (selectedOption) {
+                  setItemid(selectedOption.id); 
+                  handleChange('nombre', selectedOption.nombre); 
+                  handleChange('activo', selectedOption.activo); 
+                }
+              }}              
+              onClear={() => { handleChange(key, null) }}
+              filterKey={key}
+              setFilter={setItem}
+              icon={'tag'}
+            />}
+          {!eliminar &&
+            <TextInput
+              mode='outlined'
+              value={item.nombre || ''}
+              onChangeText={(value) => updateItemProperty('nombre', value)}
+              placeholder={`${label}${symbols.space}${button_text.opcional}`}
+              style={{
+                marginRight: 0,
+                width: screenWidth - 40,
+                backgroundColor: item[key] ? theme.colors.primary : theme.colors.white,
+                height: 38,
+                paddingVertical: 10,
+                color: theme.colors.white
+              }}
+              outlineStyle={{ borderColor: eliminar ? theme.colors.disabled : theme.colors.primary, borderRadius: 27 }}
+              disabled={eliminar}
+              label={label}
+              textColor={item[key] ? theme.colors.white : theme.colors.primary}
+              outlineColor={item[key] ? theme.colors.white : theme.colors.primary}
+              activeOutlineColor={item[key] ? theme.colors.white : theme.colors.primary}
+              theme={{ colors: { onSurfaceVariant: item[key] ? theme.colors.white : theme.colors.primary } }}
+            />}
+        </View>
+      );
+    }
+    return null
+  }
 
+  const handleSubmit = async () => {
+    if (!changeItem){
+     setMessage('No se ingreso ningun valor')
+     setVisible(true)
+     return
+    }
+    try {
+      const url = `${PAGINA_URL}${symbols.barra}${routeName}${symbols.barra}${keyId}`
       const response = await fetch(url, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
+          'refresh-token': refreshToken,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(item),
       });
 
       if (response.ok) {
-        alert("Datos enviados correctamente");
-        navigation.goBack();
+        setMessage(`Se creo correctamente`)
+        setvisibleOK(true)
       } else {
         alert("Error al enviar los datos");
       }
@@ -168,29 +183,26 @@ const CreacionEntidades = ({ navigation }) => {
   };
 
   const handleModify = async () => {
-    if (!selectedItem) {
-      alert('Por favor, selecciona un elemento.');
+    if (!selectedItem && !changeItem) {
+      setMessage('No se ingreso ningun valor')
+      setVisible(true)
       return;
     }
-
     try {
-      const token = await AsyncStorage.getItem('userToken');
-      const url = entityType === "keys"
-        ? `${PAGINA_URL}${symbols.barra}${entityType}`
-        : `${PAGINA_URL}${symbols.barra}${entityType}${symbols.barra}${keyid}${symbols.barra}${selectedItem}`;
-
+      const url = `${PAGINA_URL}${symbols.barra}${routeName}${symbols.barra}${keyId}${symbols.barra}${itemid}`
       const response = await fetch(url, {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
+          'refresh-token': refreshToken,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(item),
       });
 
       if (response.ok) {
-        alert('Entidad modificada correctamente');
-        navigation.goBack();
+        setMessage(`Se Modifico correctamente`)
+        setvisibleOK(true)
       } else {
         alert('Error al modificar la entidad');
       }
@@ -202,26 +214,24 @@ const CreacionEntidades = ({ navigation }) => {
 
   const handleDelete = async () => {
     if (!selectedItem) {
-      alert('Por favor, selecciona un elemento.');
+      setMessage('Selecciona un valor')
+      setVisible(true)
       return;
     }
-
     try {
-      const token = await AsyncStorage.getItem('userToken');
-      const url = entityType === "keys"
-        ? `${PAGINA_URL}${symbols.barra}${entityType}`
-        : `${PAGINA_URL}${symbols.barra}${entityType}${symbols.barra}${keyid}${symbols.barra}${selectedItem}`;
-
+      const url = `${PAGINA_URL}${symbols.barra}${routeName}${symbols.barra}${keyId}${symbols.barra}${itemid}`
       const response = await fetch(url, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${accessToken}`,
+          'refresh-token': refreshToken
         },
       });
 
       if (response.ok) {
-        alert('Entidad eliminada correctamente');
-        navigation.goBack();
+        setvisibleDelete(false)
+        setMessage(`Se ${item.activo ? 'Archivo' : 'Desarchivo'} correctamente`)
+        setvisibleOKDelete(true)
       } else {
         alert('Error al eliminar la entidad');
       }
@@ -231,129 +241,65 @@ const CreacionEntidades = ({ navigation }) => {
     }
   };
 
-
-
-  if (loading) {
-    return <ActivityIndicator size="large" />;
-  }
-
-  if (!schema) {
-    return <Text>Tipo de entidad no soportado</Text>;
-  }
-
   return (
-    <View style={styleEntidades.scroll}>
-      <View style={[styleEntidades.backgroundContainer, { marginTop: 10 }]}>
-        {(modificar || eliminar) && (
-          <View style={styleEntidades.container}>
-            <View style={styleEntidades.rowContainer}>
-              <Text style={styleEntidades.text}>{modificar && "Elemento a modificar" || "Elemento a eliminar"}</Text>
-              <Picker
-                selectedValue={selectedItem}
-                onValueChange={(value) => setSelectedItem(value)}
-                style={styleEntidades.picker}
-                mode={theme.picker.modo}
-                dropdownIconColor={theme.colors.textSecondary}
-              >
-                {Object.keys(pickerDataModifyDeleteState).map((key) => {
-                  const items = pickerDataModifyDeleteState[key];
-                  if (Array.isArray(items) && items.length > 0) {
-                    return items.map((item) => (
-                      <Picker.Item
-                        key={item[`id_${entityType}`] || item.key_id}
-                        label={item.Nombre || item.descripcion || item.nombre || item[entityType]}
-                        value={item[`id_${entityType}`] || item.key_id}
-                      />
-                    ));
-                  }
-                  return null;
-                })}
-              </Picker>
+    <>
+      {!loading ? (
+        <View style={styleLoading.loadingContainer}>
+          <ActivityIndicator animating={true} color={theme.colors.primary} size={theme.icons.big} />
+          <Text style={styleLoading.loadingText}>{alerts.cargando} datos...</Text>
+        </View>
+      ) : (
+        <>
+          {/* Contenido de la lista */}
+          <FlatList
+            data={entidades}
+            renderItem={({ item }) => renderEntity(item)}
+            keyExtractor={(item, index) => index.toString()}
+            showsVerticalScrollIndicator={true}
+            style={{ flex: 1, margin: 20 }}
+            nestedScrollEnabled={true}
+            keyboardShouldPersistTaps="handed"
+          />
+          {/* Vistas modales */}
+          <FaltanDatos visible={visible} setVisible={setVisible} message={message} />
+          <Correcto visible={visibleOK} setVisible={setvisibleOK} navigation={navigation} goBack={true} message={message}/>
+          <Delete
+            visible={visibleDelete}
+            setVisible={setvisibleDelete}
+            handleDelete={handleDelete}
+            visibleOk={visibleOKDelete}
+            setVisibleOk={setvisibleOKDelete}
+            archivar={item.activo}
+            navigation={navigation}
+            goBack={true}
+          />
+
+          {/* Botones de acción */}
+          <View style={styleForm.rowButton}>
+            <View style={styleForm.button}>
+              <Icon.Button backgroundColor={theme.colors.white} color={theme.colors.primary} name={theme.icons.close} onPress={() => navigation.goBack({ refresh: true })}>
+                {button_text.cancel}
+              </Icon.Button>
             </View>
-            {entityType === 'keys' && selectedItem && (
-              <View style={styleEntidades.rowContainer} >
-                <Text style={styleEntidades.text}>{modificar && "Descripcion a modificar" || "Descripcion a eliminar"}</Text>
-                <TextInput
-                  mode='outlined'
-                  disabled
-                  style={styleEntidades.text_input_wide}
-                  value={pickerDataModifyDeleteState.keys.find(item => item.key_id === selectedItem).Descripcion || ''}
-                  outlineStyle={{ borderColor: theme.colors.primary }}
-                  multiline
-                />
+            {!eliminar && (
+              <View style={styleForm.button}>
+                <Icon.Button backgroundColor={theme.colors.primary} color={theme.colors.white} name={theme.icons.save} onPress={modificar ?  handleModify :  handleSubmit}>
+                  {button_text.sumbit}
+                </Icon.Button>
+              </View>
+            )}
+            {eliminar && (
+              <View style={styleForm.button}>
+                <Icon.Button backgroundColor={theme.colors.primary} color={theme.colors.white} name={theme.icons.borrar} onPress={() => setvisibleDelete(true)}>
+                  {item.activo ? button_text.archivar : button_text.desarchivar}
+                </Icon.Button>
               </View>
             )}
           </View>
-        )}
-        {!eliminar &&
-          schema.fields.map((field) => {
-            if (field.type === "picker") {
-              return (
-                <View style={styleEntidades.rowContainer} key={field.name}>
-                  <Text style={styleEntidades.text}>{field.label}</Text>
-                  <Picker
-                    selectedValue={formData[field.name]}
-                    onValueChange={(value) => handleChange(field.name, value)}
-                    style={styleEntidades.picker}
-                    mode={theme.picker.modo}
-                    dropdownIconColor={theme.colors.textSecondary}
-                  >
-                    {pickerData[field.name]?.map((item) => (
-                      <Picker.Item
-                        key={item[`id_${field.name}`]}
-                        label={item[field.name]}
-                        value={item[`id_${field.name}`]} />
-                    ))}
-                  </Picker>
-                </View>
-              );
-            }
-            return (
-              <View style={styleEntidades.rowContainer} key={field.name}>
-                <Text style={styleEntidades.text}>{field.label}</Text>
-                <TextInput
-                  mode={theme.text_input}
-                  onChangeText={(value) => handleChange(field.name, value)}
-                  placeholder={field.label}
-                  style={styleEntidades.text_input_wide}
-                  keyboardType={field.type === "number" ? "numeric" : "default"}
-                  multiline={field.type === "textarea"}
-                  outlineStyle={{ borderColor: theme.colors.primary }}
-                />
-              </View>
-            );
-          })}
-      </View>
-      <View style={styleEntidades.button}>
-        {!modificar && !eliminar && (
-          <Icon.Button
-            backgroundColor={theme.colors.agregar}
-            name={theme.icons.save}
-            onPress={handleSubmit}
-          >
-            {button_text.sumbit}
-          </Icon.Button>
-        )}
-        {modificar && (
-          <Icon.Button
-            backgroundColor={theme.colors.agregar}
-            name={theme.icons.save}
-            onPress={handleModify}
-          >
-            Modificar
-          </Icon.Button>
-        )}
-        {eliminar && (
-          <Icon.Button
-            backgroundColor={theme.colors.delete}
-            name={theme.icons.borrar}
-            onPress={handleDelete}
-          >
-            Eliminar
-          </Icon.Button>
-        )}
-      </View>
-    </View>
+        </>
+      )}
+    </>
+
   );
 };
 

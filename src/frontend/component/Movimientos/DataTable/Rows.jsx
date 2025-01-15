@@ -7,7 +7,7 @@ import { styleComun, styleLoading } from '../../../styles/styles.js';
 import CardTable from './CardTable.jsx';
 
 const Rows = ({
-    sortedData,
+    data,
     expanded,
     onRowClick,
     columns,
@@ -17,13 +17,16 @@ const Rows = ({
     loading,
     page,
     pageSize,
-    style
+    style,
+    tipoMovimiento,
+    onEdit,
+    onDelete
 }) => {
     return (
         <ScrollView
             showsVerticalScrollIndicator={true}
             vertical
-            style={styleComun.scroll}
+            style={[styleComun.scroll,{backgroundColor:theme.colors.white}]}
             refreshControl={
                 <RefreshControl
                     refreshing={refreshing}
@@ -35,12 +38,12 @@ const Rows = ({
                     loading ? (
                         <View style={styleLoading.loadingContainer}>
                             <ActivityIndicator animating={true} color={style.colorLoading} size={theme.icons.big} />
-                            <Text style={[styleLoading.loadingText, { color: style.colorLoading }]}>{alerts.cargando} {atributos.gasto}s</Text>
+                            <Text style={[styleLoading.loadingText, { color: style.colorLoading }]}>{alerts.cargando} {atributos[tipoMovimiento]}...</Text>
                         </View>
                     ) : (
-                        sortedData.length > 0 ? (
+                        data.length > 0 ? (
                             <DataTable>
-                                {sortedData.slice(page * pageSize, (page + 1) * pageSize).map((item, index) => (
+                                {data.slice(page * pageSize, (page + 1) * pageSize).map((item, index) => (
                                     <React.Fragment key={index}>
                                         <DataTable.Row
                                             style={[style.row, expanded[item.id] && style.expandedrow]}
@@ -62,13 +65,13 @@ const Rows = ({
                                             ))}
                                         </DataTable.Row>
                                         {expanded[item.id] && (
-                                            <CardTable Cardrows={Cardrows} item={item} onDelete={item} onEdit={item} style={style} />
+                                            <CardTable Cardrows={Cardrows} item={item} onDelete={()=> onDelete(item)} onEdit={() =>onEdit(item)} style={style} />
                                         )}
                                     </React.Fragment>
                                 ))}
                             </DataTable>
                         ) : (
-                            <View style={styleLoading.loadingContainer}>
+                            <View style={style.SinDatoscontainer}>
                                 <Text style={style.SinDatos}>Sin coincidencias</Text>
                             </View>
                         )

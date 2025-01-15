@@ -6,22 +6,23 @@ import { useNavigation } from '@react-navigation/native';
 import { styleLista, styleForm, styleComun, styleDrawer } from '../../styles/styles.js';
 import { Picker } from '@react-native-picker/picker'
 import Submenu from './Submenu.jsx';
+import { useAuth } from '../../helpers/AuthContext.js';
 
 function CustomDrawerContent({ keyId }) {
   const navigation = useNavigation();
-
+  const {usernameLogeado} = useAuth()
   const menuItems = [
-    { label: "Categoria", entityType: "categoria" },
-    { label: "Tipo de Gasto", entityType: "subcategoria" },
-    { label: "Moneda", entityType: "moneda" },
-    { label: "Responsable", entityType: "responsable" },
-    { label: "Categoria de Entrada y Salida", entityType: "keys" },
+    { label: "Categoria", entityType: "categoria", routeName:'categoria' },
+    { label: "Subcategoria", entityType: "subcategoria", routeName:'subcategoria'  },
+    { label: "Moneda", entityType: "id_moneda_origen", routeName:'moneda'  },
+    { label: "Responsable", entityType: "responsable", routeName:'responsable'  },
+    { label: "Submetodo de Pago", entityType: "submetodopago", routeName:'submetodopago'  },
   ];
 
   return (
     <DrawerContentScrollView>
       <View style={styleDrawer.container}>
-        <Text style={styleComun.title}>Menu</Text>
+        <Text style={styleComun.title}>Hola {usernameLogeado}!</Text>
       </View>
       <Submenu
         label="Opciones de Creación"
@@ -39,16 +40,14 @@ function CustomDrawerContent({ keyId }) {
         keyId={keyId}
         menuItems={menuItems}
       />
-      {/*
         <Submenu
-          label="Opciones de Eliminación"
-          iconName="trash-outline"
+          label="Opciones de Archivacion"
+          iconName="archive-outline"
           submenutype="eliminar"
           navigation={navigation}
           keyId={keyId}
           menuItems={menuItems}
         />
-            */}
 
       {/* Proximamente agregar usuarios
   <DrawerItem
@@ -64,7 +63,7 @@ function CustomDrawerContent({ keyId }) {
         label="Volver al Inicio"
         onPress={() => navigation.navigate('Login')}
         icon={({ }) => <Ionicons name="log-out-outline" size={theme.fontSizes.body} color={theme.colors.white} />}
-        style={{ backgroundColor: theme.colors.pieInner, marginTop: 10 }}
+        style={{ marginTop: 10 }}
         labelStyle={{ color: theme.colors.white }}
       />
 

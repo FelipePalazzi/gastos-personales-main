@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import theme from '../../theme/theme';
 import { styleForm } from '../../styles/styles';
 
-const Submenu = ({ label, iconName, submenutype, navigation, keyId, menuItems,}) => {
+const Submenu = ({ label, iconName, submenutype, navigation, keyId, menuItems, }) => {
   const [isSubmenuVisible, setIsSubmenuVisible] = useState(false);
 
   const getActionFlags = () => {
@@ -28,7 +28,7 @@ const Submenu = ({ label, iconName, submenutype, navigation, keyId, menuItems,})
       case 'modificar':
         return `Modificar ${label}`;
       case 'eliminar':
-        return `Eliminar ${label}`;
+        return `Archivar ${label}`;
       default:
         return label;
     }
@@ -42,7 +42,7 @@ const Submenu = ({ label, iconName, submenutype, navigation, keyId, menuItems,})
         label={label}
         onPress={() => setIsSubmenuVisible(!isSubmenuVisible)}
         icon={() => <Ionicons name={iconName} size={theme.fontSizes.body} color={theme.colors.white} />}
-        style={{backgroundColor: theme.colors.pieInner, position: 'relative', zIndex: 1, marginTop: 10, marginBottom: 0,}}
+        style={{ backgroundColor:theme.colors.primary, position: 'relative', zIndex: 1, marginTop: 10, marginBottom: 0, borderRadius: 0 }}
         labelStyle={{ color: theme.colors.white }}
       />
       {isSubmenuVisible && (
@@ -52,10 +52,11 @@ const Submenu = ({ label, iconName, submenutype, navigation, keyId, menuItems,})
             {
               position: 'relative',
               top: -10,
-              backgroundColor: theme.colors.pieBackground,
+              backgroundColor: theme.colors.white,
               marginLeft: 10,
               paddingVertical: 15,
               marginEnd: 10,
+              borderRadius: 10,
             },
           ]}
         >
@@ -65,34 +66,34 @@ const Submenu = ({ label, iconName, submenutype, navigation, keyId, menuItems,})
                 key={item.entityType}
                 onPress={() =>
                   navigation.navigate('CreacionEntidades', {
-                    labelHeader:getLabelForItem(submenutype, item.label),
+                    labelHeader: getLabelForItem(submenutype, item.label),
                     entityType: item.entityType,
-                    keyid: keyId,
+                    keyId: keyId,
                     modificar: modificar,
                     eliminar: eliminar,
+                    routeName: item.routeName,
                   })
                 }
                 icon={() => (
                   <Ionicons
-                    name={submenutype === 'crear' ? 'add' : submenutype === 'modificar' ? 'create' : 'trash'}
+                    name={submenutype === 'crear' ? 'add-circle' : submenutype === 'modificar' ? 'create' : 'archive'}
                     size={theme.fontSizes.body}
-                    color={theme.colors.white}
+                    color={theme.colors.primary}
                   />
                 )}
                 style={{
-                  backgroundColor: theme.colors.pieInner,
                   marginTop: 5,
                   marginHorizontal: 5,
                 }}
                 labelStyle={{
-                  color: theme.colors.white,
+                  color: theme.colors.primary,
                   fontSize: theme.fontSizes.normal,
                   textAlign: 'center',
                 }}
                 label={() => (
                   <Text
                     style={{
-                      color: theme.colors.white,
+                      color: theme.colors.primary,
                       fontSize: theme.fontSizes.normal,
                       textAlign: 'center',
                     }}

@@ -30,7 +30,8 @@ const CardTable = ({
                     <Card.Actions>
                         <View>
                             <Icon.Button
-                                backgroundColor={theme.colors.edit}
+                                backgroundColor={theme.colors.primary}
+                                color={theme.colors.white}
                                 name={theme.icons.editar}
                                 onPress={() => onEdit(item)}
                             >{button_text.edit}
@@ -38,7 +39,8 @@ const CardTable = ({
                         </View>
                         <View>
                             <Icon.Button
-                                backgroundColor={theme.colors.delete}
+                                backgroundColor={theme.colors.white}
+                                color={theme.colors.primary}
                                 name={theme.icons.borrar}
                                 onPress={() => onDelete(item)}
                             >{button_text.delete}

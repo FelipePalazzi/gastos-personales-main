@@ -86,13 +86,36 @@ const styleComun = StyleSheet.create({
     },
     fab: {
       position: 'absolute',
-      margin: 8,
+      margin: 6,
       right: 0,
-      bottom: 0,
-      borderRadius: 20,
-      borderWidth: 4,
-      borderColor: theme.colors.primary,
+      bottom: screenHeight/2+185,
+      
     },
+    agregar:{
+      container:{
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom:10,
+      }
+    },
+    keys:{
+      container:{
+          paddingHorizontal:10,
+          marginEnd:20,
+          width:screenWidth-50,
+      },
+      button:{
+          alignItems: 'center',
+          justifyContent:'center',
+          flexDirection:'row',
+          width:'100%',
+          paddingVertical:10,
+      },
+      buttonText:{
+        color:theme.colors.white,
+        fontSize:theme.fontSizes.normal
+      }
+    }
 })
 
 export default styleComun

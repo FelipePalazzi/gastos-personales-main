@@ -4,7 +4,7 @@ import useGetKeys from '../../hooks/useGetKeys.js';
 import CustomDrawerContent from './CustomDrawerContent';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import HomeTab from './HomeTab.jsx';
-import LoadingScreen from '../Loading/LoadingScreen.jsx';
+import LoadingScreen from '../Comunes/Loading/LoadingScreen.jsx';
 import { styleDrawer } from '../../styles/styles.js';
 
 const Drawer = createDrawerNavigator();
@@ -34,7 +34,7 @@ function DrawerNavigator() {
       )}
       screenOptions={{
         drawerStyle: styleDrawer.drawerStyle,
-        drawerActiveTintColor: theme.colors.pieBackground,
+        drawerActiveTintColor: theme.colors.primary,
         drawerInactiveTintColor: theme.colors.disabled,
       }}
     >

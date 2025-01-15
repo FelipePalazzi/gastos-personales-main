@@ -5,16 +5,17 @@ const screenWidth = Dimensions.get('window').width;
 
 const styleDrawer = StyleSheet.create({
   drawerStyle: {
-    backgroundColor: theme.colors.pieBackground
+    backgroundColor: theme.colors.primary
 },
 container: {
     flex:1,
-    backgroundColor: theme.colors.pieInner,
-    paddingVertical:4,
+    backgroundColor: theme.colors.primary,
+    borderBottomWidth:0.8,
+    borderBottomColor:theme.colors.white
 },
 list:{
     marginBottom: 0,
-    backgroundColor: theme.colors.pieBackground,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 20,
     marginTop: 0,
     paddingBottom: 25,
