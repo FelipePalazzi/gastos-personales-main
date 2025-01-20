@@ -12,7 +12,7 @@ const styleBusquedaAvanzada = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Fondo oscuro semi-transparente
+    backgroundColor: 'rgba(36, 47, 92, 0.47)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -24,18 +24,16 @@ const styleBusquedaAvanzada = StyleSheet.create({
   },
   modalContent: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.85)', // Fondo blanco semi-transparente
+    backgroundColor: theme.colors.white,
     borderRadius: 15,
     padding: 20,
-    marginHorizontal: 10, // Márgenes laterales
-    marginVertical: 40, // Márgenes superior/inferior
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
-    width: '90%',
-    height: '85%',
+    width: screenWidth *0.95,
+    marginVertical:10,
   },
   title: {
     fontSize: 20,

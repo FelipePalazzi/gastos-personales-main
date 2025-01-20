@@ -2,7 +2,6 @@ import { Portal, Dialog } from "react-native-paper"
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { Text } from "react-native"
 import theme from "../../../theme/theme"
-import { alerts, button_text } from "../../../../constants"
 import { styleDialog, screenWidth } from "../../../styles/styles"
 
 const Error = ({

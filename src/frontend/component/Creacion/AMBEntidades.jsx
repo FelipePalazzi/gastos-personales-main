@@ -1,25 +1,25 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, FlatList } from 'react-native';
-import { TextInput, ActivityIndicator } from 'react-native-paper';
+import { TextInput, ActivityIndicator, SegmentedButtons } from 'react-native-paper';
 import { useRoute } from '@react-navigation/native';
-import { symbols, clasesEntidad, button_text, alerts } from '../../../constants';
+import { symbols, button_text, alerts } from '../../../constants';
 import { styleForm, } from '../../styles/styles';
 import theme from '../../theme/theme'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
-import { styleEntidades, styleComun, styleLoading, styleBusquedaAvanzada, screenWidth } from '../../styles/styles.js';
+import { styleLoading, screenWidth } from '../../styles/styles.js';
 import { getEntidades } from './entidadesConfig';
 import { useAuth } from '../../helpers/AuthContext';
 import useCombinedData from '../../hooks/useCombinedData';
 import FaltanDatos from '../Comunes/Dialogs/FaltanDatos.jsx';
-import Correcto from '../Comunes/Dialogs/Correcto.jsx';
+import Correcto from '../Comunes/Dialogs/CorrectoNavigation.jsx';
 import Delete from '../Comunes/Dialogs/Delete.jsx';
 import SearchDropdown from '../Comunes/Busqueda/SearchDropdown';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
-const CreacionEntidades = ({ navigation }) => {
+const AMBEntidades = ({ navigation }) => {
   const route = useRoute();
-  const { labelHeader, entityType, keyId, modificar, eliminar, routeName } = route.params;
+  const { labelHeader, entityType, keyId, routeName } = route.params;
   const { accessToken, refreshToken } = useAuth()
   const [item, setItem] = useState({ activo: true });
   const [itemid, setItemid] = useState(null);
@@ -31,6 +31,7 @@ const CreacionEntidades = ({ navigation }) => {
   const [visibleDelete, setvisibleDelete] = useState(false);
   const [visibleOKDelete, setvisibleOKDelete] = useState(false);
   const [message, setMessage] = useState([]);
+  const [ABM, setABM] = useState('crear');
   const { categoria, subcategoria, responsable, moneda, metodopago, submetodopago } = useCombinedData(keyId);
   const [categorias, setCategorias] = React.useState([]);
   const [subcategorias, setSubcategorias] = React.useState([]);
@@ -38,23 +39,22 @@ const CreacionEntidades = ({ navigation }) => {
   const [monedas, setMonedas] = React.useState([]);
   const [metodopagos, setMetodopagos] = React.useState([]);
   const [submetodopagos, setSubmetodopagos] = React.useState([]);
-
   React.useEffect(() => {
-    setCategorias(categoria.map(item => ({ id: item.id_categoria, nombre: item.categoria, activo:item.categoria_activo })));
+    setCategorias(categoria.map(item => ({ id: item.id_categoria, nombre: item.categoria, activo: item.categoria_activo })));
     setSubcategorias(subcategoria.map(item => ({
       id: item.id_subcategoria,
       nombre: item.subcategoria,
       id_categoria: item.id_categoria,
       id_responsable: item.id_responsable,
-      activo:item.subcategoria_activo
+      activo: item.subcategoria_activo
     })));
-    setResponsables(responsable.map(item => ({ id: item.id_responsable, nombre: item.responsable, activo:item.responsable_activo })));
-    setMonedas(moneda.map(item => ({ id: item.id_moneda, nombre: item.codigo_moneda, activo:item.activo })));
-    setMetodopagos(metodopago.map(item => ({ id: item.id_metodopago, nombre: item.metodopago, activo:item.activo })));
+    setResponsables(responsable.map(item => ({ id: item.id_responsable, nombre: item.responsable, activo: item.responsable_activo })));
+    setMonedas(moneda.map(item => ({ id: item.id_moneda, nombre: item.codigo_moneda, activo: item.moneda_activo })));
+    setMetodopagos(metodopago.map(item => ({ id: item.id_metodopago, nombre: item.metodopago, activo: true })));
     setSubmetodopagos(submetodopago.map(item => ({
       id: item.id_submetodo_pago,
       nombre: item.submetodo_pago,
-      id_metodopago: item.id_metodopago, activo:item.activo
+      id_metodopago: item.id_metodopago, activo: item.subemtodo_pago_activo
     })));
   }, [keyId, categoria, subcategoria, responsable, moneda, metodopago, submetodopago]);
 
@@ -68,14 +68,13 @@ const CreacionEntidades = ({ navigation }) => {
   ]);
 
   React.useEffect(() => {
-    if (item.subcategoria) {
-      const selectedSub = subcategorias.find(sub => sub.id === item.subcategoria);
+    if (item.submetodopago) {
+      const selectedSub = submetodopagos.find(sub => sub.id === item.submetodopago);
       if (selectedSub) {
-        updateItemProperty('categoria', selectedSub.id_categoria);
-        updateItemProperty('responsable', selectedSub.id_responsable);
+        updateItemProperty('metodopago', selectedSub.id_metodopago);
       }
     }
-  }, [item.subcategoria]);
+  }, [item.submetodopago]);
 
   React.useEffect(() => {
     if (item.submetodopago) {
@@ -86,12 +85,10 @@ const CreacionEntidades = ({ navigation }) => {
     }
   }, [item.submetodopago]);
 
-
   const handleChange = (field, value) => {
     setItem((prev) => ({ ...prev, [field]: value }))
     setSelectedItem(true);
   };
-
   const updateItemProperty = (key, value) => {
     setItem(prevItem => ({
       ...prevItem,
@@ -100,31 +97,31 @@ const CreacionEntidades = ({ navigation }) => {
     setChangeItem(true);
   };
   const renderEntity = (atributo) => {
-    const { key, label, data } = atributo;
+    const { key, label, data, icon } = atributo;
     if (key === entityType) {
       return (
         <View key={key}>
-          {(modificar || eliminar) &&
+          {ABM !== 'crear' &&
             <SearchDropdown
-            options={data
-              .filter(option => eliminar || option.activo)
-              .map(option => option.nombre)}   
-              placeholder={label}
-              value={data.find(option => option.id === item.categoria)?.nombre}
+              options={data
+                .filter(option => ABM === 'modificar' ? option.activo : true)
+                .map(option => ({ nombre: option.nombre, activo: option.activo }))}
+              placeholder={`Seleccione ${label} a ${item.activo ? ABM : `des${ABM}`}`}
+              value={data.find(option => option.id === item[key])?.nombre}
               onSelect={(selectedName) => {
-                const selectedOption = data.find(option => option.nombre === selectedName);
+                const selectedOption = data.find(option => option.nombre === selectedName.nombre);
                 if (selectedOption) {
-                  setItemid(selectedOption.id); 
-                  handleChange('nombre', selectedOption.nombre); 
-                  handleChange('activo', selectedOption.activo); 
+                  setItemid(selectedOption.id);
+                  handleChange('nombre', selectedOption.nombre);
+                  handleChange('activo', selectedOption.activo);
                 }
-              }}              
+              }}
               onClear={() => { handleChange(key, null) }}
               filterKey={key}
               setFilter={setItem}
-              icon={'tag'}
+              icon={icon}
             />}
-          {!eliminar &&
+          {ABM !== 'archivar' &&
             <TextInput
               mode='outlined'
               value={item.nombre || ''}
@@ -136,16 +133,67 @@ const CreacionEntidades = ({ navigation }) => {
                 backgroundColor: item[key] ? theme.colors.primary : theme.colors.white,
                 height: 38,
                 paddingVertical: 10,
-                color: theme.colors.white
+                color: theme.colors.white,
+                marginBottom: 15
               }}
-              outlineStyle={{ borderColor: eliminar ? theme.colors.disabled : theme.colors.primary, borderRadius: 27 }}
-              disabled={eliminar}
-              label={label}
+              outlineStyle={{ borderColor: ABM === 'archivar' ? theme.colors.disabled : theme.colors.primary, borderRadius: 27 }}
+              disabled={ABM === 'archivar'}
+              label={`Nuevo nombre de ${label}`}
               textColor={item[key] ? theme.colors.white : theme.colors.primary}
               outlineColor={item[key] ? theme.colors.white : theme.colors.primary}
               activeOutlineColor={item[key] ? theme.colors.white : theme.colors.primary}
               theme={{ colors: { onSurfaceVariant: item[key] ? theme.colors.white : theme.colors.primary } }}
             />}
+          {(key === 'subcategoria' && ABM !== 'archivar') &&
+            <>
+              <SearchDropdown
+                options={categorias
+                  .filter(option => ABM !== 'archivar' ? option.activo : true)
+                  .map(option => ({id: option.id, nombre: option.nombre, activo: option.activo }))}
+                placeholder={'Categoria asociada'}
+                value={categorias.find(option => option.id === item.categoria)?.nombre}
+                onSelect={(selectedName) => {
+                  console.log(selectedName)
+                  handleChange('categoria', selectedName.id)
+                }}
+                onClear={() => { handleChange('categoria', null) }}
+                filterKey={key}
+                setFilter={setItem}
+                icon={'tag'}
+                label={`Categoria asociada`}
+              />
+              <SearchDropdown
+                options={responsables
+                  .filter(option => ABM !== 'archivar' ? option.activo : true)
+                  .map(option => ({id: option.id,  nombre: option.nombre, activo: option.activo }))}
+                placeholder={'Responsable asociado'}
+                value={responsable.find(option => option.id === item.responsable)?.nombre}
+                onSelect={(selectedName) => {
+                  handleChange('responsable', selectedName.id);
+                }}
+                onClear={() => { handleChange('responsable', null) }}
+                filterKey={key}
+                setFilter={setItem}
+                icon={'account'}
+                label={`Responsable asociado`}
+              />
+            </>}
+          {(key === 'submetodopago') &&
+            <SearchDropdown
+            options={metodopagos
+              .filter(option => ABM !== 'archivar' ? option.activo : true)
+              .map(option => ({id: option.id,  nombre: option.nombre, activo: option.activo }))}
+              placeholder={'Metodo de pago asociado'}
+              value={metodopagos.find(option => option.id === item.metodo_pago)?.nombre}
+              onSelect={(selectedName) => {
+                handleChange('metodo_pago', selectedName.id)
+              }}
+              onClear={() => { handleChange('metodo_pago', null) }}
+              filterKey={key}
+              setFilter={setItem}
+              icon={'bank'}
+            />
+          }
         </View>
       );
     }
@@ -153,10 +201,10 @@ const CreacionEntidades = ({ navigation }) => {
   }
 
   const handleSubmit = async () => {
-    if (!changeItem){
-     setMessage('No se ingreso ningun valor')
-     setVisible(true)
-     return
+    if (!changeItem) {
+      setMessage('No se ingreso ningun valor')
+      setVisible(true)
+      return
     }
     try {
       const url = `${PAGINA_URL}${symbols.barra}${routeName}${symbols.barra}${keyId}`
@@ -249,7 +297,37 @@ const CreacionEntidades = ({ navigation }) => {
           <Text style={styleLoading.loadingText}>{alerts.cargando} datos...</Text>
         </View>
       ) : (
-        <>
+        <><SegmentedButtons
+          value={ABM}
+          onValueChange={setABM}
+          style={{ margin: 10 }}
+          buttons={[
+            {
+              value: 'crear',
+              label: 'Creacion',
+              icon: theme.icons.save,
+              checkedColor: theme.colors.white,
+              uncheckedColor: theme.colors.primary,
+              style: { backgroundColor: ABM === 'crear' ? theme.colors.primary : theme.colors.white }
+            },
+            {
+              value: 'modificar',
+              label: 'Modificacion',
+              icon: theme.icons.editar,
+              checkedColor: theme.colors.white,
+              uncheckedColor: theme.colors.primary,
+              style: { backgroundColor: ABM === 'modificar' ? theme.colors.primary : theme.colors.white }
+            },
+            {
+              value: 'archivar',
+              label: 'Archivar',
+              icon: theme.icons.borrar,
+              checkedColor: theme.colors.white,
+              uncheckedColor: theme.colors.primary,
+              style: { backgroundColor: ABM === 'archivar' ? theme.colors.primary : theme.colors.white }
+            },
+          ]}
+        />
           {/* Contenido de la lista */}
           <FlatList
             data={entidades}
@@ -262,7 +340,7 @@ const CreacionEntidades = ({ navigation }) => {
           />
           {/* Vistas modales */}
           <FaltanDatos visible={visible} setVisible={setVisible} message={message} />
-          <Correcto visible={visibleOK} setVisible={setvisibleOK} navigation={navigation} goBack={true} message={message}/>
+          <Correcto visible={visibleOK} setVisible={setvisibleOK} navigation={navigation} goBack={true} message={message} />
           <Delete
             visible={visibleDelete}
             setVisible={setvisibleDelete}
@@ -281,14 +359,14 @@ const CreacionEntidades = ({ navigation }) => {
                 {button_text.cancel}
               </Icon.Button>
             </View>
-            {!eliminar && (
+            {ABM !== 'archivar' && (
               <View style={styleForm.button}>
-                <Icon.Button backgroundColor={theme.colors.primary} color={theme.colors.white} name={theme.icons.save} onPress={modificar ?  handleModify :  handleSubmit}>
+                <Icon.Button backgroundColor={theme.colors.primary} color={theme.colors.white} name={theme.icons.save} onPress={ABM === 'modificar' ? handleModify : handleSubmit}>
                   {button_text.sumbit}
                 </Icon.Button>
               </View>
             )}
-            {eliminar && (
+            {ABM === 'archivar' && (
               <View style={styleForm.button}>
                 <Icon.Button backgroundColor={theme.colors.primary} color={theme.colors.white} name={theme.icons.borrar} onPress={() => setvisibleDelete(true)}>
                   {item.activo ? button_text.archivar : button_text.desarchivar}
@@ -303,4 +381,4 @@ const CreacionEntidades = ({ navigation }) => {
   );
 };
 
-export default CreacionEntidades;
+export default AMBEntidades;

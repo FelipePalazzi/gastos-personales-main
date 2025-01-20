@@ -153,7 +153,7 @@ invitacionesController.getInvitacionsbyKeyId = async (req, res, next) => {
         const invitacionCheck = await pool.query(
           `SELECT user_id FROM invitaciones
           WHERE id = $1 and
-          estado = (select id from invitaciones_estado where nombre = 'pendiente')`,
+          estado = (select id from invitaciones_estado where nombre = 'Pendiente')`,
           [id]
         );
     
@@ -168,7 +168,7 @@ invitacionesController.getInvitacionsbyKeyId = async (req, res, next) => {
         const updateInvitacion = await pool.query(
           `
             UPDATE invitaciones
-            SET estado = (SELECT id FROM invitaciones_estado WHERE nombre = 'cancelada')
+            SET estado = (SELECT id FROM invitaciones_estado WHERE nombre = 'Cancelada')
             WHERE id = $1
             RETURNING *;
           `,
@@ -205,7 +205,7 @@ invitacionesController.getInvitacionsbyKeyId = async (req, res, next) => {
 
     const updateInvitacion = await pool.query(
       ` UPDATE invitaciones
-        SET estado = (SELECT id FROM invitaciones_estado WHERE nombre = 'aprobada')
+        SET estado = (SELECT id FROM invitaciones_estado WHERE nombre = 'Aprobada')
         WHERE id = $1
         RETURNING *;`,
       [id]

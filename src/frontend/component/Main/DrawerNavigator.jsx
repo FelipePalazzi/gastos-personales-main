@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import theme from '../../theme/theme.js';
 import useGetKeys from '../../hooks/useGetKeys.js';
 import CustomDrawerContent from './CustomDrawerContent';
@@ -6,30 +6,74 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import HomeTab from './HomeTab.jsx';
 import LoadingScreen from '../Comunes/Loading/LoadingScreen.jsx';
 import { styleDrawer } from '../../styles/styles.js';
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import InvitacionesList from '../Invitaciones/InvitacionesList.jsx';
+import { useNavigate } from 'react-router-native';
+
 
 const Drawer = createDrawerNavigator();
 
 function DrawerNavigator() {
   const { getkeys, loading, fetchGetKeys } = useGetKeys();
   const [keyId, setKeyId] = useState(null);
+  const [nombreKey, setNombreKey] = useState('Selecciona una Key');
+  const navigation = useNavigate()
+  useFocusEffect(
+    useCallback(() => {
+      const loadKeysOnFocus = async () => {
+        try {
+          await fetchGetKeys();
+        } catch (error) {
+          console.error('Error cargando las keys:', error);
+          navigation.navigate('Login')
+        }
+      };
+      loadKeysOnFocus();
+    }, [])
+  );
 
-  useEffect(() => {
-    const loadKeys = async () => {
-      await fetchGetKeys();
+    useEffect(() => {
+      const getKeyId = async () => {
+        try {
+          const storedKeyId = await AsyncStorage.getItem('keyId');
+          if (!keyId && storedKeyId !== null) {
+            setKeyId(storedKeyId);
+          } else if (!storedKeyId) {
+            setNombreKey('Seleccione una key...');
+          }
+        } catch (error) {
+          console.log('Error fetching keyId:', error);
+        }
+      };
+      getKeyId();
+    }, [keyId]);
+    
+
+    useEffect(() => {
+      if (keyId && getkeys.length > 0) {
+        const key = getkeys.find((key) => Number(key.id_key) === Number(keyId));
+        setNombreKey(key ? key.nombre : 'Key no encontrada. Seleccione otra');
+      }
+    }, [keyId, getkeys]);
+    
+
+    const handleKeyId = async (itemValue) => {
+      setKeyId(itemValue);
+      try {
+        await AsyncStorage.setItem('keyId', itemValue.toString());
+      } catch (error) {
+        console.log('Error saving keyId:', error);
+      }
+      navigation.setParams({ keyId: itemValue });
     };
-    loadKeys();
-  }, []);
-  useEffect(() => {
-    if (getkeys.length > 0) {
-      setKeyId(getkeys[0].id_key)
-    }
-  }, [getkeys]);
 
   return (
     <Drawer.Navigator
       drawerContent={() => (
         <CustomDrawerContent
           keyId={keyId}
+          nombreKey={nombreKey}
         />
       )}
       screenOptions={{
@@ -42,7 +86,13 @@ function DrawerNavigator() {
         name="HomeTab"
         options={{ headerShown: false }}
       >
-        {(props) => keyId && <HomeTab {...props} keyId={keyId} setKeyId={setKeyId} keys={getkeys} /> || <LoadingScreen Nombre={"Datos"} />}
+        {(props) => <HomeTab {...props} keyId={keyId} handleKeyId={handleKeyId} keys={getkeys} nombreKey={nombreKey}/> || <LoadingScreen Nombre={"Datos"} />}
+      </Drawer.Screen>
+      <Drawer.Screen
+        name="Invitacioneskey"
+        options={{ headerShown: false, animation: "slide" }}
+      >
+        {(props) => <InvitacionesList {...props} keyId={keyId} handleKeyId={handleKeyId} keys={getkeys} nombreKey={nombreKey}/> || <LoadingScreen Nombre={"Datos"} />}
       </Drawer.Screen>
     </Drawer.Navigator>
   );

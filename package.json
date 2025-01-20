@@ -23,6 +23,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@neondatabase/serverless": "^0.9.3",
     "@react-native-async-storage/async-storage": "^2.0.0",
+    "@react-native-clipboard/clipboard": "^1.16.1",
     "@react-native-community/blur": "^4.4.1",
     "@react-native-community/datetimepicker": "^8.2.0",
     "@react-native-picker/picker": "^2.7.6",

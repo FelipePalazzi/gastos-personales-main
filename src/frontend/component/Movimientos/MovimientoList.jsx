@@ -1,34 +1,37 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
-import moment from 'moment'
 import { atributos, symbols } from '../../../constants.js';
-import { filterData, sortData, getSortIcon } from '../../utils.js';
+import { getSortIcon } from '../../utils.js';
 import useGastos from '../../hooks/useGastos.js';
 import useIngresos from '../../hooks/useIngresos.js';
 import BusquedaAvanzada from '../Comunes/Busqueda/BusquedaAvanzada.jsx';
-import Header from './DataTable/Header.jsx';
-import Rows from './DataTable/Rows.jsx';
-import Pagination from './DataTable/Pagination.jsx';
+import Header from '../Comunes/DataTable/Header.jsx';
+import Rows from '../Comunes/DataTable/Rows.jsx';
+import Pagination from '../Comunes/DataTable/Pagination.jsx';
 import { styleMovimiento } from '../../styles/styles.js';
 import useCombinedData from '../../hooks/useCombinedData.js';
 import { getColumns, getCardRows, getAtributosSearch } from './listConfig.js';
+
+const getPageData = (data, page, pageSize) => {
+    const startIndex = page * pageSize;
+    const endIndex = startIndex + pageSize;
+    return data.slice(startIndex, endIndex);
+};
 
 const MovimientoList = ({ keyId, routeParams }) => {
     const navigation = useNavigation();
     const [orden, setOrden] = useState('asc');
     const [columna, setColumna] = useState('id');
-    const [search, setSearch] = useState('');
     const [refreshing, setRefreshing] = useState(false);
     const [page, setPage] = useState(0);
-    const [pageSize, setPageSize] = useState(9);
-    const [numberOfItemsPerPage, onItemsPerPageChange] = useState(9);
+    const [pageSize, setPageSize] = useState(10);
+    const [numberOfItemsPerPage, onItemsPerPageChange] = useState(10);
     const [expanded, setExpanded] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const route = useRoute();
     const tipo = routeParams?.tipo || route.params?.tipo;
     const esEntrada = tipo === 'entradas';
-    const esSalida = tipo === 'salidas';
     const MovimientoForm = esEntrada ? 'IngresoForm' : 'GastoForm';
     const MovimientoLabelForm = esEntrada ? 'Nuevo Ingreso' : 'Nuevo Gasto'
 
@@ -64,7 +67,7 @@ const MovimientoList = ({ keyId, routeParams }) => {
 
     const onRefresh = async () => {
         setRefreshing(true);
-        await fetchData('limit=18');
+        await fetchData(`limit=${pageSize*3}`);
         setRefreshing(false);
     };
 
@@ -73,7 +76,7 @@ const MovimientoList = ({ keyId, routeParams }) => {
             if (keyId && keyId !== previousKeyId.current) {
                 previousKeyId.current = keyId;
                 setIsLoading(true);
-                fetchData('limit=18').finally(() => setIsLoading(false));
+                fetchData('limit=30').finally(() => setIsLoading(false));
             }
         }, [keyId, fetchData])
     );
@@ -98,6 +101,14 @@ const MovimientoList = ({ keyId, routeParams }) => {
         setPageSize(value);
         onItemsPerPageChange(value);
     };
+    useEffect(() => {
+        onRefresh();
+    }, [numberOfItemsPerPage]);
+    
+    const currentData = useMemo(() => {
+        return getPageData(data, page, pageSize);
+    }, [data, page, pageSize]);
+    
 
     const handleSubmit = async () => {
         navigation.navigate(MovimientoForm, { deleteMode: false, keyId: keyId, labelHeader: MovimientoLabelForm })
@@ -118,7 +129,7 @@ const MovimientoList = ({ keyId, routeParams }) => {
     const cardrows = useMemo(() => getCardRows(esEntrada, atributos, symbols), [esEntrada, atributos, symbols]);
 
     const numberOfPages = Math.ceil(data.length / pageSize)
-    const numberOfItemsPerPageList = [9, 10, 15, 20];
+    const numberOfItemsPerPageList = [10, 15, 20, 50, 100];
 
     const [appliedFilters, setAppliedFilters] = useState({});
 
@@ -132,13 +143,32 @@ const MovimientoList = ({ keyId, routeParams }) => {
     const [submetodopagos, setSubmetodopagos] = React.useState([]);
 
     React.useEffect(() => {
-        setCategorias(categoria.map(item => item.categoria));
-        setSubcategorias(subcategoria.map(item => item.subcategoria));
-        setResponsables(responsable.map(item => item.responsable));
-        setMonedas(moneda.map(item => item.codigo_moneda));
-        setMetodopagos(metodopago.map(item => item.metodopago));
-        setSubmetodopagos(submetodopago.map(item => item.submetodo_pago));
+        setCategorias(categoria.map(item => ({
+            nombre: item.categoria,
+            activo: item.categoria_activo,
+        })));
+        setSubcategorias(subcategoria.map(item => ({
+            nombre: item.subcategoria,
+            activo: item.subcategoria_activo,
+        })));
+        setResponsables(responsable.map(item => ({
+            nombre: item.responsable,
+            activo: item.responsable_activo,
+        })));
+        setMonedas(moneda.map(item => ({
+            nombre: item.codigo_moneda,
+            activo: item.moneda_activo,
+        })));
+        setMetodopagos(metodopago.map(item => ({
+            nombre: item.metodopago,
+            activo: true,
+        })));
+        setSubmetodopagos(submetodopago.map(item => ({
+            nombre: item.submetodo_pago,
+            activo: item.submetodo_pago_activo,
+        })));
     }, [keyId, categoria, subcategoria, responsable, moneda, metodopago, submetodopago]);
+    
 
     const atributosSearch = useMemo(() => getAtributosSearch(esEntrada, { categorias, subcategorias, responsables, monedas, metodopagos, submetodopagos }), [
         esEntrada,
@@ -171,7 +201,7 @@ const MovimientoList = ({ keyId, routeParams }) => {
             </View>
             <Rows
                 expanded={expanded}
-                data={data}
+                data={currentData}
                 onRowClick={handlePressGasto}
                 columns={columns}
                 Cardrows={cardrows}
@@ -187,7 +217,6 @@ const MovimientoList = ({ keyId, routeParams }) => {
             />
 
             <Pagination
-                data={data}
                 page={page}
                 onPageChange={handlePageChange}
                 numberOfPages={numberOfPages}
@@ -195,10 +224,7 @@ const MovimientoList = ({ keyId, routeParams }) => {
                 numberOfItemsPerPage={numberOfItemsPerPage}
                 handleSubmit={handleSubmit}
                 onItemsPerPageChange={handleItemsPerPageChange}
-                tipo={tipo}
                 style={styleMovimiento}
-                navigation={navigation}
-                keyId={keyId}
             />
 
         </>

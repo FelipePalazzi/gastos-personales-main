@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { Card } from 'react-native-paper';
 import theme from '../../../theme/theme.js';
-import Icon from 'react-native-vector-icons/FontAwesome'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons.js'
 import { button_text } from '../../../../constants.js';
 
 const CardTable = ({

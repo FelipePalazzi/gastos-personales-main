@@ -13,6 +13,7 @@ const DatePickerSearchBar = ({
     style = {},
     searchbarStyle = {},
     onClear = () => { },
+    deleteMode,
 }) => {
     const [datePickerVisible, setDatePickerVisible] = useState(false);
     const [selectedDate, setSelectedDate] = useState(value);
@@ -27,7 +28,7 @@ const DatePickerSearchBar = ({
 
     const handleConfirmDate = (event, date) => {
         setDatePickerVisible(false)
-        if (event.type === 'set' && date) { 
+        if (event.type === 'set' && date) {
             const formattedDate = moment(date).format('YYYY-MM-DD HH:mm:ss');
             setSelectedDate(formattedDate);
             onSelect(formattedDate);
@@ -40,14 +41,21 @@ const DatePickerSearchBar = ({
     };
     return (
         <View style={[styles.container, style]}>
-            <TouchableOpacity onPress={handleOpenDatePicker}>
+            <TouchableOpacity onPress={!deleteMode ? handleOpenDatePicker : null} disabled={deleteMode}>
+                {deleteMode && (
+                    <TouchableOpacity
+                        style={styles.overlayButton}
+                        disabled={true}
+                        onPress={null}
+                    />
+                )}
                 <View style={[styles.searchbarContainer]}>
                     {selectedDate ? (
                         <Text style={styles.label}>Fecha:</Text>
                     ) : null}
                     <Searchbar
                         placeholder={placeholder}
-                        value={selectedDate ? moment(selectedDate).format('LL') : null}
+                        value={selectedDate ? moment(selectedDate).utc().format('LL') : null}
                         editable={false}
                         style={[
                             selectedDate ? styles.selectedSearchbar : styles.searchbar,
@@ -60,6 +68,7 @@ const DatePickerSearchBar = ({
                             color: selectedDate ? theme.colors.white : theme.colors.primary
                         }}
                         onClearIconPress={handleClear}
+                        clearIcon={deleteMode}
                     />
                 </View>
             </TouchableOpacity>
@@ -102,6 +111,14 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: theme.colors.white,
         marginBottom: 10,
+    },
+    overlayButton: {
+        position: 'absolute', 
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 1,
     },
 });
 

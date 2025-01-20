@@ -5,7 +5,7 @@ const loginController = {};
 require('dotenv').config();
 
 loginController.register = async (req, res) => {
-    const { username, password, role } = req.body;
+    const { username, password, pin, role, email } = req.body;
 
     try {
         if (role === 'admin') {
@@ -16,25 +16,31 @@ loginController.register = async (req, res) => {
             }
 
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            if (!decoded || decoded.userId !== 1 && decoded.username !== 'Felipe') {
+            if (!decoded || (decoded.userId !== 1 && decoded.username !== 'Felipe')) {
                 return res.status(403).send('No tienes permiso para crear un administrador.');
             }
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        await pool.query(`INSERT INTO users (username, password, role) VALUES ($1, $2, $3)`, [username, hashedPassword, role || 'user']);
-        
+        const hashedPin = await bcrypt.hash(pin, 10);
+
+        await pool.query(
+            `INSERT INTO users (username, password, pin, role, email) VALUES ($1, $2, $3, $4, $5)`,
+            [username, hashedPassword, hashedPin, role , email]
+        );
+
         res.status(200).send('Usuario registrado exitosamente');
     } catch (error) {
+        console.error('Error al registrar usuario:', error);
         res.status(400).send('Error al registrar el usuario');
     }
 };
 
 loginController.login = async (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
     try {
-        const userResult = await pool.query(`SELECT user_id, username, password FROM users WHERE username = $1`, [username]);
+        const userResult = await pool.query(`SELECT user_id, username, password FROM users WHERE email = $1`, [email]);
 
         if (userResult.rows.length > 0) {
             const user = userResult.rows[0];
@@ -56,7 +62,7 @@ loginController.login = async (req, res) => {
                 const keyIds = keyRoles.map(row => row.key_id);
                 const roles = keyRoles.map(row => row.nombre);
                 const accessToken = jwt.sign(
-                    { 
+                    {
                         userId: user.user_id,
                         username: user.username,
                         roles,
@@ -65,12 +71,13 @@ loginController.login = async (req, res) => {
                     process.env.JWT_SECRET,
                     { expiresIn: '15m' }
                 );
-                
+
                 const refreshToken = jwt.sign(
-                    {   userId: user.user_id,
-                        username:user.username,
-                        roles: roles,         
-                        keyIds: keyIds        
+                    {
+                        userId: user.user_id,
+                        username: user.username,
+                        roles: roles,
+                        keyIds: keyIds
                     },
                     process.env.REFRESH_TOKEN_SECRET,
                     { expiresIn: '7d' }
@@ -82,10 +89,10 @@ loginController.login = async (req, res) => {
 
                 res.status(200).json({ accessToken, refreshToken });
             } else {
-                res.status(400).send('Contraseña incorrecta');
+                res.status(399).send('Contraseña incorrecta');
             }
         } else {
-            res.status(400).send('Usuario no encontrado');
+            res.status(399).send('Usuario no encontrado');
         }
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
@@ -93,131 +100,159 @@ loginController.login = async (req, res) => {
     }
 };
 
+loginController.validatePin = async (req, res) => {
+    const { pin } = req.body;
+    const userId = req.user?.userId;
+
+    try {
+        if (!userId) {
+            return res.status(401).send('Usuario no autenticado.');
+        }
+
+        const userResult = await pool.query(`SELECT pin FROM users WHERE user_id = $1`, [userId]);
+
+        if (userResult.rows.length > 0) {
+            const validPin = await bcrypt.compare(pin, userResult.rows[0].pin);
+            if (validPin) {
+                return res.status(200).send('PIN válido.');
+            } else {
+                return res.status(399).send('PIN incorrecto.');
+            }
+        } else {
+            return res.status(404).send('Usuario no encontrado.');
+        }
+    } catch (error) {
+        console.error('Error al validar PIN:', error);
+        res.status(500).send('Error al validar PIN.');
+    }
+};
+
+
 loginController.refreshToken = async (req, res) => {
     const refreshToken = req.headers['refresh-token'];
-  
+
     if (!refreshToken) {
-      return { error: 'Refresh token requerido' }; 
+        return { error: 'Refresh token requerido' };
     }
-  
+
     try {
-      const tokenResult = await pool.query(`SELECT * FROM refresh_tokens WHERE token = $1 AND expires_at > NOW()`, [refreshToken]);
-      if (tokenResult.rowCount === 0) {
-        return { error: 'Refresh token inválido o expirado' };
-      }
-      const tokenData = tokenResult.rows[0];
-  
-      const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-      if (payload.userId !== tokenData.user_id) {
-        return { error: 'Refresh token no válido para este usuario' }; 
-      }
-  
-      const keyRoleResult = await pool.query(`
+        const tokenResult = await pool.query(`SELECT * FROM refresh_tokens WHERE token = $1 AND expires_at > NOW()`, [refreshToken]);
+        if (tokenResult.rowCount === 0) {
+            return { error: 'Refresh token inválido o expirado' };
+        }
+        const tokenData = tokenResult.rows[0];
+
+        const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+        if (payload.userId !== tokenData.user_id) {
+            return { error: 'Refresh token no válido para este usuario' };
+        }
+
+        const keyRoleResult = await pool.query(`
           SELECT uk.key_id, r.nombre
           FROM user_keys uk
           JOIN role_user_keys r ON uk.role = r.id
           WHERE uk.user_id = $1
       `, [payload.userId]);
-  
-      const keyRoles = keyRoleResult.rows;
-      const keyIds = keyRoles.map(row => row.key_id);
-      const roles = keyRoles.map(row => row.nombre);
-  
-      const newAccessToken = jwt.sign(
-        {
-          userId: payload.userId,
-          username: payload.username,
-          roles: roles,
-          keyIds: keyIds
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: '15m' }
-      );
-  
-      const newRefreshToken = jwt.sign(
-        {
-          userId: payload.userId,
-          username: payload.username,
-          roles: roles,
-          keyIds: keyIds
-        },
-        process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '7d' }
-      );
 
-      await pool.query(`INSERT INTO refresh_tokens (token, user_id) VALUES ($1, $2)`, [newRefreshToken, payload.userId]);
-      await pool.query(`DELETE FROM refresh_tokens WHERE token = $1`, [refreshToken]);
-  
-      return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+        const keyRoles = keyRoleResult.rows;
+        const keyIds = keyRoles.map(row => row.key_id);
+        const roles = keyRoles.map(row => row.nombre);
+
+        const newAccessToken = jwt.sign(
+            {
+                userId: payload.userId,
+                username: payload.username,
+                roles: roles,
+                keyIds: keyIds
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '15m' }
+        );
+
+        const newRefreshToken = jwt.sign(
+            {
+                userId: payload.userId,
+                username: payload.username,
+                roles: roles,
+                keyIds: keyIds
+            },
+            process.env.REFRESH_TOKEN_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        await pool.query(`INSERT INTO refresh_tokens (token, user_id) VALUES ($1, $2)`, [newRefreshToken, payload.userId]);
+        await pool.query(`DELETE FROM refresh_tokens WHERE token = $1`, [refreshToken]);
+
+        return { accessToken: newAccessToken, refreshToken: newRefreshToken };
     } catch (error) {
-      console.error('Error al refrescar el token:', error);
-      return { error: 'Token inválido o expirado' }; 
+        console.error('Error al refrescar el token:', error);
+        return { error: 'Token inválido o expirado' };
     }
-  };
-  
+};
+
 loginController.refreshTokenJSON = async (req, res) => {
     const refreshToken = req.headers['refresh-token'];
-  
-    if (!refreshToken) {
-      return res.status(403).send('Refresh token requerido');
-    }
-  
-    try {
-      const tokenResult = await pool.query(`SELECT * FROM refresh_tokens WHERE token = $1 AND expires_at > NOW()`, [refreshToken]);
-      if (tokenResult.rowCount === 0) {
-        return res.status(403).send('Refresh token inválido o expirado');
-      }
-      
-      const tokenData = tokenResult.rows[0];
-      const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-      if (payload.userId !== tokenData.user_id) {
-        return res.status(403).send('Refresh token no válido para este usuario');
-      }
 
-      const keyRoleResult = await pool.query(`
+    if (!refreshToken) {
+        return res.status(403).send('Refresh token requerido');
+    }
+
+    try {
+        const tokenResult = await pool.query(`SELECT * FROM refresh_tokens WHERE token = $1 AND expires_at > NOW()`, [refreshToken]);
+        if (tokenResult.rowCount === 0) {
+            return res.status(403).send('Refresh token inválido o expirado');
+        }
+
+        const tokenData = tokenResult.rows[0];
+        const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+        if (payload.userId !== tokenData.user_id) {
+            return res.status(403).send('Refresh token no válido para este usuario');
+        }
+
+        const keyRoleResult = await pool.query(`
           SELECT uk.key_id, r.nombre
           FROM user_keys uk
           JOIN role_user_keys r ON uk.role = r.id
           WHERE uk.user_id = $1
       `, [payload.userId]);
-  
-      const keyRoles = keyRoleResult.rows;
-      const keyIds = keyRoles.map(row => row.key_id);
-      const roles = keyRoles.map(row => row.nombre);
-  
-      const newAccessToken = jwt.sign(
-        {
-          userId: payload.userId,
-          username: payload.username,
-          roles: roles,
-          keyIds: keyIds
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: '15m' }
-      );
-  
-      const newRefreshToken = jwt.sign(
-        {
-          userId: payload.userId,
-          username: payload.username,
-          roles: roles,
-          keyIds: keyIds
-        },
-        process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '7d' }
-      );
 
-      await pool.query(`INSERT INTO refresh_tokens (token, user_id) VALUES ($1, $2)`, [newRefreshToken, payload.userId]);
-      await pool.query(`DELETE FROM refresh_tokens WHERE token = $1`, [refreshToken]);
+        const keyRoles = keyRoleResult.rows;
+        const keyIds = keyRoles.map(row => row.key_id);
+        const roles = keyRoles.map(row => row.nombre);
 
-      return res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
-  
+        const newAccessToken = jwt.sign(
+            {
+                userId: payload.userId,
+                username: payload.username,
+                roles: roles,
+                keyIds: keyIds
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '15m' }
+        );
+
+        const newRefreshToken = jwt.sign(
+            {
+                userId: payload.userId,
+                username: payload.username,
+                roles: roles,
+                keyIds: keyIds
+            },
+            process.env.REFRESH_TOKEN_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        await pool.query(`INSERT INTO refresh_tokens (token, user_id) VALUES ($1, $2)`, [newRefreshToken, payload.userId]);
+        await pool.query(`DELETE FROM refresh_tokens WHERE token = $1`, [refreshToken]);
+
+        return res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+
     } catch (error) {
-      console.error('Error al refrescar el token:', error);
-      return res.status(500).send('Error al renovar los tokens');
+        console.error('Error al refrescar el token:', error);
+        return res.status(500).send('Error al renovar los tokens');
     }
-  };
-  
+};
+
 
 loginController.otorgarAcceso = async (req, res) => {
     const { userId, keyId } = req.body;

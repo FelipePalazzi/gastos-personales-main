@@ -13,7 +13,8 @@ const SearchDropdown = ({
     searchbarStyle = {},
     value = "",
     onClear = () => { },
-    icon = 'magnify'
+    icon = 'magnify',
+    deleteMode = false,
 }) => {
     const [searchQuery, setSearchQuery] = useState(value);
     const [visible, setVisible] = useState(false);
@@ -24,7 +25,7 @@ const SearchDropdown = ({
 
     const filteredOptions = useMemo(() => {
         return options.filter(option =>
-            option.toLowerCase().includes(searchQuery.toLowerCase())
+            option.nombre.toLowerCase().includes(searchQuery.toLowerCase())
         );
     }, [searchQuery, options]);
 
@@ -41,25 +42,33 @@ const SearchDropdown = ({
     };
 
     const handleSelectOption = (option) => {
-        setSearchQuery(option);
+        setSearchQuery(option.nombre);
         setVisible(false);
         onSelect(option);
     };
 
     const handleClear = () => {
-        setSearchQuery('');
-        setVisible(false); // Asegura que el modal se cierre
-        onClear();
+        if (!deleteMode) {
+            setSearchQuery('');
+            setVisible(false);
+            onClear();
+        }
     };
     const handleClearInside = () => {
         setSearchQuery('');
         onClear();
     };
-console.log(filteredOptions)
     return (
         <View style={[styles.container, style]}>
             {/* "Botón" para abrir el modal */}
-            <TouchableOpacity onPress={handleOpenModal}>
+            <TouchableOpacity onPress={!deleteMode ? handleOpenModal : null} disabled={deleteMode}>
+                {deleteMode && (
+                    <TouchableOpacity
+                        style={styles.overlayButton}
+                        disabled={true}
+                        onPress={null}
+                    />
+                )}
                 <View style={[styles.searchbarContainer]}>
                     {searchQuery ? (
                         <Text style={styles.label}>{placeholder}:</Text>
@@ -67,16 +76,18 @@ console.log(filteredOptions)
                     <Searchbar
                         placeholder={placeholder}
                         value={searchQuery}
-                        editable={false} // Hace que no sea editable, actuando como un botón
+                        editable={false}
                         style={[
-                            searchQuery ? styles.modalSearchbar : styles.searchbar, // Cambia el estilo según `searchQuery`
+                            searchQuery ? styles.modalSearchbar : styles.searchbar,
                             searchbarStyle,
+                            { color: theme.colors.white }
                         ]}
                         iconColor={searchQuery ? theme.colors.white : theme.colors.primary}
                         placeholderTextColor={searchQuery ? theme.colors.white : theme.colors.primary}
                         inputStyle={{ color: searchQuery ? theme.colors.white : theme.colors.primary }}
-                        onClearIconPress={handleClear} // Borra el valor y cierra el modal
+                        onClearIconPress={handleClear}
                         icon={icon}
+                        clearIcon={deleteMode}
                     />
                 </View>
             </TouchableOpacity>
@@ -85,7 +96,7 @@ console.log(filteredOptions)
                 visible={visible}
                 transparent
                 animationType="fade"
-                onRequestClose={handleCloseModal} // Permite cerrar el modal con el botón de atrás
+                onRequestClose={handleCloseModal}
             >
                 <BlurView
                     style={styleBusquedaAvanzada.blurView}
@@ -95,7 +106,7 @@ console.log(filteredOptions)
                     <TouchableWithoutFeedback onPress={handleCloseModal}>
                         <View style={styles.modalOverlay}>
                             <View style={styles.title}>
-                                <Text style={[styleBusquedaAvanzada.closeButtonText, {color:theme.colors.white}]}>{placeholder}</Text>
+                                <Text style={[styleBusquedaAvanzada.closeButtonText, { color: theme.colors.white }]}>{placeholder}</Text>
                             </View>
                             <TouchableWithoutFeedback>
                                 <View style={styles.modalContent}>
@@ -110,7 +121,7 @@ console.log(filteredOptions)
                                             onChangeText={handleSearchQueryChange}
                                             onClearIconPress={handleClearInside}
                                             style={[
-                                                searchQuery ? styles.modalSearchbar : styles.searchbar, // Cambia el estilo según `searchQuery`
+                                                searchQuery ? styles.modalSearchbar : styles.searchbar,
                                                 searchbarStyle,
                                             ]}
                                             iconColor={searchQuery ? theme.colors.white : theme.colors.primary}
@@ -120,25 +131,27 @@ console.log(filteredOptions)
                                         />
                                     </View>
                                     {/* Lista de opciones */}
-                                    {filteredOptions && filteredOptions.length > 0  ? (
+                                    {filteredOptions && filteredOptions.length > 0 ? (
                                         <FlatList
-                                        data={filteredOptions}
-                                        keyExtractor={(item, index) => `${item}-${index}`}
-                                        renderItem={({ item }) => (
-                                            <TouchableOpacity
-                                                onPress={() => handleSelectOption(item)}
-                                                style={styles.dropdownItem}
-                                            >
-                                                <Text style={styles.dropdownText}>{item}</Text>
-                                            </TouchableOpacity>
-                                        )}
-                                        keyboardShouldPersistTaps="handled"
-                                        nestedScrollEnabled
-                                        showsVerticalScrollIndicator
-                                    />)
-                                : (<View style={styles.noDataContainer}>
-                                    <Text style={styles.noDataText}>No hay datos disponibles</Text>
-                                </View>)}
+                                            data={filteredOptions}
+                                            keyExtractor={(item, index) => `${item.nombre}-${index}`}
+                                            renderItem={({ item }) => (
+                                                <TouchableOpacity
+                                                    onPress={() => handleSelectOption(item)}
+                                                    style={styles.dropdownItem}
+                                                >
+                                                    <Text style={styles.dropdownText}>
+                                                        {`${item.activo ? '' : '(Archivado) '}${item.nombre}`}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            )}
+                                            keyboardShouldPersistTaps="handled"
+                                            nestedScrollEnabled
+                                            showsVerticalScrollIndicator
+                                        />)
+                                        : (<View style={styles.noDataContainer}>
+                                            <Text style={styles.noDataText}>No hay datos disponibles</Text>
+                                        </View>)}
                                     <TouchableOpacity onPress={handleCloseModal} style={styleBusquedaAvanzada.closeButton}>
                                         <Text style={styleBusquedaAvanzada.closeButtonText}>Cerrar</Text>
                                     </TouchableOpacity>
@@ -162,6 +175,14 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginTop: 10,
     },
+    overlayButton: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 1,
+    },
     noDataText: {
         fontSize: 16,
         color: theme.colors.primary,
@@ -172,26 +193,26 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     searchbarContainer: {
-        position: 'relative', // Permite posicionar el texto del label
+        position: 'relative',
         width: '100%',
     },
     label: {
         position: 'absolute',
         zIndex: 2,
-        top: 0, 
+        top: 0,
         left: 15,
-        fontSize: 12, 
-        color: theme.colors.white, 
+        fontSize: 12,
+        color: theme.colors.white,
         paddingHorizontal: 5,
     },
-    labelRight:{
+    labelRight: {
         position: 'absolute',
         zIndex: 2,
         top: 6,
-        right: 6, 
-        fontSize: 12, 
-        color: theme.colors.white, 
-        paddingHorizontal: 5, 
+        right: 6,
+        fontSize: 12,
+        color: theme.colors.white,
+        paddingHorizontal: 5,
     },
     title: {
         backgroundColor: theme.colors.primary,
@@ -214,7 +235,7 @@ const styles = StyleSheet.create({
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(36, 47, 92, 0.47)',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -224,7 +245,7 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.white,
         borderRadius: 10,
         padding: 10,
-        shadowColor: '#000',
+        shadowColor: theme.colors.black,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 4,

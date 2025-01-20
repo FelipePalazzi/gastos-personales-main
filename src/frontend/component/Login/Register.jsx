@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Button, Alert, Text } from 'react-native';
+import { View, Alert, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Keychain from 'react-native-keychain';
-import { alerts, button_text, atributos, symbols, pagina } from '../../../constants.js';
+import { alerts, symbols } from '../../../constants.js';
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
-import * as LocalAuthentication from 'expo-local-authentication';
 import { useNavigation } from '@react-navigation/native';
 import { ActivityIndicator, Dialog, Portal, TextInput, } from 'react-native-paper'
-import { styleForm } from '../../styles/styles.js';
+import { styleForm, styleComun } from '../../styles/styles.js';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import theme from '../../theme/theme.js';
+import LoadingScreen from '../Comunes/Loading/LoadingScreen.jsx';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
 const Register = () => {
@@ -83,23 +83,18 @@ const Register = () => {
   const navigation = useNavigation();
 
   return (
-    <View style={{ backgroundColor: theme.colors.pieBackground, flex: 1 }}>
-      {loading ? (
-        <View style={{ marginTop: 140, marginHorizontal: 10, backgroundColor: theme.colors.disabled, borderColor: theme.colors.gray, borderRadius: 5, borderWidth: 2, paddingBottom: 170 }}>
-          <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 160 }}>
-            <ActivityIndicator animating={true} color={theme.colors.primary} size={theme.icons.big} />
-            <Text style={styleForm.loadingText}>{alerts.cargando}</Text>
-          </View>
-        </View>
-      ) : (
-        <View style={{ marginTop: 140, marginHorizontal: 10, backgroundColor: theme.colors.disabled, borderColor: theme.colors.gray, borderRadius: 5, borderWidth: 2 }}>
+    <View style={{ backgroundColor: theme.colors.primary, flex: 1 }}>
+      {loading ? 
+            <LoadingScreen Nombre={'Registro'}/>
+       : (
+        <View style={{ marginTop: 160, marginHorizontal: 10, backgroundColor: theme.colors.white, borderColor: theme.colors.gray, borderRadius: 5, borderWidth: 2 }}>
 
-          <View style={{ justifyContent: 'center', paddingHorizontal: 161, marginTop: 10 }}>
-            <Icon.Button backgroundColor={theme.colors.transparente} name={'account-circle'} size={30} color={theme.colors.textSecondary} iconStyle={{ marginRight: 0 }} />
-          </View>
-          <View style={[styleForm.loadingContainer, { padding: 0, marginBottom: 15 }]}>
-            <Text style={[styleForm.loadingText, { color: theme.colors.textSecondary }]}>{`Registro`}</Text>
-          </View>
+        <View style={{ justifyContent: 'center', paddingHorizontal: 161, marginTop: 10 }}>
+          <Icon.Button backgroundColor={theme.colors.transparente} name={'account-circle'} size={30} color={theme.colors.primary} iconStyle={{ marginRight: 0 }} />
+        </View>
+        <View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 15 }}>
+          <Text style={{ fontSize: theme.fontSizes.body, fontWeight: theme.fontWeights.bold, color: theme.colors.primary }}>{`Registrarse`}</Text>
+        </View>
           
           <View style={[styleForm.rowContainer, { paddingHorizontal: 10 }]}>
             <TextInput
@@ -107,7 +102,7 @@ const Register = () => {
               value={username}
               onChangeText={setUsername}
               placeholder={"Nombre de usuario"}
-              style={styleForm.text_input}
+              style={styleComun.text_input}
             />
           </View>
           <View style={[styleForm.rowContainer, { paddingHorizontal: 10 }]}>
@@ -117,7 +112,7 @@ const Register = () => {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
-              style={styleForm.text_input}
+              style={styleComun.text_input}
             />
           </View>
           <View style={[styleForm.rowContainer, { paddingHorizontal: 10 }]}>
@@ -127,7 +122,7 @@ const Register = () => {
               value={passwordConfirm}
               onChangeText={setPasswordConfirm}
               secureTextEntry
-              style={styleForm.text_input}
+              style={styleComun.text_input}
             />
           </View>
           <View style={{ paddingHorizontal: 10, marginBottom: 20, justifyContent: 'center' }}>

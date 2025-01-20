@@ -1,32 +1,30 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react'
-import { View, Text, ScrollView, Pressable, FlatList, KeyboardAvoidingView } from 'react-native'
+import React, { useState, useEffect, useMemo } from 'react'
+import { View, Text, FlatList } from 'react-native'
 import useCombinedData from '../../hooks/useCombinedData.js';
-import { Picker } from '@react-native-picker/picker'
-import DateTimePickerModal from "react-native-modal-datetime-picker"
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import theme from '../../theme/theme'
-import { ActivityIndicator, Dialog, Portal, TextInput, } from 'react-native-paper'
+import { ActivityIndicator, TextInput, } from 'react-native-paper'
 import moment from 'moment'
 import 'moment/locale/es'
-import { alerts, button_text, atributos, symbols, pagina } from '../../../constants'
+import { alerts, button_text, symbols, pagina } from '../../../constants'
 import { styleForm, styleComun, screenWidth, styleLoading } from '../../styles/styles.js'
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 import { useAuth } from '../../helpers/AuthContext.js';
 import FaltanDatos from '../Comunes/Dialogs/FaltanDatos.jsx';
-import Correcto from '../Comunes/Dialogs/Correcto.jsx';
+import Correcto from '../Comunes/Dialogs/CorrectoNavigation.jsx';
 import Delete from '../Comunes/Dialogs/Delete.jsx';
 import SearchDropdown from '../Comunes/Busqueda/SearchDropdown.jsx';
 import { getAtributosForm } from './formConfig.js';
 import DatePickerSearchBar from '../Comunes/Busqueda/DatePickerSearchBar.jsx';
-import CurrencyInput from 'react-native-currency-input';
+import CurrencyInput from '../Comunes/CurrencyInput.jsx';
 
 const MovimientoForm = ({ routeParams }) => {
     const navigation = useNavigation();
     const route = useRoute();
     const { itemParam, deleteMode, keyId, labelHeader } = route.params;
-    const [item, setItem] = useState({ fecha: moment().format('YYYY-MM-DD HH:mm:ss'), ...itemParam });
+    const [item, setItem] = useState({ fecha: moment().format('YYYY-MM-DD HH:mm:ss'), ...itemParam, });
     const [loading, setLoading] = useState(true);
     const { categoria, subcategoria, responsable, moneda, metodopago, submetodopago } = useCombinedData(keyId);
     const [visible, setVisible] = useState(false);
@@ -37,7 +35,6 @@ const MovimientoForm = ({ routeParams }) => {
     const { accessToken, refreshToken } = useAuth()
     const tipo = routeParams?.tipo || route.params?.tipo;
     const esEntrada = tipo === 'entradas';
-    const esSalida = tipo === 'salidas';
     const RutaAnterior = esEntrada ? 'Ingresos' : 'Gastos';
     const [categorias, setCategorias] = React.useState([]);
     const [subcategorias, setSubcategorias] = React.useState([]);
@@ -48,28 +45,64 @@ const MovimientoForm = ({ routeParams }) => {
 
     React.useEffect(() => {
         if (itemParam) {
-            updateItemProperty('monto', item[item.monedamonto])
+            updateItemProperty('estado', itemParam.nombre === 'Activo' ? 'Archivado' : 'Activo')
+            updateItemProperty('id_moneda_origen', itemParam.id_moneda)
+            updateItemProperty('monto', item[item.monedamonto].toFixed(2))
             updateItemProperty('metodopago', item.id_metodopago)
             updateItemProperty('submetodopago', item.id_submetodopago)
+            updateItemProperty('categoria', item.id_categoria)
+            updateItemProperty('subcategoria', item.id_subcategoria)
+            updateItemProperty('responsable', item.id_responsable)
+            setLoading(false)
         }
     }, [itemParam])
     React.useEffect(() => {
-        setCategorias(categoria.map(item => ({ id: item.id_categoria, nombre: item.categoria })));
+        setCategorias(categoria.map(item => ({
+            id: item.id_categoria,
+            nombre: item.categoria,
+            activo: item.categoria_activo
+        })));
+
         setSubcategorias(subcategoria.map(item => ({
             id: item.id_subcategoria,
             nombre: item.subcategoria,
             id_categoria: item.id_categoria,
             id_responsable: item.id_responsable,
+            activo: item.subcategoria_activo
         })));
-        setResponsables(responsable.map(item => ({ id: item.id_responsable, nombre: item.responsable })));
-        setMonedas(moneda.map(item => ({ id: item.id_moneda, nombre: item.codigo_moneda })));
-        setMetodopagos(metodopago.map(item => ({ id: item.id_metodopago, nombre: item.metodopago })));
+
+        setResponsables(responsable.map(item => ({
+            id: item.id_responsable,
+            nombre: item.responsable,
+            activo: item.responsable_activo
+        })));
+
+        setMonedas(moneda.map(item => ({
+            id: item.id_moneda,
+            nombre: item.codigo_moneda,
+            activo: item.moneda_activo
+        })));
+        setMetodopagos(metodopago.map(item => ({
+            id: item.id_metodopago,
+            nombre: item.metodopago,
+            activo: true
+        })));
         setSubmetodopagos(submetodopago.map(item => ({
             id: item.id_submetodo_pago,
             nombre: item.submetodo_pago,
-            id_metodopago: item.id_metodopago
+            id_metodopago: item.id_metodopago,
+            activo: item.submetodo_pago_activo
         })));
     }, [keyId, categoria, subcategoria, responsable, moneda, metodopago, submetodopago]);
+
+    React.useEffect(() => {
+        if (categorias.find(option => option.id === item.categoria)?.nombre &&
+            responsables.find(option => option.id === item.responsable)?.nombre &&
+            subcategorias.find(option => option.id === item.subcategoria)?.nombre) {
+            setLoading(true);
+        }
+    }, [categorias, responsables, subcategorias]);
+
 
     const atributosForm = useMemo(() => getAtributosForm(esEntrada, { categorias, subcategorias, responsables, monedas, metodopagos, submetodopagos }), [
         esEntrada,
@@ -100,24 +133,17 @@ const MovimientoForm = ({ routeParams }) => {
         }
     }, [item.submetodopago]);
 
-    const [value, setValue] = useState(Number(item.monto) || 0);
-
-    useEffect(() => {
-        // Si item.monto cambia, actualiza el valor
-        setValue(Number(item.monto) || 0);
-    }, [item.monto]);
-
     const renderInput = (atributo) => {
-        const { key, label, renderType, data } = atributo;
+        const { key, label, renderType, data, icon } = atributo;
         if (key === 'categoria') {
             return (
                 <View key={key}>
                     <SearchDropdown
-                        options={categorias.map(option => option.nombre)}
+                        options={categorias.map(option => ({ nombre: option.nombre, activo: option.activo }))}
                         placeholder={label}
-                        value={!itemParam ? categorias.find(option => option.id === item.categoria)?.nombre : item.categoria}
+                        value={categorias.find(option => option.id === item.categoria)?.nombre}
                         onSelect={(value) => {
-                            const selected = categorias.find(option => option.nombre === value);
+                            const selected = categorias.find(option => option.nombre === value.nombre);
                             updateItemProperty('categoria', selected ? selected.id : null);
                             updateItemProperty('subcategoria', null);
                             updateItemProperty('responsable', null);
@@ -129,7 +155,8 @@ const MovimientoForm = ({ routeParams }) => {
                         }}
                         filterKey={key}
                         setFilter={setItem}
-                        icon={'tag'}
+                        icon={icon}
+                        deleteMode={deleteMode}
                     />
                 </View>
             );
@@ -142,11 +169,11 @@ const MovimientoForm = ({ routeParams }) => {
             return (
                 <View key={key}>
                     <SearchDropdown
-                        options={filteredSubcategoria.map(option => option.nombre)}
+                        options={filteredSubcategoria.map(option => ({ nombre: option.nombre, activo: option.activo }))}
                         placeholder={label}
-                        value={!itemParam ? subcategorias.find(option => option.id === item.subcategoria)?.nombre : item.subcategoria}
+                        value={subcategorias.find(option => option.id === item.subcategoria)?.nombre}
                         onSelect={(value) => {
-                            const selected = subcategorias.find(option => option.nombre === value);
+                            const selected = subcategorias.find(option => option.nombre === value.nombre);
                             updateItemProperty('subcategoria', selected ? selected.id : null);
                         }}
                         onClear={() => {
@@ -155,7 +182,8 @@ const MovimientoForm = ({ routeParams }) => {
                         }}
                         filterKey={key}
                         setFilter={setItem}
-                        icon={'layers'}
+                        icon={icon}
+                        deleteMode={deleteMode}
                     />
                 </View>
             );
@@ -165,11 +193,11 @@ const MovimientoForm = ({ routeParams }) => {
             return (
                 <View key={key}>
                     <SearchDropdown
-                        options={responsables.map(option => option.nombre)}
+                        options={responsables.map(option => ({ nombre: option.nombre, activo: option.activo }))}
                         placeholder={label}
-                        value={!itemParam ? responsables.find(option => option.id === item.responsable)?.nombre : item.responsable}
+                        value={responsables.find(option => option.id === item.responsable)?.nombre}
                         onSelect={(value) => {
-                            const selected = responsables.find(option => option.nombre === value);
+                            const selected = responsables.find(option => option.nombre === value.nombre);
                             updateItemProperty('responsable', selected ? selected.id : null);
                         }}
                         onClear={() => {
@@ -177,7 +205,8 @@ const MovimientoForm = ({ routeParams }) => {
                         }}
                         filterKey={key}
                         setFilter={setItem}
-                        icon={'account'}
+                        icon={icon}
+                        deleteMode={deleteMode}
                     />
                 </View>
             );
@@ -187,11 +216,11 @@ const MovimientoForm = ({ routeParams }) => {
             return (
                 <View key={key}>
                     <SearchDropdown
-                        options={metodopagos.map(option => option.nombre)}
+                        options={metodopagos.map(option => ({ nombre: option.nombre, activo: option.activo }))}
                         placeholder={label}
                         value={!itemParam ? metodopagos.find(option => option.id === item.metodopago)?.nombre : item.metododepago}
                         onSelect={(value) => {
-                            const selected = metodopagos.find(option => option.nombre === value);
+                            const selected = metodopagos.find(option => option.nombre === value.nombre);
                             updateItemProperty('metodopago', selected ? selected.id : null);
                             updateItemProperty('submetodopago', null);
                         }}
@@ -201,7 +230,8 @@ const MovimientoForm = ({ routeParams }) => {
                         }}
                         filterKey={key}
                         setFilter={setItem}
-                        icon={'bank'}
+                        icon={icon}
+                        deleteMode={deleteMode}
                     />
                 </View>
             );
@@ -214,11 +244,11 @@ const MovimientoForm = ({ routeParams }) => {
             return (
                 <View key={key}>
                     <SearchDropdown
-                        options={filteredSubmetodopagos.map(option => option.nombre)}
+                        options={filteredSubmetodopagos.map(option => ({ nombre: option.nombre, activo: option.activo }))}
                         placeholder={label}
                         value={!itemParam ? submetodopagos.find(option => option.id === item.submetodo_pago)?.nombre : item.submetododepago}
                         onSelect={(value) => {
-                            const selected = submetodopagos.find(option => option.nombre === value);
+                            const selected = submetodopagos.find(option => option.nombre === value.nombre);
                             updateItemProperty('submetodopago', selected ? selected.id : null);
                         }}
                         onClear={() => {
@@ -226,7 +256,8 @@ const MovimientoForm = ({ routeParams }) => {
                         }}
                         filterKey={key}
                         setFilter={setItem}
-                        icon={'credit-card'}
+                        icon={icon}
+                        deleteMode={deleteMode}
                     />
                 </View>
             );
@@ -254,17 +285,28 @@ const MovimientoForm = ({ routeParams }) => {
                             textColor={item[key] ? theme.colors.white : theme.colors.primary}
                             outlineColor={item[key] ? theme.colors.white : theme.colors.primary}
                             activeOutlineColor={item[key] ? theme.colors.white : theme.colors.primary}
-                            theme={{ colors: { onSurfaceVariant: item[key] ? theme.colors.white : theme.colors.primary } }}
+                            theme={{ colors: { onSurfaceVariant: item[key] ? theme.colors.white : theme.colors.primary, onSurfaceDisabled: theme.colors.white } }}
+                            right={
+                                item[key] && !deleteMode ? (
+                                    <TextInput.Icon
+                                        icon="close"
+                                        onPress={() => updateItemProperty(key, '')}
+                                        size={26}
+                                        color={theme.colors.white}
+                                        style={{ marginTop: 34 }}
+                                    />
+                                ) : null
+                            }
                         />
                         :
                         key === 'id_moneda_origen' ?
                             (<View style={[styleComun.rowContainer, { marginVertical: 20, height: 55 }]}>
                                 <SearchDropdown
                                     key={key}
-                                    options={data.map(option => option.nombre)}
+                                    options={data.map(option => ({ nombre: option.nombre, activo: option.activo }))}
                                     placeholder={label}
                                     onSelect={(value) => {
-                                        const selected = data.find(option => option.nombre === value);
+                                        const selected = data.find(option => option.nombre === value.nombre);
                                         updateItemProperty(key, selected ? selected.id : null);
                                     }}
                                     onClear={() => {
@@ -276,61 +318,30 @@ const MovimientoForm = ({ routeParams }) => {
                                     filterKey={key}
                                     setFilter={setItem}
                                     style={{ width: screenWidth / 3, marginTop: 16 }}
-                                    icon={'currency-usd'}
+                                    icon={icon}
+                                    deleteMode={deleteMode}
                                 />
-                                <TextInput
-                                    value={item.monto || ''}
-                                    mode='outlined'
-                                    placeholder={label}
-                                    style={{
-                                        width: screenWidth / 3 * 2 - 50,
-                                        marginLeft: 10,
-                                        backgroundColor: item.monto ? theme.colors.primary : theme.colors.white,
-                                        paddingVertical: 10,
-                                        color: theme.colors.white,
-                                        height: 38,
-                                    }}
-                                    outlineStyle={{
-                                        borderColor: deleteMode ? theme.colors.disabled : theme.colors.primary,
-                                        borderRadius: 27,
-                                    }}
-                                    disabled={deleteMode}
-                                    keyboardType="numeric"
-                                    label={label}
-                                    textColor={item.monto ? theme.colors.white : theme.colors.primary}
-                                    outlineColor={item.monto ? theme.colors.white : theme.colors.primary}
-                                    activeOutlineColor={item.monto ? theme.colors.white : theme.colors.primary}
-                                    theme={{ colors: { onSurfaceVariant: item.monto ? theme.colors.white : theme.colors.primary } }}
-                                    render={(props) => (
-                                        <CurrencyInput
-                                            {...props}
-                                            value={value || ''}
-                                            onChangeValue={(value) => updateItemProperty('monto', value)}  // Guarda el valor numérico real
-                                            prefix={item.id_moneda_origen ? `${data.find(option => option.id === item[key])?.nombre} ` : '$ '}
-                                            delimiter="."
-                                            separator=","
-                                            precision={0}
-                                            minValue={0}
-                                        />
-                                    )}
+                                <CurrencyInput
+                                    value={String(item.monto || '')}
+                                    onChange={(value) => updateItemProperty('monto', value)}
+                                    label={'Importe'}
+                                    deleteMode={deleteMode}
                                 />
-
-
                             </View>)
                             : null}
                 </View>
             );
         }
-
         if (renderType === 'datePicker') {
             return (
                 <DatePickerSearchBar
-                    value={item[key]} // Valor actual de la fecha
+                    value={item[key] || ''}
                     onSelect={(date) => {
                         updateItemProperty(key, moment(date).format('YYYY-MM-DD HH:mm:ss'));
                     }}
-                    onClear={() => updateItemProperty(key, null)} // Para limpiar la fecha
+                    onClear={() => updateItemProperty(key, null)}
                     placeholder="Fecha"
+                    deleteMode={deleteMode}
                 />
 
             );
@@ -364,18 +375,17 @@ const MovimientoForm = ({ routeParams }) => {
             console.error(error)
         }
     }
-
     const update = async (item) => {
         try {
             setLoading(false)
-            const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina[`pagina_${tipo}`]}${symbols.barra}${keyid}${symbols.barra}${[tipo].id}`, {
+            const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina[`pagina_${tipo}`]}${symbols.barra}${keyId}${symbols.barra}${item.id}`, {
                 method: "PUT",
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                     'refresh-token': refreshToken,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(tipo),
+                body: JSON.stringify(item),
             })
             const data = await response.json()
             setLoading(true)
@@ -384,17 +394,19 @@ const MovimientoForm = ({ routeParams }) => {
             console.error(error)
         }
     }
+
     const handleDelete = async () => {
         if (item.id) {
             try {
                 setLoading(false)
-                const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina[`pagina_${tipo}`]}${symbols.barra}${item.id}`, {
+                const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina[`pagina_${tipo}`]}${symbols.barra}${keyId}${symbols.barra}${item.id}`, {
                     method: 'DELETE',
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
                         'refresh-token': refreshToken,
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    body: JSON.stringify({ estado: item.estado }),
                 })
                 setLoading(true)
                 setvisibleDelete(false)
@@ -456,9 +468,10 @@ const MovimientoForm = ({ routeParams }) => {
                         handleDelete={handleDelete}
                         visibleOk={visibleOKDelete}
                         setVisibleOk={setvisibleOKDelete}
-                        archivar={item.activo}
+                        archivar={item.estado === 'Archivado' ? true : false}
                         navigation={navigation}
-                        RutaAnterior={RutaAnterior} goBack={false}
+                        RutaAnterior={RutaAnterior}
+                        goBack={false}
                     />
 
                     {/* Botones de acción */}
@@ -477,7 +490,7 @@ const MovimientoForm = ({ routeParams }) => {
                         )}
                         {deleteMode && (
                             <View style={styleForm.button}>
-                                <Icon.Button backgroundColor={theme.colors.red} name={theme.icons.borrar} onPress={() => setvisibleDelete(true)}>
+                                <Icon.Button backgroundColor={theme.colors.primary} color={theme.colors.white} name={theme.icons.borrar} onPress={() => setvisibleDelete(true)}>
                                     {button_text.delete}
                                 </Icon.Button>
                             </View>

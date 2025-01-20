@@ -1,17 +1,18 @@
 import React from 'react';
-import { View, Text, Modal, TextInput, Pressable, ScrollView } from 'react-native';
+import { View, Text, Modal, Pressable, ScrollView, KeyboardAvoidingView } from 'react-native';
 import theme from '../../../theme/theme.js';
-import Icon from 'react-native-vector-icons/FontAwesome'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons.js'
 import { BlurView } from '@react-native-community/blur';
-import { styleBusquedaAvanzada, styleComun } from '../../../styles/styles.js';
+import { styleBusquedaAvanzada } from '../../../styles/styles.js';
 import SearchDropdown from './SearchDropdown.jsx';
-import DateTimePickerModal from "react-native-modal-datetime-picker"
 import moment from 'moment'
 import 'moment/locale/es'
+import DatePickerSearchBar from './DatePickerSearchBar.jsx';
+import CurrencyInput from '../CurrencyInput.jsx';
+import { TextInput } from 'react-native-paper';
 
 const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, keyId }) => {
   const [modalVisible, setModalVisible] = React.useState(false);
-  const [datePickerVisible, setDatePickerVisible] = React.useState(false);
 
   const [filters, setFilters] = React.useState({});
 
@@ -45,9 +46,21 @@ const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, key
     setModalVisible(false);
   };
 
+  React.useEffect(() => {
+    const fechaDesde = filters['fechaDesde'];
+    const fechaHasta = filters['fechaHasta'];
+
+    if (fechaDesde && fechaHasta && moment(fechaDesde).isAfter(moment(fechaHasta))) {
+      setFilters((prevFilters) => ({
+        ...prevFilters,
+        fechaDesde: fechaHasta,
+        fechaHasta: fechaDesde,
+      }));
+    }
+  }, [filters['fechaDesde'], filters['fechaHasta']]);
 
   const renderInput = (atributo) => {
-    const { key, label, renderType, data } = atributo;
+    const { key, label, renderType, data, icon } = atributo;
 
     switch (renderType) {
       case 'textInput':
@@ -55,51 +68,74 @@ const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, key
           <TextInput
             key={key}
             placeholder={label}
+            mode={'outlined'}
+            label={label}
             value={filters[key] || ''}
             onChangeText={(value) => handleInputChange(key, value)}
-            style={{ marginBottom: 10, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}
+            style={{
+              width: '100%',
+              backgroundColor: filters[key] ? theme.colors.primary : theme.colors.white,
+              paddingVertical: 10,
+              color: theme.colors.white,
+              height: 38,
+              marginTop: -5, marginBottom: 5
+            }}
+            outlineStyle={{
+              borderColor: theme.colors.primary,
+              borderRadius: 27,
+            }}
+            textColor={filters[key] ? theme.colors.white : theme.colors.primary}
+            outlineColor={filters[key] ? theme.colors.white : theme.colors.primary}
+            activeOutlineColor={filters[key] ? theme.colors.white : theme.colors.primary}
+            theme={{ colors: { onSurfaceVariant: filters[key] ? theme.colors.white : theme.colors.primary } }}
+            right={
+              filters[key] ? (
+                <TextInput.Icon
+                  icon="close"
+                  onPress={() => handleInputChange(key, '')}
+                  size={26}
+                  color={theme.colors.white}
+                  style={{ marginTop: 34 }}
+                />
+              ) : null
+            }
           />
         );
       case 'searchDropdown':
         return (
           <SearchDropdown
             key={key}
-            options={data}
+            options={data
+              .map(option => ({ nombre: option.nombre, activo: option.activo }))}
             placeholder={label}
-            onSelect={(value) => handleInputChange(key, value)}
+            onSelect={(value) => handleInputChange(key, value.nombre)}
             value={filters[key]}
             filterKey={key}
             setFilter={setFilters}
+            onClear={() => handleInputChange(key, '')}
+            icon={icon}
           />
         );
       case 'datePicker':
         return (
-          <View key={key} style={{ marginBottom: 10 }}>
-            <Text>{label}</Text>
-            <Pressable
-              onPress={() => setDatePickerVisible(true)}
-              style={{
-                padding: 10,
-                borderWidth: 1,
-                borderColor: '#ccc',
-                borderRadius: 5,
-                justifyContent: 'center',
-              }}
-            >
-              <Text style={{ color: filters[key] ? '#000' : '#aaa' }}>
-                {filters[key] ? moment(filters[key]).format('LL') : 'Seleccionar fecha'}
-              </Text>
-            </Pressable>
-            <DateTimePickerModal
-              isVisible={datePickerVisible}
-              mode="date"
-              onConfirm={(date) => {
-                handleInputChange(key, date.toISOString());
-                setDatePickerVisible(false);
-              }}
-              onCancel={() => setDatePickerVisible(false)}
-            />
-          </View>
+          <DatePickerSearchBar
+            key={key}
+            value={filters[key]}
+            onSelect={(date) => {
+              handleInputChange(key, moment(date).format('YYYY-MM-DD HH:mm:ss'));
+            }}
+            onClear={() => handleInputChange(key, null)}
+            placeholder={label}
+          />
+        );
+      case 'monedaInput':
+        return (
+          filters.monedaFiltro && <CurrencyInput
+            value={filters[key]}
+            onChange={(value) => handleInputChange(key, value)}
+            label={`Monto ${filters.monedaFiltro} ${label}`}
+            style={{ width: '100%', marginLeft: 0, marginTop: -5, marginBottom: 10 }}
+          />
         );
       default:
         return null;
@@ -108,22 +144,22 @@ const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, key
 
   return (
     <>
-<View style={styleBusquedaAvanzada.container}>
-  <Icon.Button
-    backgroundColor={theme.colors.white}
-    name={'search'}
-    onPress={() => setModalVisible(true)}
-    style={{
-      paddingHorizontal: 50,
-    }}
-    color={theme.colors.primary}
-    iconStyle={{ marginRight: 10 }} // Ajusta el margen del ícono
-  >
-    <Text style={{ fontSize: theme.fontSizes.busqueda_avanzada, fontWeight: 'bold', color: theme.colors.primary }}>
-      Busqueda Avanzada
-    </Text>
-  </Icon.Button>
-</View>
+      <View style={styleBusquedaAvanzada.container}>
+        <Icon.Button
+          backgroundColor={theme.colors.white}
+          name={'magnify'}
+          onPress={() => setModalVisible(true)}
+          style={{
+            paddingHorizontal: 50,
+          }}
+          color={theme.colors.primary}
+          iconStyle={{ marginRight: 10 }}
+        >
+          <Text style={{ fontSize: theme.fontSizes.busqueda_avanzada, fontWeight: 'bold', color: theme.colors.primary }}>
+            Busqueda Avanzada
+          </Text>
+        </Icon.Button>
+      </View>
 
       <Modal
         visible={modalVisible}
@@ -137,37 +173,41 @@ const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, key
           blurAmount={15}
         >
           <View style={styleBusquedaAvanzada.overlay}>
-
-            <View style={styleBusquedaAvanzada.modalContent}>
-              <Text style={styleBusquedaAvanzada.title}>Búsqueda Avanzada</Text>
+            <KeyboardAvoidingView
+              behavior={'padding'}
+              keyboardVerticalOffset={10} // Ajusta según tu diseño
+            >
+              <View style={styleBusquedaAvanzada.modalContent}>
+                <Text style={styleBusquedaAvanzada.title}>Búsqueda Avanzada</Text>
                 <ScrollView
-                style={{flex:1}}
-                  contentContainerStyle={styleBusquedaAvanzada.scrollContainer}
+                  style={{ flex: 1, marginHorizontal: -10 }}
                   nestedScrollEnabled={true}
+                  keyboardShouldPersistTaps="handled"
                 >
                   {atributosSearch.map((atributo) => renderInput(atributo))}
                 </ScrollView>
-              <View style={styleBusquedaAvanzada.buttonRow}>
-              <Pressable
-                style={styleBusquedaAvanzada.applyButton}
-                onPress={handleApplyFilters}
-              >
-                <Text style={styleBusquedaAvanzada.applyButtonText}>Aplicar</Text>
-              </Pressable>
-              <Pressable
-                style={styleBusquedaAvanzada.closeButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styleBusquedaAvanzada.closeButtonText}>Cerrar</Text>
-              </Pressable>
-              <Pressable
-                style={styleBusquedaAvanzada.closeButton}
-                onPress={handleClear}
-              >
-                <Text style={styleBusquedaAvanzada.closeButtonText}>Borrar Filtros</Text>
-              </Pressable>
+                <View style={styleBusquedaAvanzada.buttonRow}>
+                  <Pressable
+                    style={styleBusquedaAvanzada.applyButton}
+                    onPress={handleApplyFilters}
+                  >
+                    <Text style={styleBusquedaAvanzada.applyButtonText}>Aplicar</Text>
+                  </Pressable>
+                  <Pressable
+                    style={styleBusquedaAvanzada.closeButton}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <Text style={styleBusquedaAvanzada.closeButtonText}>Cerrar</Text>
+                  </Pressable>
+                  <Pressable
+                    style={styleBusquedaAvanzada.closeButton}
+                    onPress={handleClear}
+                  >
+                    <Text style={styleBusquedaAvanzada.closeButtonText}>Borrar Filtros</Text>
+                  </Pressable>
+                </View>
               </View>
-            </View>
+            </KeyboardAvoidingView>
           </View>
         </BlurView>
       </Modal>

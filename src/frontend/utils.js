@@ -172,6 +172,16 @@ export const filterData = (data, search, monedaProp, fechaProp, yearProp) => {
         return null;
     }
   }
+  export function decodeTokenUsername (token) {
+    try {
+        const decoded = jwtDecode(token);
+        const username = decoded.username; 
+        return username;
+    } catch (error) {
+        console.error('Error al decodificar el token:', error);
+        return null;
+    }
+  }
   export function decodeTokenUserId (token) {
     try {
         const decoded = jwtDecode(token);

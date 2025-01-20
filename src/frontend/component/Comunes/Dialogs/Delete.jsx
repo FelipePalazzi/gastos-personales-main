@@ -33,7 +33,7 @@ const Delete = ({
           <Dialog.Icon icon={theme.icons.deleteComplete} color={theme.colors.primary}/>
           <Dialog.Title style={styleDialog.title}>{archivar ? alerts.archivado_exito : alerts.desarchivado_exito}</Dialog.Title>
           <Dialog.Actions style={{ marginEnd: screenWidth / 5, marginTop: 10 }}>
-            <Icon.Button style={{paddingHorizontal:50}} name={theme.icons.ok} color={theme.colors.white} backgroundColor={theme.colors.primary} onPress={() => goBack ? ( navigation.goBack(), setVisibleOk(false)) : (navigation.navigate(RutaAnterior, { refresh: true }), setVisibleOk(false))}>{button_text.ok}</Icon.Button>
+            <Icon.Button style={{paddingHorizontal:50}} name={theme.icons.ok} color={theme.colors.white} backgroundColor={theme.colors.primary} onPress={() => (setVisibleOk(false), goBack ? navigation.goBack() : navigation.navigate(RutaAnterior, { refresh: true }))}>{button_text.ok}</Icon.Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>

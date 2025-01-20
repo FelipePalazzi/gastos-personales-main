@@ -92,6 +92,7 @@ const themeaqua = {
         ok: 'check',
         deleteAlert: 'delete-alert',
         deleteComplete: 'delete-empty',
+        options: 'cog',
     },
     scroll: {
         desplazamiento: 16,

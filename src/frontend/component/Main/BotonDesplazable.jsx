@@ -1,21 +1,18 @@
 import React, { useEffect, useRef } from 'react';
 import { Dimensions, Animated, StyleSheet } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { Easing } from 'react-native';
 const { width, height } = Dimensions.get('window');
+import theme from '../../theme/theme';
 
 const BotonDesplazable = ({ theme, activeIndex }) => {
-  // Animaciones para posición y escala del ícono
-  const translateX = useRef(new Animated.Value(width / 2 - 40)).current; // Inicia en el centro
+  const translateX = useRef(new Animated.Value(width / 2 - 40)).current;
 
-  // Íconos según el índice
-  const icons = ['trending-down-outline', 'stats-chart', 'trending-up-outline'];
+  const icons = ['trending-down', 'poll', 'trending-up'];
 
   useEffect(() => {
-    // Calcular posición destino
-    const targetX = (width / 3) * activeIndex + width / 6 - 40; // Ajuste dinámico
+    const targetX = (width / 3) * activeIndex + width / 6 - 40;
 
-    // Animar movimiento del botón
     Animated.timing(translateX, {
       toValue: targetX,
       easing: Easing.ease,
@@ -35,9 +32,8 @@ const BotonDesplazable = ({ theme, activeIndex }) => {
         },
       ]}
     >
-      {/* Icono con animación de escala */}
       <Animated.View>
-        <Ionicons name={icons[activeIndex]} size={40} color={theme.colors.white} />
+        <Icon name={icons[activeIndex]} size={40} color={theme.colors.white} />
       </Animated.View>
     </Animated.View>
   );
@@ -51,15 +47,15 @@ const styles = StyleSheet.create({
     left: 0,
     borderRadius: 50,
     borderWidth: 4,
-    borderColor: '#fff',
+    borderColor: theme.colors.white,
     shadowOpacity: 0.3,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 5,
     elevation: 8,
     height: 80,
     width: 80,
-    justifyContent: 'center', // Centrar contenido verticalmente
-    alignItems: 'center', // Centrar contenido horizontalmente
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

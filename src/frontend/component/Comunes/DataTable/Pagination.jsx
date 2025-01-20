@@ -1,13 +1,12 @@
 import React from 'react';
 import { View } from 'react-native';
-import { DataTable, FAB } from 'react-native-paper';
+import { DataTable } from 'react-native-paper';
 import theme from '../../../theme/theme.js';
 import { alerts, symbols, pagina } from '../../../../constants.js';
-import { styleComun, styleBusquedaAvanzada } from '../../../styles/styles.js';
-import Icon from 'react-native-vector-icons/FontAwesome'
+import { styleComun } from '../../../styles/styles.js';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons.js'
 
 const Pagination = ({
-    data,
     page,
     numberOfPages,
     onPageChange,
@@ -15,10 +14,7 @@ const Pagination = ({
     numberOfItemsPerPageList,
     numberOfItemsPerPage,
     handleSubmit,
-    tipo,
     style,
-    navigation,
-    keyId
 }) => {
     return (
         <View style={{backgroundColor:theme.colors.white}}>
@@ -42,7 +38,7 @@ const Pagination = ({
                         paddingHorizontal: 180,
                     }}
                     color={theme.colors.primary}
-                    iconStyle={{ marginRight: 0 }} // Ajusta el margen del ícono
+                    iconStyle={{ marginRight: 0 }}
                 />
             </View>
         </View>

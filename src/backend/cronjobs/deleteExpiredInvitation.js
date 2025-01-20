@@ -7,9 +7,9 @@ cron.schedule('0 * * * *', async () => {
     try {
         const resultUpdate = await pool.query(`
             UPDATE invitaciones
-            SET estado = (SELECT id FROM invitaciones_estado WHERE nombre = 'expirada')
+            SET estado = (SELECT id FROM invitaciones_estado WHERE nombre = 'Expirada')
             WHERE fecha_expiracion < NOW()
-              AND estado = (SELECT id FROM invitaciones_estado WHERE nombre = 'pendiente')
+              AND estado = (SELECT id FROM invitaciones_estado WHERE nombre = 'Pendiente')
         `);
         console.log(`${resultUpdate.rowCount} invitaciones actualizadas a estado expirado.`);
     } catch (error) {
@@ -24,7 +24,7 @@ cron.schedule('5 0 * * *', async () => {
         const resultDelete = await pool.query(`
             DELETE FROM invitaciones
             WHERE fecha_expiracion < NOW() - INTERVAL '31 days'
-              AND estado = (SELECT id FROM invitaciones_estado WHERE nombre = 'expirada')
+              AND estado = (SELECT id FROM invitaciones_estado WHERE nombre = 'Expirada')
         `);
         console.log(`${resultDelete.rowCount} invitaciones expiradas eliminadas.`);
     } catch (error) {

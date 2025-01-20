@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, RefreshControl } from 'react-native';
-import { DataTable, ActivityIndicator, Card } from 'react-native-paper';
+import { DataTable, ActivityIndicator } from 'react-native-paper';
 import theme from '../../../theme/theme.js';
 import { alerts, atributos } from '../../../../constants.js';
 import { styleComun, styleLoading } from '../../../styles/styles.js';
@@ -20,8 +20,11 @@ const Rows = ({
     style,
     tipoMovimiento,
     onEdit,
-    onDelete
+    onDelete,
+    message
 }) => {
+    React.useEffect(() => {
+    }, [data]);
     return (
         <ScrollView
             showsVerticalScrollIndicator={true}
@@ -36,15 +39,15 @@ const Rows = ({
             <View style={style.container}>
                 {
                     loading ? (
-                        <View style={styleLoading.loadingContainer}>
+                        <View style={styleLoading.loadingData}>
                             <ActivityIndicator animating={true} color={style.colorLoading} size={theme.icons.big} />
                             <Text style={[styleLoading.loadingText, { color: style.colorLoading }]}>{alerts.cargando} {atributos[tipoMovimiento]}...</Text>
                         </View>
                     ) : (
                         data.length > 0 ? (
                             <DataTable>
-                                {data.slice(page * pageSize, (page + 1) * pageSize).map((item, index) => (
-                                    <React.Fragment key={index}>
+                                {data.map((item, index) => (
+                                    <React.Fragment key={item.id}>
                                         <DataTable.Row
                                             style={[style.row, expanded[item.id] && style.expandedrow]}
                                             onPress={() => onRowClick(item.id, index)}
@@ -53,7 +56,7 @@ const Rows = ({
                                                 <DataTable.Cell
                                                     key={colIndex}
                                                     textStyle={style.textRowTable}
-                                                    style={col.key === 'fecha' ? { marginHorizontal: 10, marginStart: 20 } : null}
+                                                    style={colIndex === 0 ? { marginHorizontal: 0, marginStart: 20 } : null}
                                                 >
                                                     {col.render
                                                         ? (col.key === 'importe'
@@ -72,7 +75,7 @@ const Rows = ({
                             </DataTable>
                         ) : (
                             <View style={style.SinDatoscontainer}>
-                                <Text style={style.SinDatos}>Sin coincidencias</Text>
+                                <Text style={style.SinDatos}>{message ? message : 'Sin coincidencias'}</Text>
                             </View>
                         )
                     )

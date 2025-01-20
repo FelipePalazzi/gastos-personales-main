@@ -4,12 +4,12 @@
     "slug": "expenzzi",
     "version": "2.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.jpg",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.jpg",
       "resizeMode": "contain",
-      "backgroundColor": "#e3e7e8"
+      "backgroundColor": "#242F5C"
     },
     "ios": {
       "supportsTablet": true
@@ -17,13 +17,13 @@
     "android": {
       "adaptiveIcon": {
         "package": "Expenzzi",
-        "foregroundImage": "./assets/icon.jpg",
+        "foregroundImage": "./assets/adaptative-icon.png",
         "backgroundColor": "#e3e7e8"
       },
       "package": "com.felipepalazzi.expenzzi"
     },
     "web": {
-      "favicon": "./assets/favicon.jpg"
+      "favicon": "./assets/favicon.ico"
     },
     "extra": {
       "eas": {

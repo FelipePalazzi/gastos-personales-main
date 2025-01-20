@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Button, Alert, Text } from 'react-native';
-import { alerts, button_text, atributos, symbols, pagina } from '../../../constants.js';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { symbols } from '../../../constants.js';
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useNavigation } from '@react-navigation/native';
-import { ActivityIndicator, Dialog, Portal, TextInput, } from 'react-native-paper'
+import { TextInput, } from 'react-native-paper'
 import { styleComun, styleForm } from '../../styles/styles.js';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import theme from '../../theme/theme.js';
@@ -15,9 +15,11 @@ import LoadingScreen from '../Comunes/Loading/LoadingScreen.jsx';
 import Error from './Dialogs/Error.jsx';
 import Correcto from './Dialogs/Correcto.jsx';
 import Logout from './Dialogs/Logout.jsx';
+import { decodeTokenUsername } from '../../utils.js';
+import PinInput from './PinInput.jsx'
 
 const LoginScreen = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [visibleOK, setvisibleOK] = useState(false);
   const [visibleLogout, setVisibleLogout] = useState(false);
@@ -30,6 +32,8 @@ const LoginScreen = () => {
   const [nombreUsuario, setNombreUsuario] = useState([]);
   const navigation = useNavigation();
   const { accessToken, refreshAccessToken, saveTokensAndUser, clearTokensAndUser, getSavedUser } = useAuth();
+  const [requestPin, setRequestPin] = useState(false);
+  const [pin, setPin] = useState('');
 
   const handleLogin = async () => {
     try {
@@ -39,17 +43,18 @@ const LoginScreen = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       });
       if (response.ok) {
         const { accessToken, refreshToken } = await response.json();
+        const username = decodeTokenUsername(accessToken)
         saveTokensAndUser(accessToken, refreshToken, username);
         setNombreUsuario(username)
         setvisibleOK(true)
         setFingertip(true)
         setRegistrarse(false)
         setLoading(false)
-        setUsername('')
+        setEmail('')
         setPassword('')
       } else {
         const errorData = await response.text();
@@ -66,6 +71,7 @@ const LoginScreen = () => {
   const logout = async () => {
     try {
       setLoading(true)
+      setRequestPin(false)
       clearTokensAndUser()
       setVisibleLogout(true)
       setFingertip(false)
@@ -95,12 +101,11 @@ const LoginScreen = () => {
       return;
     }
 
-    const { password: refreshToken } = credentials;
-
     const biometricSupported = await LocalAuthentication.hasHardwareAsync();
     const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-
-    setUsername('');
+    setLoading(false);
+    setRequestPin(true)
+    setEmail('');
     setPassword('');
     setFingertip(true);
     setNombreUsuario(username);
@@ -116,29 +121,65 @@ const LoginScreen = () => {
         if (!accessToken) {
           const refreshed = await refreshAccessToken();
         }
+        setRequestPin(false)
         setLoading(false);
         setMessage(null)
         navigation.navigate('Drawer');
-      } else {
-        setMessage(null)
-        setLoading(false);
-        setVisibleError(true)
       }
     } else {
+      setLoading(false)
       setMessage(null)
-      setLoading(false);
-      setVisibleError(true)
       setFingertip(false);
     }
   };
 
+  const onValidatePin = (pin) => {
+    console.log(pin)
+  }
+
+  const renderEmailPasswordForm = () => (
+    <>
+      <View style={[styleForm.rowContainer, { paddingHorizontal: 10 }]}>
+        <TextInput
+          textContentType='email'
+          mode='outlined'
+          value={email}
+          onChangeText={setEmail}
+          placeholder={"Ingrese email..."}
+          style={styleComun.text_input}
+          label="Email"
+          textColor={theme.colors.primary}
+          outlineColor={theme.colors.primary}
+          activeOutlineColor={theme.colors.primary}
+          theme={{ colors: { onSurfaceVariant: theme.colors.primary } }}
+        />
+      </View>
+      <View style={[styleForm.rowContainer, { paddingHorizontal: 10 }]}>
+        <TextInput
+          textContentType='password'
+          mode='outlined'
+          placeholder="Ingrese contraseña..."
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={secureTextEntry}
+          style={styleComun.text_input}
+          label="Password"
+          textColor={theme.colors.primary}
+          outlineColor={theme.colors.primary}
+          activeOutlineColor={theme.colors.primary}
+          theme={{ colors: { onSurfaceVariant: theme.colors.primary } }}
+          right={<TextInput.Icon color={theme.colors.primary} icon={secureTextEntry ? 'eye-off' : 'eye'} onPress={() => setSecureTextEntry(!secureTextEntry)} style={{ marginTop: 30 }} />}
+        />
+      </View>
+    </>
+  )
 
   return (
     <View style={{ backgroundColor: theme.colors.primary, flex: 1 }}>
       {loading ? (
         <LoadingScreen Nombre={"Login"} />
       ) : (
-        <View style={{ marginTop: 160, marginHorizontal: 10, backgroundColor: theme.colors.white, borderColor: theme.colors.gray, borderRadius: 5, borderWidth: 2 }}>
+        <View style={{ marginTop: requestPin ? 120 : 160, marginHorizontal: 10, backgroundColor: theme.colors.white, borderColor: theme.colors.gray, borderRadius: 5, borderWidth: 2 }}>
 
           <View style={{ justifyContent: 'center', paddingHorizontal: 161, marginTop: 10 }}>
             <Icon.Button backgroundColor={theme.colors.transparente} name={'account-circle'} size={30} color={theme.colors.primary} iconStyle={{ marginRight: 0 }} />
@@ -150,42 +191,10 @@ const LoginScreen = () => {
           {!fingertip && (<View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 15 }}>
             <Text style={{ fontSize: theme.fontSizes.body, fontWeight: theme.fontWeights.bold, color: theme.colors.primary }}>{`Inicio de Sesion`}</Text>
           </View>)}
-
-          <View style={[styleForm.rowContainer, { paddingHorizontal: 10 }]}>
-            <TextInput
-            textContentType='username'
-              mode='outlined'
-              value={username}
-              onChangeText={setUsername}
-              placeholder={"Ingrese nombre de usuario..."}
-              style={styleComun.text_input}
-              label="Nombre de Usuario"
-              textColor={theme.colors.primary}
-              outlineColor={theme.colors.primary}
-              activeOutlineColor={theme.colors.primary}
-              theme={{ colors: { onSurfaceVariant:theme.colors.primary } }}
-            />
-          </View>
-          <View style={[styleForm.rowContainer, { paddingHorizontal: 10 }]}>
-            <TextInput
-            textContentType='password'
-              mode='outlined'
-              placeholder="Ingrese contraseña..."
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={secureTextEntry}
-              style={styleComun.text_input}
-              label="Password"
-              textColor={theme.colors.primary}
-              outlineColor={theme.colors.primary}
-              activeOutlineColor={theme.colors.primary}
-              theme={{ colors: { onSurfaceVariant:theme.colors.primary } }}
-              right={<TextInput.Icon color={theme.colors.primary} icon={secureTextEntry ? "eye-off" : 'eye'} onPress={() => setSecureTextEntry(!secureTextEntry)} style={{ marginTop: 30 }} />}
-            />
-          </View>
-          <View style={{ paddingHorizontal: 10, marginBottom: 20, justifyContent: 'center' }}>
+          {requestPin ? <PinInput onValidatePin={onValidatePin} /> : renderEmailPasswordForm()}
+          {!requestPin && <View style={{ paddingHorizontal: 10, marginBottom: 20, justifyContent: 'center' }}>
             <Icon.Button backgroundColor={theme.colors.primary} color={theme.colors.white} name={'login'} onPress={handleLogin} size={30} iconStyle={{ marginRight: 110 }}>{'Acceder'}</Icon.Button>
-          </View>
+          </View>}
           <View style={styleForm.rowButton}>
             <View style={styleForm.button}>
               <Icon.Button backgroundColor={theme.colors.white} color={theme.colors.primary} name={fingertip ? 'fingerprint' : 'fingerprint-off'} onPress={handleAuthentication} size={30} iconStyle={{ marginRight: 0 }} />

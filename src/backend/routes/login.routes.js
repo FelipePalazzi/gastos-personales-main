@@ -8,6 +8,8 @@ router.post(`${symbols.barra}register`, loginController.register );
 
 router.post(`${symbols.barra}login`, loginController.login);
 
+router.post(`${symbols.barra}validarPin`, authenticateToken, loginController.validatePin);
+
 router.post(`${symbols.barra}refresh`, loginController.refreshToken);
 
 router.post(`${symbols.barra}refreshTokens`, loginController.refreshTokenJSON);
