@@ -18,9 +18,14 @@ keysController.getKeysbyUserId = async (req, res, next) => {
              k.descripcion as "descripcion", 
              k.key_id as "id_key", 
              k.codigo_invitacion as "codigo_invitacion",
-             k.activo as "activo"
+             k.activo as "activo",
+             CASE 
+                WHEN ruk.nombre = 'admin_creator' THEN TRUE
+                ELSE FALSE
+            END AS "owner"
       FROM "keys" k
       LEFT JOIN user_keys uk ON uk.key_id = k.key_id
+      LEFT JOIN role_user_keys ruk ON uk.role = ruk.id
       WHERE uk.user_id = $1
       AND ($2::boolean IS NULL OR activo = $2)
       ORDER BY k.nombre, k.descripcion ASC

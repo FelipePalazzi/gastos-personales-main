@@ -20,7 +20,9 @@ const Rows = ({
     style,
     tipoMovimiento,
     onEdit,
+    boton1,
     onDelete,
+    boton2,
     message
 }) => {
     React.useEffect(() => {
@@ -29,7 +31,7 @@ const Rows = ({
         <ScrollView
             showsVerticalScrollIndicator={true}
             vertical
-            style={[styleComun.scroll,{backgroundColor:theme.colors.white}]}
+            style={[styleComun.scroll, { backgroundColor: theme.colors.white }]}
             refreshControl={
                 <RefreshControl
                     refreshing={refreshing}
@@ -68,7 +70,15 @@ const Rows = ({
                                             ))}
                                         </DataTable.Row>
                                         {expanded[item.id] && (
-                                            <CardTable Cardrows={Cardrows} item={item} onDelete={()=> onDelete(item)} onEdit={() =>onEdit(item)} style={style} />
+                                            <CardTable
+                                                Cardrows={Cardrows}
+                                                item={item}
+                                                onDelete={() => onDelete(item)}
+                                                onEdit={() => onEdit(item)}
+                                                style={style}
+                                                boton1={boton1}
+                                                boton2={boton2}
+                                            />
                                         )}
                                     </React.Fragment>
                                 ))}

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
-import { atributos, symbols } from '../../../constants.js';
+import { atributos, button_text, symbols } from '../../../constants.js';
 import { getSortIcon } from '../../utils.js';
 import useGastos from '../../hooks/useGastos.js';
 import useIngresos from '../../hooks/useIngresos.js';
@@ -33,7 +33,7 @@ const MovimientoList = ({ keyId, routeParams }) => {
     const tipo = routeParams?.tipo || route.params?.tipo;
     const esEntrada = tipo === 'entradas';
     const MovimientoForm = esEntrada ? 'IngresoForm' : 'GastoForm';
-    const MovimientoLabelForm = esEntrada ? 'Nuevo Ingreso' : 'Nuevo Gasto'
+    const MovimientoLabelForm = esEntrada ? 'Nueva Entrada' : 'Nueva Salida'
 
     const { gastos, loading, fetchGastos } = useGastos(keyId);
     const { ingresos, loadingIngreso, fetchIngresos } = useIngresos(keyId);
@@ -135,51 +135,61 @@ const MovimientoList = ({ keyId, routeParams }) => {
 
     const { categoria, subcategoria, responsable, moneda, metodopago, submetodopago } = useCombinedData(keyId);
 
-    const [categorias, setCategorias] = React.useState([]);
-    const [subcategorias, setSubcategorias] = React.useState([]);
-    const [responsables, setResponsables] = React.useState([]);
-    const [monedas, setMonedas] = React.useState([]);
-    const [metodopagos, setMetodopagos] = React.useState([]);
-    const [submetodopagos, setSubmetodopagos] = React.useState([]);
 
-    React.useEffect(() => {
-        setCategorias(categoria.map(item => ({
+
+    const categorias = React.useMemo(() => 
+        categoria.map(item => ({
             nombre: item.categoria,
             activo: item.categoria_activo,
-        })));
-        setSubcategorias(subcategoria.map(item => ({
+        })), 
+        [categoria]
+    );
+    
+    const subcategorias = React.useMemo(() => 
+        subcategoria.map(item => ({
             nombre: item.subcategoria,
             activo: item.subcategoria_activo,
-        })));
-        setResponsables(responsable.map(item => ({
+        })), 
+        [subcategoria]
+    );
+    
+    const responsables = React.useMemo(() => 
+        responsable.map(item => ({
             nombre: item.responsable,
             activo: item.responsable_activo,
-        })));
-        setMonedas(moneda.map(item => ({
+        })), 
+        [responsable]
+    );
+    
+    const monedas = React.useMemo(() => 
+        moneda.map(item => ({
             nombre: item.codigo_moneda,
             activo: item.moneda_activo,
-        })));
-        setMetodopagos(metodopago.map(item => ({
+        })), 
+        [moneda]
+    );
+    
+    const metodopagos = React.useMemo(() => 
+        metodopago.map(item => ({
             nombre: item.metodopago,
             activo: true,
-        })));
-        setSubmetodopagos(submetodopago.map(item => ({
+        })), 
+        [metodopago]
+    );
+    
+    const submetodopagos = React.useMemo(() => 
+        submetodopago.map(item => ({
             nombre: item.submetodo_pago,
             activo: item.submetodo_pago_activo,
-        })));
-    }, [keyId, categoria, subcategoria, responsable, moneda, metodopago, submetodopago]);
+        })), 
+        [submetodopago]
+    );
     
-
-    const atributosSearch = useMemo(() => getAtributosSearch(esEntrada, { categorias, subcategorias, responsables, monedas, metodopagos, submetodopagos }), [
-        esEntrada,
-        categorias,
-        subcategorias,
-        responsables,
-        monedas,
-        metodopagos,
-        submetodopagos,
-    ]);
-
+    const atributosSearch = React.useMemo(() => 
+        getAtributosSearch(esEntrada, { categorias, subcategorias, responsables, monedas, metodopagos, submetodopagos }), 
+        [esEntrada, categorias, subcategorias, responsables, monedas, metodopagos, submetodopagos]
+    );
+    
     return (
         <>
             <View style={{ backgroundColor: styleMovimiento.colorBackground }}>
@@ -208,7 +218,9 @@ const MovimientoList = ({ keyId, routeParams }) => {
                 onRefresh={onRefresh}
                 refreshing={refreshing}
                 onEdit={onEdit}
+                boton1={button_text.edit}
                 onDelete={onDelete}
+                boton2={button_text.archivar}
                 loading={isLoading}
                 page={page}
                 pageSize={pageSize}

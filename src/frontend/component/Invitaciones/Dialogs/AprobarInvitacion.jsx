@@ -23,7 +23,7 @@ const AprobarInvitacion = ({
     const handleAprobar = async () => {
         try {
             setLoading(true)
-            const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_invitaciones}${symbols.barra}${invitacionId}`, {
+            const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_invitaciones}${symbols.barra}aprobar${symbols.barra}${invitacionId}`, {
                 method: "PUT",
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -64,7 +64,7 @@ const AprobarInvitacion = ({
                 </Dialog>
             </Portal>
             <Error visibleError={visibleError} setVisibleError={setVisibleError} message={message} />
-            <Correcto visibleOk={visibleOk} setVisibleOk={setVisibleOk} message={message} />
+            <Correcto visibleOk={visibleOk} setVisibleOk={setVisibleOk} message={message} goBack={true}/>
         </>
     )
 }

@@ -63,14 +63,12 @@ export const AuthProvider = ({ children }) => {
         console.error('No refresh token found');
         return false;
       }
-
       const response = await globalThis.fetch(`${PAGINA_URL}/refreshTokens`, {
         method: 'POST',
         headers: {
           'refresh-token': credentials.password,
         },
       });
-
       if (!response.ok) {
         console.error('Error refreshing access token');
         return false;

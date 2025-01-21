@@ -12,7 +12,7 @@ const Correcto = ({
 }) => {
   return (
     <Portal>
-    <Dialog style={{backgroundColor:theme.colors.white}} visible={visible} onDismiss={() => [setVisible(false), navigation.navigate(`Drawer`)]}>
+    <Dialog style={{backgroundColor:theme.colors.white}} visible={visible} onDismiss={() => [setVisible(false), navigation.navigate(`Drawer`, {nombreUsuario:nombreUsuario})]}>
       <Dialog.Icon color={theme.colors.primary}  icon={'account-check'} />
       <Dialog.Title style={styleDialog.title}>{'Inicio de sesion correcto'}</Dialog.Title>
       <Dialog.Content>

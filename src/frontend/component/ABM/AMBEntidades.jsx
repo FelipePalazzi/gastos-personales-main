@@ -14,6 +14,7 @@ import useCombinedData from '../../hooks/useCombinedData';
 import FaltanDatos from '../Comunes/Dialogs/FaltanDatos.jsx';
 import Correcto from '../Comunes/Dialogs/CorrectoNavigation.jsx';
 import Delete from '../Comunes/Dialogs/Delete.jsx';
+import Error from '../Comunes/Dialogs/Error';
 import SearchDropdown from '../Comunes/Busqueda/SearchDropdown';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
@@ -30,6 +31,7 @@ const AMBEntidades = ({ navigation }) => {
   const [visibleOK, setvisibleOK] = useState(false);
   const [visibleDelete, setvisibleDelete] = useState(false);
   const [visibleOKDelete, setvisibleOKDelete] = useState(false);
+  const [visibleError, setVisibleError] = useState(false);
   const [message, setMessage] = useState([]);
   const [ABM, setABM] = useState('crear');
   const { categoria, subcategoria, responsable, moneda, metodopago, submetodopago } = useCombinedData(keyId);
@@ -39,6 +41,7 @@ const AMBEntidades = ({ navigation }) => {
   const [monedas, setMonedas] = React.useState([]);
   const [metodopagos, setMetodopagos] = React.useState([]);
   const [submetodopagos, setSubmetodopagos] = React.useState([]);
+
   React.useEffect(() => {
     setCategorias(categoria.map(item => ({ id: item.id_categoria, nombre: item.categoria, activo: item.categoria_activo })));
     setSubcategorias(subcategoria.map(item => ({
@@ -149,7 +152,7 @@ const AMBEntidades = ({ navigation }) => {
               <SearchDropdown
                 options={categorias
                   .filter(option => ABM !== 'archivar' ? option.activo : true)
-                  .map(option => ({id: option.id, nombre: option.nombre, activo: option.activo }))}
+                  .map(option => ({ id: option.id, nombre: option.nombre, activo: option.activo }))}
                 placeholder={'Categoria asociada'}
                 value={categorias.find(option => option.id === item.categoria)?.nombre}
                 onSelect={(selectedName) => {
@@ -165,7 +168,7 @@ const AMBEntidades = ({ navigation }) => {
               <SearchDropdown
                 options={responsables
                   .filter(option => ABM !== 'archivar' ? option.activo : true)
-                  .map(option => ({id: option.id,  nombre: option.nombre, activo: option.activo }))}
+                  .map(option => ({ id: option.id, nombre: option.nombre, activo: option.activo }))}
                 placeholder={'Responsable asociado'}
                 value={responsable.find(option => option.id === item.responsable)?.nombre}
                 onSelect={(selectedName) => {
@@ -180,9 +183,9 @@ const AMBEntidades = ({ navigation }) => {
             </>}
           {(key === 'submetodopago') &&
             <SearchDropdown
-            options={metodopagos
-              .filter(option => ABM !== 'archivar' ? option.activo : true)
-              .map(option => ({id: option.id,  nombre: option.nombre, activo: option.activo }))}
+              options={metodopagos
+                .filter(option => ABM !== 'archivar' ? option.activo : true)
+                .map(option => ({ id: option.id, nombre: option.nombre, activo: option.activo }))}
               placeholder={'Metodo de pago asociado'}
               value={metodopagos.find(option => option.id === item.metodo_pago)?.nombre}
               onSelect={(selectedName) => {
@@ -222,11 +225,15 @@ const AMBEntidades = ({ navigation }) => {
         setMessage(`Se creo correctamente`)
         setvisibleOK(true)
       } else {
-        alert("Error al enviar los datos");
+        const errorData = await response.json();
+        setMessage(errorData.message || 'Error desconocido.');
+        setVisibleError(true);
       }
     } catch (error) {
       console.error(error);
-      alert("Error al conectar con la API");
+      const errorData = await response.json();
+      setMessage(errorData.message || 'Error desconocido.');
+      setVisibleError(true);
     }
   };
 
@@ -252,11 +259,15 @@ const AMBEntidades = ({ navigation }) => {
         setMessage(`Se Modifico correctamente`)
         setvisibleOK(true)
       } else {
-        alert('Error al modificar la entidad');
+        const errorData = await response.json();
+        setMessage(errorData.message || 'Error desconocido.');
+        setVisibleError(true);
       }
     } catch (error) {
       console.error(error);
-      alert('Error al conectar con la API');
+      const errorData = await response.json();
+      setMessage(errorData.message || 'Error desconocido.');
+      setVisibleError(true);
     }
   };
 
@@ -281,11 +292,15 @@ const AMBEntidades = ({ navigation }) => {
         setMessage(`Se ${item.activo ? 'Archivo' : 'Desarchivo'} correctamente`)
         setvisibleOKDelete(true)
       } else {
-        alert('Error al eliminar la entidad');
+        const errorData = await response.json();
+        setMessage(errorData.message || 'Error desconocido.');
+        setVisibleError(true);
       }
     } catch (error) {
       console.error(error);
-      alert('Error al conectar con la API');
+      const errorData = await response.json();
+      setMessage(errorData.message || 'Error desconocido.');
+      setVisibleError(true);
     }
   };
 
@@ -351,6 +366,7 @@ const AMBEntidades = ({ navigation }) => {
             navigation={navigation}
             goBack={true}
           />
+          <Error visibleError={visibleError} setVisibleError={setVisibleError} message={message} />
 
           {/* Botones de acción */}
           <View style={styleForm.rowButton}>

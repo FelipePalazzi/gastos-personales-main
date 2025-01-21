@@ -131,6 +131,7 @@ const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, key
       case 'monedaInput':
         return (
           filters.monedaFiltro && <CurrencyInput
+            key={key}
             value={filters[key]}
             onChange={(value) => handleInputChange(key, value)}
             label={`Monto ${filters.monedaFiltro} ${label}`}

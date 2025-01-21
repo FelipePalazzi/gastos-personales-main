@@ -22,12 +22,12 @@ function CustomDrawerContent({ keyId, nombreKey = 'Cargando...' }) {
   const [visibleCodigo, setVisibleCodigo] = useState(false);
   const handlePress = () => {
     setVisibleCodigo(false);
-};
+  };
 
   return (
     <DrawerContentScrollView>
-      <View style={[styleDrawer.container, {backgroundColor:theme.colors.white}]}>
-        <Text style={[styleComun.title, {color:theme.colors.primary}]}>Hola {usernameLogeado}!</Text>
+      <View style={[styleDrawer.container, { backgroundColor: theme.colors.white }]}>
+        <Text style={[styleComun.title, { color: theme.colors.primary }]}>Hola {usernameLogeado}!</Text>
       </View>
       <Submenu
         label="Modificacion de entidades"
@@ -37,9 +37,16 @@ function CustomDrawerContent({ keyId, nombreKey = 'Cargando...' }) {
         menuItems={menuItems}
       />
       <DrawerItem
-        label="Administrar Invitaciones"
+        label="Invitaciones recibidas"
         onPress={() => navigation.navigate('Invitacioneskey', { keyId: keyId })}
         icon={({ }) => <Icon name="card-account-mail" size={theme.fontSizes.body} color={theme.colors.white} />}
+        style={{ marginTop: 10 }}
+        labelStyle={{ color: theme.colors.white }}
+      />
+      <DrawerItem
+        label="Invitaciones enviadas"
+        onPress={() => navigation.navigate('Invitacionesuser')}
+        icon={({ }) => <Icon name="send-clock" size={theme.fontSizes.body} color={theme.colors.white} />}
         style={{ marginTop: 10 }}
         labelStyle={{ color: theme.colors.white }}
       />
@@ -68,7 +75,7 @@ function CustomDrawerContent({ keyId, nombreKey = 'Cargando...' }) {
         style={{ marginTop: 10 }}
         labelStyle={{ color: theme.colors.white }}
       />
-<CodigoInvitacionIngresar visible={visibleCodigo} handlePress={handlePress} keyName={nombreKey} />
+      <CodigoInvitacionIngresar visible={visibleCodigo} handlePress={handlePress} keyName={nombreKey} />
     </DrawerContentScrollView>
   );
 }

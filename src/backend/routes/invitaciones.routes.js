@@ -12,7 +12,8 @@ router.post(`${symbols.barra}${pagina.pagina_invitaciones}${symbols.barra}:userI
 
 router.delete(`${symbols.barra}${pagina.pagina_invitaciones}${symbols.barra}:id`,authenticateToken, invitacionesController.deleteinvitacion);
 
-router.put(`${symbols.barra}${pagina.pagina_invitaciones}${symbols.barra}:id`,authenticateToken, invitacionesController.aprobarinvitacion);
+router.put(`${symbols.barra}${pagina.pagina_invitaciones}${symbols.barra}aprobar${symbols.barra}:id`,authenticateToken, invitacionesController.aprobarinvitacion);
 
+router.put(`${symbols.barra}${pagina.pagina_invitaciones}${symbols.barra}rechazar${symbols.barra}:id`,authenticateToken, invitacionesController.rechazarinvitacion);
 
 module.exports = router;

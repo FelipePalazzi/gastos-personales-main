@@ -9,7 +9,9 @@ const CardTable = ({
     Cardrows,
     item,
     onDelete,
+    boton1,
     onEdit,
+    boton2,
     style
 }) => {
     return (
@@ -28,24 +30,24 @@ const CardTable = ({
                 ))}
                 <View>
                     <Card.Actions>
-                        <View>
+                        {boton1 && <View>
                             <Icon.Button
                                 backgroundColor={theme.colors.primary}
                                 color={theme.colors.white}
                                 name={theme.icons.editar}
                                 onPress={() => onEdit(item)}
-                            >{button_text.edit}
+                            >{boton1}
                             </Icon.Button>
-                        </View>
-                        <View>
+                        </View>}
+                        {boton2 && <View>
                             <Icon.Button
                                 backgroundColor={theme.colors.white}
                                 color={theme.colors.primary}
                                 name={theme.icons.borrar}
                                 onPress={() => onDelete(item)}
-                            >{button_text.delete}
+                            >{boton2}
                             </Icon.Button>
-                        </View>
+                        </View>}
                     </Card.Actions>
                 </View>
             </Card.Content>

@@ -103,7 +103,6 @@ const MovimientoForm = ({ routeParams }) => {
         }
     }, [categorias, responsables, subcategorias]);
 
-
     const atributosForm = useMemo(() => getAtributosForm(esEntrada, { categorias, subcategorias, responsables, monedas, metodopagos, submetodopagos }), [
         esEntrada,
         categorias,

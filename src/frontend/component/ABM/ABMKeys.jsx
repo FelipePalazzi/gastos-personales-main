@@ -14,6 +14,7 @@ import Correcto from '../Comunes/Dialogs/CorrectoNavigation.jsx';
 import Delete from '../Comunes/Dialogs/Delete.jsx';
 import SearchDropdown from '../Comunes/Busqueda/SearchDropdown';
 import useGetKeys from '../../hooks/useGetKeys';
+import Error from '../Comunes/Dialogs/Error';
 
 const AMBKeys = ({ navigation }) => {
     const route = useRoute();
@@ -28,9 +29,10 @@ const AMBKeys = ({ navigation }) => {
     const [visibleOK, setvisibleOK] = useState(false);
     const [visibleDelete, setvisibleDelete] = useState(false);
     const [visibleOKDelete, setvisibleOKDelete] = useState(false);
+    const [visibleError, setVisibleError] = useState(false);
     const [message, setMessage] = useState([]);
     const [keys, setKeys] = React.useState([]);
-    const {getkeys, loading, fetchGetKeys} = useGetKeys();
+    const { getkeys, loading, fetchGetKeys } = useGetKeys();
 
     useEffect(() => {
         setKeys(getkeys.map(item => ({ id: item.id_key, nombre: item.nombre, descripcion: item.descripcion, activo: item.activo })));
@@ -90,7 +92,7 @@ const AMBKeys = ({ navigation }) => {
                                 height: 38,
                                 paddingVertical: 10,
                                 color: theme.colors.white,
-                                marginBottom:20,
+                                marginBottom: 20,
                             }}
                             outlineStyle={{ borderColor: ABM === 'archivar' ? theme.colors.disabled : theme.colors.primary, borderRadius: 27 }}
                             disabled={ABM === 'archivar'}
@@ -148,11 +150,15 @@ const AMBKeys = ({ navigation }) => {
                 setMessage(`Se creo correctamente`)
                 setvisibleOK(true)
             } else {
-                alert("Error al enviar los datos");
+                const errorData = await response.json();
+                setMessage(errorData.message || 'Error desconocido.');
+                setVisibleError(true);
             }
         } catch (error) {
             console.error(error);
-            alert("Error al conectar con la API");
+            const errorData = await response.json();
+            setMessage(errorData.message || 'Error desconocido.');
+            setVisibleError(true);
         }
     };
 
@@ -178,11 +184,15 @@ const AMBKeys = ({ navigation }) => {
                 setMessage(`Se Modifico correctamente`)
                 setvisibleOK(true)
             } else {
-                alert('Error al modificar la entidad');
+                const errorData = await response.json();
+                setMessage(errorData.message || 'Error desconocido.');
+                setVisibleError(true);
             }
         } catch (error) {
             console.error(error);
-            alert('Error al conectar con la API');
+            const errorData = await response.json();
+            setMessage(errorData.message || 'Error desconocido.');
+            setVisibleError(true);
         }
     };
 
@@ -207,11 +217,15 @@ const AMBKeys = ({ navigation }) => {
                 setMessage(`Se ${item.activo ? 'Archivo' : 'Desarchivo'} correctamente`)
                 setvisibleOKDelete(true)
             } else {
-                alert('Error al eliminar la entidad');
+                const errorData = await response.json();
+                setMessage(errorData.message || 'Error desconocido.');
+                setVisibleError(true);
             }
         } catch (error) {
             console.error(error);
-            alert('Error al conectar con la API');
+            const errorData = await response.json();
+            setMessage(errorData.message || 'Error desconocido.');
+            setVisibleError(true);
         }
     };
 
@@ -227,7 +241,7 @@ const AMBKeys = ({ navigation }) => {
                     <SegmentedButtons
                         value={ABM}
                         onValueChange={setABM}
-                        style={{ marginHorizontal: 20, marginTop:20 }}
+                        style={{ marginHorizontal: 20, marginTop: 20 }}
                         buttons={[
                             {
                                 value: 'crear',
@@ -278,6 +292,7 @@ const AMBKeys = ({ navigation }) => {
                         navigation={navigation}
                         goBack={true}
                     />
+                    <Error visibleError={visibleError} setVisibleError={setVisibleError} message={message}/>
 
                     {/* Botones de acción */}
                     <View style={styleForm.rowButton}>

@@ -1,23 +1,21 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
-import { atributos, symbols } from '../../../constants.js';
-import { getSortIcon } from '../../utils.js';
+import { getSortIcon, decodeTokenUsername } from '../../utils.js';
 import SearchDropdown from '../Comunes/Busqueda/SearchDropdown.jsx';
 import Header from '../Comunes/DataTable/Header.jsx';
 import Rows from '../Comunes/DataTable/Rows.jsx';
 import Pagination from '../Comunes/DataTable/Pagination.jsx';
-import { styleMovimiento, styleComun } from '../../styles/styles.js';
-import { getColumns, getCardRows, getAtributosSearch } from './listConfig.js';
-import useInvitacionesKey from '../../hooks/useInvitacionesKey.js';
-import PickerModal from '../Main/PickerModal.jsx';
+import { styleMovimiento, styleComun, screenWidth } from '../../styles/styles.js';
+import { getColumns, getCardRows } from './listUserConfig.js';
+import useInvitacionesUser from '../../hooks/useInvitacionesUser.js';
 import theme from '../../theme/theme.js';
-import CodigoInvitacion from './Dialogs/CodigoInvitacion.jsx';
-import AprobarInvitacion from './Dialogs/AprobarInvitacion.jsx';
 import CancelarInvitacion from './Dialogs/CancelarInvitacion.jsx';
+import { useAuth } from '../../helpers/AuthContext.js';
+import CodigoInvitacionIngresar from './Dialogs/CodigoInvitacionIngresar.jsx';
 
-const InvitacionesList = ({ keyId, handleKeyId, keys, nombreKey = 'Cargando...', navigation }) => {
+const InvitacionesListUser = ({ navigation }) => {
     const [message, setMessage] = useState('');
     const [orden, setOrden] = useState('asc');
     const [columna, setColumna] = useState('id');
@@ -26,62 +24,58 @@ const InvitacionesList = ({ keyId, handleKeyId, keys, nombreKey = 'Cargando...',
     const [pageSize, setPageSize] = useState(10);
     const [numberOfItemsPerPage, onItemsPerPageChange] = useState(10);
     const [expanded, setExpanded] = useState({});
-    const [isLoading, setIsLoading] = useState(false);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [visibleCodigo, setVisibleCodigo] = useState(false);
-    const [visibleAprobar, setVisibleAprobar] = useState(false);
     const [visibleCancelar, setVisibleCancelar] = useState(false);
-
-    const { getinvitacioneskey, loading, fetchInvitacioneskey } = useInvitacionesKey(keyId);
+    const { accessToken } = useAuth()
+    const nombreUsuario = decodeTokenUsername(accessToken)
+    const { getinvitacionesuser, loading, fetchInvitacionesuser } = useInvitacionesUser();
 
     const data = useMemo(() => {
-        return Array.isArray(getinvitacioneskey)
-            ? getinvitacioneskey.map(({ id_invitacion, ...rest }) => ({
+        return Array.isArray(getinvitacionesuser)
+            ? getinvitacionesuser.map(({ id_invitacion, ...rest }) => ({
                 id: id_invitacion,
                 ...rest,
             }))
             : [];
-    }, [getinvitacioneskey]);
+    }, [getinvitacionesuser]);
 
     const handlePressRow = useCallback((invitacionId, index) => {
         setExpanded((prevExpanded) => ({ ...prevExpanded, [invitacionId]: !prevExpanded[invitacionId] }));
     }, []);
 
-    const prevKeyId = useRef(keyId);
     const prevQuery = useRef(query);
 
     const fetchData = useCallback(
         async (filters) => {
-            if (keyId) {
-                await fetchInvitacioneskey(filters);
-            }
+            await fetchInvitacionesuser(filters);
         },
-        [fetchInvitacioneskey, keyId]
+        [fetchInvitacionesuser]
     );
+
+    const [hasRefreshed, setHasRefreshed] = useState(false);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         const filters = query ? `estado=${query}` : `estado=Pendiente`;
         await fetchData(filters);
         setRefreshing(false);
+        setHasRefreshed(true); 
     }, [fetchData, query]);
 
-    const [codigo, setCodigo] = useState(keys.find((key) => Number(key.id_key) === Number(keyId))?.codigo_invitacion || '')
-
-    const handlePress = () => {
-        setVisibleCodigo(false);
-    };
+    const prevStates = useRef({ visibleCancelar: false, visibleCodigo: false });
 
     useEffect(() => {
-        const selectedKey = keys.find((key) => Number(key.id_key) === Number(keyId));
-        setCodigo(selectedKey?.codigo_invitacion || '');
-
-        if (keyId !== prevKeyId.current) {
-            prevKeyId.current = keyId;
+        const { visibleCancelar: prevVisibleCancelar, visibleCodigo: prevVisibleCodigo } = prevStates.current;
+    
+        if (
+            (prevVisibleCancelar && !visibleCancelar) || 
+            (prevVisibleCodigo && !visibleCodigo)       
+        ) {
             onRefresh();
         }
-    }, [keyId, onRefresh, keys]);
-
+    
+        prevStates.current = { visibleCancelar, visibleCodigo };
+    }, [visibleCancelar, visibleCodigo, onRefresh]);
+    
 
     useEffect(() => {
         if (query !== prevQuery.current) {
@@ -113,19 +107,11 @@ const InvitacionesList = ({ keyId, handleKeyId, keys, nombreKey = 'Cargando...',
         onRefresh();
     }, [numberOfItemsPerPage]);
 
-    const handleSubmit = async () => {
-        setVisibleCodigo(true)
-    }
     const [invitacionId, setInvitacionId] = useState(null);
-
-    const handleAprobar = async (item) => {
-        setInvitacionId(item.id)
-        setVisibleAprobar(true)
-    }
 
     const handleCancelar = async (item) => {
         setInvitacionId(item.id)
-        setVisibleAprobar(true)
+        setVisibleCancelar(true)
     }
 
     const columns = useMemo(() => getColumns(), []);
@@ -151,11 +137,16 @@ const InvitacionesList = ({ keyId, handleKeyId, keys, nombreKey = 'Cargando...',
         }
     }, [loading, data, query]);
 
+    const [visibleCodigo, setVisibleCodigo] = useState(false);
+    const handlePressCodigo = () => {
+        setVisibleCodigo(!visibleCodigo);
+    };
+
     return (
         <>
             <View style={{ backgroundColor: styleMovimiento.colorBackground }}>
 
-                <View style={{ flexDirection: 'row', backgroundColor: theme.colors.primary, paddingTop: 45, paddingBottom: 8, alignItems: 'center' }}>
+                <View style={{ justifyContent: 'space-between', flexDirection: 'row', backgroundColor: theme.colors.primary, paddingTop: 45, paddingBottom: 8 }}>
                     <View style={{ alignItems: 'center' }}>
                         <TouchableOpacity
                             style={{
@@ -169,23 +160,21 @@ const InvitacionesList = ({ keyId, handleKeyId, keys, nombreKey = 'Cargando...',
 
                         </TouchableOpacity>
                     </View>
-                    <View style={styleComun.keys.container}>
-                        <TouchableOpacity
-                            style={styleComun.keys.button}
-                            onPress={() => setModalVisible(true)}
-                        >
-                            <Text style={styleComun.keys.buttonText}>
-                                {nombreKey}
-                            </Text>
-                            <Icon name="menu-down" size={20} color={theme.colors.white} style={{ marginLeft: 10 }} />
-                        </TouchableOpacity>
-
+                    <View style={[styleComun.keys.container, { width: screenWidth / 2 }]}>
+                        <Icon name="account" size={20} color={theme.colors.white} style={{ marginLeft: 10 }} />
+                        <Text style={styleComun.keys.buttonText}>
+                            {nombreUsuario ? nombreUsuario : 'Cargando...'}
+                        </Text>
                     </View>
                 </View>
-                {keys && <PickerModal keys={keys} modalVisible={modalVisible} setModalVisible={setModalVisible} handleKeyId={handleKeyId} navigation={navigation} nombreKey={nombreKey} />}
-
                 <SearchDropdown
-                    options={[{ nombre: 'Pendiente', activo: true }, { nombre: 'Expirada', activo: true }, { nombre: 'Aprobada', activo: true }, { nombre: 'Cancelada', activo: true }]}
+                    options={
+                        [{ nombre: 'Pendiente', activo: true },
+                        { nombre: 'Expirada', activo: true },
+                        { nombre: 'Aprobada', activo: true },
+                        { nombre: 'Cancelada', activo: true },
+                        { nombre: 'Rechazada', activo: true }]
+                    }
                     placeholder={'Estado'}
                     onSelect={(value) => {
                         setQuery(value.nombre);
@@ -212,9 +201,9 @@ const InvitacionesList = ({ keyId, handleKeyId, keys, nombreKey = 'Cargando...',
                 Cardrows={cardrows}
                 onRefresh={onRefresh}
                 refreshing={refreshing}
-                onEdit={handleAprobar}
                 onDelete={handleCancelar}
-                loading={isLoading}
+                boton2={(query === 'Pendiente' || query === '') ? 'Cancelar' : null}
+                loading={loading}
                 page={page}
                 pageSize={pageSize}
                 style={styleMovimiento}
@@ -227,15 +216,16 @@ const InvitacionesList = ({ keyId, handleKeyId, keys, nombreKey = 'Cargando...',
                 numberOfPages={numberOfPages}
                 numberOfItemsPerPageList={numberOfItemsPerPageList}
                 numberOfItemsPerPage={numberOfItemsPerPage}
-                handleSubmit={handleSubmit}
                 onItemsPerPageChange={handleItemsPerPageChange}
                 style={styleMovimiento}
+                handleSubmit={handlePressCodigo}
+                IconHandleSumbit={'clipboard-plus-outline'}
+                textIconSumbit={'Unirse'}
             />
-            <CodigoInvitacion visible={visibleCodigo} handlePress={handlePress} codigo={codigo} keyName={nombreKey} />
-            <AprobarInvitacion visible={visibleAprobar} setVisible={setVisibleAprobar} invitacionId={invitacionId} />
             <CancelarInvitacion visible={visibleCancelar} setVisible={setVisibleCancelar} invitacionId={invitacionId} />
+            <CodigoInvitacionIngresar visible={visibleCodigo} handlePress={handlePressCodigo} />
         </>
     );
 };
 
-export default InvitacionesList;
+export default InvitacionesListUser;

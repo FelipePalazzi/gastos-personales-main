@@ -9,7 +9,7 @@ monedaController.getMoneda = async (req, res, next) => {
     const keyIdNum = Number(keyId);
     const { activo } = req.query; // true, false, or null
     const activeFilter = activo === 'null' ? null : activo === 'true';
-    const allowedRoles = ['admin', 'admin_creator'];
+    const allowedRoles = ['admin', 'admin_creator', 'user'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
@@ -50,7 +50,7 @@ monedaController.getMonedaFaltante = async (req, res, next) => {
   try {
     const { keyId } = req.params;
     const keyIdNum = Number(keyId);
-    const allowedRoles = ['admin', 'admin_creator'];
+    const allowedRoles = ['admin', 'admin_creator', 'user'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
@@ -91,7 +91,7 @@ monedaController.getMonedabyID = async (req, res, next) => {
   try {
     const { keyId, id } = req.params;
     const keyIdNum = Number(keyId);
-    const allowedRoles = ['admin', 'admin_creator'];
+    const allowedRoles = ['admin', 'admin_creator', 'user'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });

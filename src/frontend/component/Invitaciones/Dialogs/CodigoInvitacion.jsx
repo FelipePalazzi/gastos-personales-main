@@ -41,13 +41,13 @@ const CodigoInvitacion = ({
                 </Dialog.Title>
                 <Dialog.Content>
                     <TouchableWithoutFeedback onPress={copyToClipboard}>
-                        <View style={[styleDialog.searchbarContainer, { marginTop:10}]}>
+                        <View style={[styleDialog.searchbarContainer, { marginTop: 10 }]}>
                             {copiado ? (
-                                <Text style={[styleDialog.label, { top: 3}]}>
+                                <Text style={[styleDialog.label, { top: 3 }]}>
                                     Copiado
                                 </Text>
-                            ) : 
-                            <Text style={[styleDialog.label, {top: 3,color:theme.colors.primary}]}>
+                            ) :
+                                <Text style={[styleDialog.label, { top: 3, color: theme.colors.primary }]}>
                                     Código de invitación:
                                 </Text>}
                             <Searchbar
@@ -57,9 +57,9 @@ const CodigoInvitacion = ({
                                 multiline={true}
                                 style={[
                                     {
-                                        minHeight: 60, 
+                                        minHeight: 60,
                                         justifyContent: "center",
-                                        paddingVertical:10
+                                        paddingVertical: 10
                                     },
                                     copiado
                                         ? styleDialog.modalSearchbar
@@ -90,10 +90,20 @@ const CodigoInvitacion = ({
                             />
                         </View>
                     </TouchableWithoutFeedback>
+                    {!copiado && <View style={[styleDialog.searchbarContainer, {marginTop:-10,width:'93%',flexDirection:'row', alignItems:'center', justifyContent:'flex-end' }]}>
+                        <Icon
+                            backgroundColor={theme.colors.white}
+                            color={theme.colors.primary}
+                            name={"information-outline"}
+                        />
+                        <Text style={{ color: theme.colors.primary }}>
+                            Toque arriba para copiar
+                        </Text>
+                    </View>}
                 </Dialog.Content>
                 <Dialog.Actions
                     style={{
-                        marginEnd: screenWidth/5.2,
+                        marginEnd: screenWidth / 5.2,
                         alignItems: "flex-start",
                     }}
                 >

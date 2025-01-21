@@ -8,8 +8,9 @@ import LoadingScreen from '../Comunes/Loading/LoadingScreen.jsx';
 import { styleDrawer } from '../../styles/styles.js';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import InvitacionesList from '../Invitaciones/InvitacionesList.jsx';
+import InvitacionesListKeys from '../Invitaciones/InvitacionesListKeys.jsx';
 import { useNavigate } from 'react-router-native';
+import InvitacionesListUser from '../Invitaciones/InvitacionesListUser.jsx';
 
 
 const Drawer = createDrawerNavigator();
@@ -19,6 +20,7 @@ function DrawerNavigator() {
   const [keyId, setKeyId] = useState(null);
   const [nombreKey, setNombreKey] = useState('Selecciona una Key');
   const navigation = useNavigate()
+
   useFocusEffect(
     useCallback(() => {
       const loadKeysOnFocus = async () => {
@@ -33,40 +35,44 @@ function DrawerNavigator() {
     }, [])
   );
 
-    useEffect(() => {
-      const getKeyId = async () => {
-        try {
-          const storedKeyId = await AsyncStorage.getItem('keyId');
-          if (!keyId && storedKeyId !== null) {
-            setKeyId(storedKeyId);
-          } else if (!storedKeyId) {
-            setNombreKey('Seleccione una key...');
-          }
-        } catch (error) {
-          console.log('Error fetching keyId:', error);
-        }
-      };
-      getKeyId();
-    }, [keyId]);
-    
-
-    useEffect(() => {
-      if (keyId && getkeys.length > 0) {
-        const key = getkeys.find((key) => Number(key.id_key) === Number(keyId));
-        setNombreKey(key ? key.nombre : 'Key no encontrada. Seleccione otra');
-      }
-    }, [keyId, getkeys]);
-    
-
-    const handleKeyId = async (itemValue) => {
-      setKeyId(itemValue);
+  useEffect(() => {
+    const getKeyId = async () => {
       try {
-        await AsyncStorage.setItem('keyId', itemValue.toString());
+        const storedKeyId = await AsyncStorage.getItem('keyId');
+        if (!keyId && storedKeyId !== null) {
+          setKeyId(storedKeyId);
+        } else if (!storedKeyId && getkeys.length > 0) {
+          const firstKey = getkeys[0];
+          if (firstKey) {
+            setKeyId(firstKey.id_key); 
+          }
+        } else if (!storedKeyId) {
+          setNombreKey('Seleccione una key...');
+        }
       } catch (error) {
-        console.log('Error saving keyId:', error);
+        console.log('Error fetching keyId:', error);
       }
-      navigation.setParams({ keyId: itemValue });
     };
+
+    getKeyId();
+  }, [getkeys]); 
+
+  useEffect(() => {
+    if (keyId && getkeys.length>0) {
+      const key = getkeys.find((key) => Number(key.id_key) === Number(keyId));
+      setNombreKey(key ? key.nombre : 'Key no encontrada. Seleccione otra');
+    }
+  }, [keyId, getkeys]);
+
+  const handleKeyId = async (itemValue) => {
+    setKeyId(itemValue);
+    try {
+      await AsyncStorage.setItem('keyId', itemValue.toString());
+    } catch (error) {
+      console.log('Error saving keyId:', error);
+    }
+    navigation.setParams({ keyId: itemValue });
+  };
 
   return (
     <Drawer.Navigator
@@ -86,13 +92,19 @@ function DrawerNavigator() {
         name="HomeTab"
         options={{ headerShown: false }}
       >
-        {(props) => <HomeTab {...props} keyId={keyId} handleKeyId={handleKeyId} keys={getkeys} nombreKey={nombreKey}/> || <LoadingScreen Nombre={"Datos"} />}
+        {(props) => <HomeTab {...props} keyId={keyId} handleKeyId={handleKeyId} keys={getkeys} nombreKey={nombreKey} /> || <LoadingScreen Nombre={"Datos"} />}
       </Drawer.Screen>
       <Drawer.Screen
         name="Invitacioneskey"
         options={{ headerShown: false, animation: "slide" }}
       >
-        {(props) => <InvitacionesList {...props} keyId={keyId} handleKeyId={handleKeyId} keys={getkeys} nombreKey={nombreKey}/> || <LoadingScreen Nombre={"Datos"} />}
+        {(props) => <InvitacionesListKeys {...props} keyId={keyId} handleKeyId={handleKeyId} keys={getkeys} nombreKey={nombreKey} /> || <LoadingScreen Nombre={"Invitaciones"} />}
+      </Drawer.Screen>
+      <Drawer.Screen
+        name="Invitacionesuser"
+        options={{ headerShown: false, animation: "slide" }}
+      >
+        {(props) => <InvitacionesListUser {...props}/> || <LoadingScreen Nombre={"Invitaciones"} />}
       </Drawer.Screen>
     </Drawer.Navigator>
   );

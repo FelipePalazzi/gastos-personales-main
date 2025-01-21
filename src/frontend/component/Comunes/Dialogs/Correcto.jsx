@@ -14,9 +14,9 @@ const Error = ({
             <Dialog style={{ backgroundColor: theme.colors.white }} visible={visibleOk} onDismiss={() => setVisibleOk(false)}>
                 <Dialog.Icon color={theme.colors.primary} icon={'cloud-check'} />
                 <Dialog.Title style={styleDialog.title}>Correcto</Dialog.Title>
-                <Dialog.Content style={{ alignItems: 'center' }}>
+                {message && <Dialog.Content style={{ alignItems: 'center' }}>
                     <Text style={[styleDialog.dateText, { marginRight: 0 }]}>{message}</Text>
-                </Dialog.Content>
+                </Dialog.Content>}
                 <Dialog.Actions style={{ marginEnd: screenWidth / 5, marginTop: 10 }}>
                     <Icon.Button backgroundColor={theme.colors.primary} color={theme.colors.white} name={'check'} onPress={() => setVisibleOk(false)} iconStyle={{ marginRight: 0, paddingHorizontal: 50 }} />
                 </Dialog.Actions>

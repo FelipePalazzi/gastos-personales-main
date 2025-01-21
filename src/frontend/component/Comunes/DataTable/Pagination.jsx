@@ -15,9 +15,11 @@ const Pagination = ({
     numberOfItemsPerPage,
     handleSubmit,
     style,
+    IconHandleSumbit,
+    textIconSumbit,
 }) => {
     return (
-        <View style={{backgroundColor:theme.colors.white}}>
+        <View style={{ backgroundColor: theme.colors.white }}>
             <DataTable.Pagination
                 page={page}
                 numberOfPages={numberOfPages}
@@ -29,18 +31,20 @@ const Pagination = ({
                 numberOfItemsPerPage={numberOfItemsPerPage}
                 style={style.pagination}
             />
-            <View style={styleComun.agregar.container}>
+            {handleSubmit && <View style={styleComun.agregar.container}>
                 <Icon.Button
                     backgroundColor={theme.colors.white}
-                    name={'plus'}
+                    name={IconHandleSumbit ? IconHandleSumbit : 'plus'}
                     onPress={handleSubmit}
                     style={{
                         paddingHorizontal: 180,
                     }}
                     color={theme.colors.primary}
-                    iconStyle={{ marginRight: 0 }}
-                />
-            </View>
+                    iconStyle={{ marginRight: textIconSumbit? 10 : 0 }}
+                >
+                    {textIconSumbit ? textIconSumbit : null}
+                </Icon.Button>
+            </View>}
         </View>
     )
 }

@@ -17,6 +17,7 @@ import Correcto from './Dialogs/Correcto.jsx';
 import Logout from './Dialogs/Logout.jsx';
 import { decodeTokenUsername } from '../../utils.js';
 import PinInput from './PinInput.jsx'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -31,7 +32,7 @@ const LoginScreen = () => {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [nombreUsuario, setNombreUsuario] = useState([]);
   const navigation = useNavigation();
-  const { accessToken, refreshAccessToken, saveTokensAndUser, clearTokensAndUser, getSavedUser } = useAuth();
+  const { accessToken, refreshToken, refreshAccessToken, saveTokensAndUser, clearTokensAndUser, getSavedUser } = useAuth();
   const [requestPin, setRequestPin] = useState(false);
   const [pin, setPin] = useState('');
 
@@ -73,12 +74,54 @@ const LoginScreen = () => {
       setLoading(true)
       setRequestPin(false)
       clearTokensAndUser()
+      await AsyncStorage.removeItem('keyId');
       setVisibleLogout(true)
       setFingertip(false)
       setLoading(false)
       setRegistrarse(true)
     } catch (error) {
       setVisibleError(true)
+    }
+  };
+
+  const handlePin = async (pin, retried = false) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${PAGINA_URL}${symbols.barra}validarPin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+          'refresh-token': refreshToken,
+        },
+        body: JSON.stringify({ pin }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 403 && !retried) {
+          const tokenRefreshed = await refreshAccessToken();
+          if (tokenRefreshed) {
+            setLoading(false);
+            return handlePin(pin, true);
+          } else {
+            const errorData = await response.text();
+            console.error('Error al validar el PIN:', errorData.message || 'Error desconocido');
+            setMessage(errorData.message || 'Error al validar el PIN.');
+            setVisibleError(true);
+            setLoading(false);
+            return;
+          }
+        }
+      }
+      setRequestPin(false);
+      setLoading(false);
+      setMessage('Correcto');
+      navigation.navigate('Drawer');
+    } catch (error) {
+      console.error('Error en la validación del PIN:', error.message || error);
+      setMessage(error.message || 'Ocurrió un error al validar el PIN.');
+      setVisibleError(true);
+      setLoading(false);
     }
   };
 
@@ -134,7 +177,7 @@ const LoginScreen = () => {
   };
 
   const onValidatePin = (pin) => {
-    console.log(pin)
+    handlePin(pin)
   }
 
   const renderEmailPasswordForm = () => (
@@ -191,7 +234,7 @@ const LoginScreen = () => {
           {!fingertip && (<View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 15 }}>
             <Text style={{ fontSize: theme.fontSizes.body, fontWeight: theme.fontWeights.bold, color: theme.colors.primary }}>{`Inicio de Sesion`}</Text>
           </View>)}
-          {requestPin ? <PinInput onValidatePin={onValidatePin} /> : renderEmailPasswordForm()}
+          {requestPin ? <PinInput onValidatePin={onValidatePin} title={'Ingresa tu PIN'}/> : renderEmailPasswordForm()}
           {!requestPin && <View style={{ paddingHorizontal: 10, marginBottom: 20, justifyContent: 'center' }}>
             <Icon.Button backgroundColor={theme.colors.primary} color={theme.colors.white} name={'login'} onPress={handleLogin} size={30} iconStyle={{ marginRight: 110 }}>{'Acceder'}</Icon.Button>
           </View>}
