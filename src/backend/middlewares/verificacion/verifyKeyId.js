@@ -1,4 +1,4 @@
-const pool = require('../db/dbConnection.js');
+const pool = require('../../db/dbConnection.js');
 
 const verifyKeyId = async (req, res, next) => {
     try {
