@@ -26,7 +26,7 @@ loginController.register = async (req, res) => {
 
         await pool.query(
             `INSERT INTO users (username, password, pin, role, email) VALUES ($1, $2, $3, $4, $5)`,
-            [username, hashedPassword, hashedPin, role , email]
+            [username, hashedPassword, hashedPin, role, email]
         );
 
         res.status(200).send('Usuario registrado exitosamente');
@@ -51,12 +51,13 @@ loginController.login = async (req, res) => {
                 if (existingTokenResult.rowCount > 0) {
                     await pool.query(`DELETE FROM refresh_tokens WHERE user_id = $1`, [user.user_id]);
                 }
+                const estadoKeyCheck = 1
                 const keyRoleResult = await pool.query(`
                     SELECT uk.key_id, r.nombre
                     FROM user_keys uk
                     JOIN role_user_keys r ON uk.role = r.id
                     WHERE uk.user_id = $1 and uk.estado = $2
-                `, [user.user_id, estado=1]);
+                `, [user.user_id, estadoKeyCheck]);
 
                 const keyRoles = keyRoleResult.rows;
                 const keyIds = keyRoles.map(row => row.key_id);
@@ -152,7 +153,7 @@ loginController.refreshToken = async (req, res) => {
           FROM user_keys uk
           JOIN role_user_keys r ON uk.role = r.id
           WHERE uk.user_id = $1 and uk.estado = $2
-      `, [payload.userId, estado=1]);
+      `, [payload.userId, estado = 1]);
 
         const keyRoles = keyRoleResult.rows;
         const keyIds = keyRoles.map(row => row.key_id);
@@ -214,7 +215,7 @@ loginController.refreshTokenJSON = async (req, res) => {
           FROM user_keys uk
           JOIN role_user_keys r ON uk.role = r.id
           WHERE uk.user_id = $1 and uk.estado = $2
-      `, [payload.userId, estado=1]);
+      `, [payload.userId, estado = 1]);
 
         const keyRoles = keyRoleResult.rows;
         const keyIds = keyRoles.map(row => row.key_id);

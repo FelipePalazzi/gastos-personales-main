@@ -13,17 +13,11 @@ subcategoriaController.getsubcategoria = async (req, res, next) => {
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
-  }
-
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
-    if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
-
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const subcategorias = await pool.query(`
@@ -53,17 +47,11 @@ subcategoriaController.getsubcategoriabyID = async (req, res, next) => {
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
-  }
-
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
-    if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
-
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const subcategoria = await pool.query(`
@@ -90,23 +78,17 @@ subcategoriaController.getsubcategoriabyID = async (req, res, next) => {
 subcategoriaController.createsubcategoria = async (req, res, next) => {
   try {
     const { nombre, categoria, responsable } = req.body;
-    const { keyId } = req.params;  
+    const { keyId } = req.params;
     const keyIdNum = Number(keyId);
     const allowedRoles = ['admin', 'admin_creator'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
-  }
-
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
-    if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
-
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const newSubcategoria = await pool.query(
@@ -129,30 +111,24 @@ subcategoriaController.createsubcategoria = async (req, res, next) => {
 subcategoriaController.updatesubcategoria = async (req, res, next) => {
   try {
     const { keyId, id } = req.params;
-    const { nombre, categoria, responsable, activo } = req.body; 
+    const { nombre, categoria, responsable, activo } = req.body;
     const keyIdNum = Number(keyId);
     const allowedRoles = ['admin', 'admin_creator'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
-  }
-
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
-    if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
-
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const updateSubcategoria = await pool.query(
       `UPDATE subcategoria 
        SET nombre = $1, categoria = $2, responsable = $3, activo = $4
        WHERE id = $5 AND key_id = $6 RETURNING *`,
-      [nombre, categoria, responsable,activo, id, keyId]
+      [nombre, categoria, responsable, activo, id, keyId]
     );
     if (updateSubcategoria.rows.length === 0) {
       return res.status(404).json({ message: "Subcategoria no encontrada" });
@@ -172,17 +148,11 @@ subcategoriaController.deletesubcategoria = async (req, res, next) => {
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
-  }
-
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
-    if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
-
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const updateSubcategoria = await pool.query(
@@ -199,4 +169,4 @@ subcategoriaController.deletesubcategoria = async (req, res, next) => {
   }
 };
 
-  module.exports = subcategoriaController
+module.exports = subcategoriaController

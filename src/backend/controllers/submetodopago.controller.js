@@ -13,17 +13,11 @@ submetodopagoController.getsubmetodopago = async (req, res, next) => {
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
-  }
-
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
-    if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
-
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const submetodospagos = await pool.query(`
@@ -52,17 +46,11 @@ submetodopagoController.getsubmetodopagobyID = async (req, res, next) => {
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
-  }
-
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
-    if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
-
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const submetodopago = await pool.query(`
@@ -88,23 +76,17 @@ submetodopagoController.getsubmetodopagobyID = async (req, res, next) => {
 submetodopagoController.createsubmetodopago = async (req, res, next) => {
   try {
     const { nombre, metodo_pago } = req.body;
-    const { keyId } = req.params;  
+    const { keyId } = req.params;
     const keyIdNum = Number(keyId);
     const allowedRoles = ['admin', 'admin_creator'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
-  }
-
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
-    if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
-
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const newSubmetodopago = await pool.query(
@@ -127,30 +109,24 @@ submetodopagoController.createsubmetodopago = async (req, res, next) => {
 submetodopagoController.updatesubmetodopago = async (req, res, next) => {
   try {
     const { keyId, id } = req.params;
-    const { nombre, metodo_pago, activo } = req.body; 
+    const { nombre, metodo_pago, activo } = req.body;
     const keyIdNum = Number(keyId);
     const allowedRoles = ['admin', 'admin_creator'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
-  }
-
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
-    if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
-
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const updateSubmetodopago = await pool.query(
       `UPDATE submetodopago 
        SET nombre = $1, metodo_pago = $2 , activo=$3
        WHERE id = $4 AND key_id = $5 RETURNING *`,
-      [nombre, metodo_pago,activo, id, keyId]
+      [nombre, metodo_pago, activo, id, keyId]
     );
     if (updateSubmetodopago.rows.length === 0) {
       return res.status(404).json({ message: "Submetodo de pago no encontrado" });
@@ -170,17 +146,11 @@ submetodopagoController.deletesubmetodopago = async (req, res, next) => {
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
-  }
-
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
-    if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
-
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const updateSubmetodopago = await pool.query(

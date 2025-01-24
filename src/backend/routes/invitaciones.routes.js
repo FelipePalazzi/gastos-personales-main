@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 const invitacionesController = require ('../controllers/invitaciones.controller.js');
 const authenticateToken = require('../middlewares/autenticacion/autenticacion.controller.js');
+const verifyKeyId = require('../middlewares/verificacion/verifyKeyId.js');
 const { pagina, symbols } = require('../../constants.js');
 
 router.get(`${symbols.barra}${pagina.pagina_invitaciones}${symbols.barra}userid${symbols.barra}:userId`,authenticateToken, invitacionesController.getInvitacionsbyUser);
 
-router.get(`${symbols.barra}${pagina.pagina_invitaciones}${symbols.barra}keyid${symbols.barra}:keyId`,authenticateToken, invitacionesController.getInvitacionsbyKeyId);
+router.get(`${symbols.barra}${pagina.pagina_invitaciones}${symbols.barra}keyid${symbols.barra}:keyId`,verifyKeyId,authenticateToken, invitacionesController.getInvitacionsbyKeyId);
 
 router.post(`${symbols.barra}${pagina.pagina_invitaciones}${symbols.barra}:userId`,authenticateToken, invitacionesController.createinvitacion);
 

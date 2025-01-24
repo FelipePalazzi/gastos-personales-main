@@ -13,17 +13,11 @@ responsableController.getresponsable = async (req, res, next) => {
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
-  }
-
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
-    if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
-
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const responsables = await pool.query(`
@@ -51,17 +45,11 @@ responsableController.getresponsablebyID = async (req, res, next) => {
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
-  }
-
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
-    if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
-
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const responsable = await pool.query(`
@@ -86,23 +74,17 @@ responsableController.getresponsablebyID = async (req, res, next) => {
 responsableController.createresponsable = async (req, res, next) => {
   try {
     const { nombre } = req.body;
-    const { keyId } = req.params;  
+    const { keyId } = req.params;
     const keyIdNum = Number(keyId);
     const allowedRoles = ['admin', 'admin_creator'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
-  }
-
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
-    if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
-
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const newResponsable = await pool.query(
@@ -125,28 +107,22 @@ responsableController.createresponsable = async (req, res, next) => {
 responsableController.updateresponsable = async (req, res, next) => {
   try {
     const { keyId, id } = req.params;
-    const { nombre, activo } = req.body; 
+    const { nombre, activo } = req.body;
     const keyIdNum = Number(keyId);
     const allowedRoles = ['admin', 'admin_creator'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
-  }
-
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
-    if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
-
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const updateResponsable = await pool.query(
       `UPDATE responsable SET nombre = $1, activo=$2 WHERE id = $3 AND key_id = $4 RETURNING *`,
-      [nombre,activo, id, keyId]
+      [nombre, activo, id, keyId]
     );
     if (updateResponsable.rows.length === 0) {
       return res.status(404).json({ message: "Responsable no encontrado" });
@@ -166,17 +142,11 @@ responsableController.deleteresponsable = async (req, res, next) => {
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
       return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
-  }
-
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
-    if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
-
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const updateResponsable = await pool.query(
@@ -193,4 +163,4 @@ responsableController.deleteresponsable = async (req, res, next) => {
   }
 };
 
-  module.exports = responsableController
+module.exports = responsableController
