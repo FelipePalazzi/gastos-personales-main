@@ -43,13 +43,6 @@ const Resumen = () => {
       placeholderTextColor={theme.colors.primary}
       iconColor={theme.colors.primary}
     />
-    {loading  ? (
-        <View style={styleMovimiento.loadingContainer}>
-          <ActivityIndicator animating={true} color={theme.colors.primary} size={theme.icons.big} />
-          <Text style={styleMovimiento.loadingText}>{alerts.cargando}</Text>
-        </View>
-      ): (
-        <>
       <MonedaSelector
         selectedMoneda={selectedMoneda}
         onMonedaChange={setSelectedMoneda}
@@ -63,8 +56,6 @@ const Resumen = () => {
 {/*           <IngrGastResponsable resumen={resumen} search={search} selectedMoneda={selectedMoneda} />
           <StackTGResponsable resumen={resumen} search={search} selectedMoneda={selectedMoneda} />
           <BalanceResponsable resumen={resumen} selectedMoneda={selectedMoneda} /> */}
-        </>
-      )}
     </View>
     </ScrollView>
   );

@@ -17,8 +17,8 @@ const IngrGastDiaMes = ({ selectedMoneda }) => {
 
   useEffect(() => {
     // Llamar a los hooks para cargar datos si no están disponibles
-    if (!gastos.length) fetchGastos();
-    if (!ingresos.length) fetchIngresos();
+    if (gastos.length) fetchGastos();
+    if (ingresos.length) fetchIngresos();
   }, [fetchGastos, fetchIngresos, gastos, ingresos]);
 
   useEffect(() => {

@@ -28,7 +28,8 @@ keysController.getKeysbyUserId = async (req, res, next) => {
       FROM "keys" k
       LEFT JOIN user_keys uk ON uk.key_id = k.key_id
       LEFT JOIN role_user_keys ruk ON uk.role = ruk.id
-      WHERE uk.user_id = $1 and uk.estado=$2
+      left join user_keys_estado uke on uk.estado = uke.id
+      WHERE uk.user_id = $1 AND (uke.nombre ILIKE '%' || $2 || '%' OR $2 = '')
       AND ($3::boolean IS NULL OR activo = $3)
       AND (k.nombre ILIKE '%' || $4 || '%' OR $4 = '')
       AND (

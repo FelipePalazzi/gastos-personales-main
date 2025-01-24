@@ -25,21 +25,21 @@ const MonedaSelector = ({ selectedMoneda, onMonedaChange }) => {
             label: "USD",
             checkedColor: theme.colors.white,
             uncheckedColor: theme.colors.primary,
-            style: { backgroundColor: selectedOption === 'USD' ? theme.colors.primary : theme.colors.white }
+            style: { backgroundColor: selectedMoneda === 'USD' ? theme.colors.primary : theme.colors.white }
           },
           {
             value: "UYU",
             label: "UYU",
             checkedColor: theme.colors.white,
             uncheckedColor: theme.colors.primary,
-            style: { backgroundColor: selectedOption === 'UYU' ? theme.colors.primary : theme.colors.white }
+            style: { backgroundColor: selectedMoneda === 'UYU' ? theme.colors.primary : theme.colors.white }
           },
           {
             value: "ARG",
             label: "ARG",
             checkedColor: theme.colors.white,
             uncheckedColor: theme.colors.primary,
-            style: { backgroundColor: selectedOption === 'ARG' ? theme.colors.primary : theme.colors.white }
+            style: { backgroundColor: selectedMoneda === 'ARG' ? theme.colors.primary : theme.colors.white }
           },
         ]}
       />

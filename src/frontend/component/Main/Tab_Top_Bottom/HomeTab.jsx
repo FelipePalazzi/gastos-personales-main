@@ -9,6 +9,7 @@ import CustomTab from './CustomTab.jsx';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import TutorialDialog from '../../Comunes/Dialogs/TutorialDialog.jsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Resumen from '../../Resumen/Resumen.jsx';
 
 function HomeTab({ keyId, nombreKey, navigation}) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -26,7 +27,7 @@ function HomeTab({ keyId, nombreKey, navigation}) {
 
   const screens = [
     <MovimientoList keyId={keyId} routeParams={{ tipo: 'salidas' }} />,
-    <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 300 }}><Text style={{ color: theme.colors.pieInner, fontSize: theme.fontSizes.body, fontWeight: theme.fontWeights.bold }}>Proximamente Resumenes</Text></View>,
+    <Resumen/>,
     <MovimientoList keyId={keyId} routeParams={{ tipo: 'entradas' }} />,
   ];
 
