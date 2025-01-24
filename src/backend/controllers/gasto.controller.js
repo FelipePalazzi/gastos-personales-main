@@ -126,9 +126,6 @@ gastoController.getGastos = async (req, res, next) => {
         s2.metodo_pago as "id_metodopago",
         s2.nombre as "submetododepago",
         g.submetodo_pago as "id_submetodopago",
-        cambio_usd.cambio AS cambio_usd,
-        cambio_uyu.cambio AS cambio_uyu,
-        cambio_arg.cambio AS cambio_arg,
         g.comentario,
         e.nombre
       FROM gasto g
@@ -140,33 +137,6 @@ gastoController.getGastos = async (req, res, next) => {
       LEFT JOIN monedas_posibles mp ON mp.id = m.id_moneda
       LEFT JOIN submetodopago s2 ON s2.id = g.submetodo_pago AND s2.key_id = g.key_id
       LEFT JOIN metodopago m2 ON s2.metodo_pago = m2.id
-      LEFT JOIN cambio cambio_usd ON cambio_usd.moneda_origen = m.id_moneda
-        AND cambio_usd.moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'USD')
-        AND cambio_usd.fecha = (
-          SELECT MAX(fecha)
-          FROM cambio
-          WHERE moneda_origen = m.id_moneda
-            AND moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'USD')
-            AND fecha <= g.fecha
-        )
-      LEFT JOIN cambio cambio_uyu ON cambio_uyu.moneda_origen = m.id_moneda
-        AND cambio_uyu.moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'UYU')
-        AND cambio_uyu.fecha = (
-          SELECT MAX(fecha)
-          FROM cambio
-          WHERE moneda_origen = m.id_moneda
-            AND moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'UYU')
-            AND fecha <= g.fecha
-        )
-      LEFT JOIN cambio cambio_arg ON cambio_arg.moneda_origen = m.id_moneda
-        AND cambio_arg.moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'ARG')
-        AND cambio_arg.fecha = (
-          SELECT MAX(fecha)
-          FROM cambio
-          WHERE moneda_origen = m.id_moneda
-            AND moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'ARG')
-            AND fecha <= g.fecha
-        )
       WHERE g.key_id = $1
       ${filters.length ? `AND ${filters.join(' AND ')}` : ''}
       ORDER BY g.fecha DESC
@@ -219,9 +189,6 @@ gastoController.getGastobyID = async (req, res, next) => {
         s2.metodo_pago as "id_metodopago",
         s2.nombre as "submetododepago",
         g.submetodo_pago as "id_submetodopago",
-        cambio_usd.cambio AS cambio_usd,
-        cambio_uyu.cambio AS cambio_uyu,
-        cambio_arg.cambio AS cambio_arg,
         g.comentario,
         e.nombre
       FROM gasto g
@@ -233,33 +200,6 @@ gastoController.getGastobyID = async (req, res, next) => {
       LEFT JOIN monedas_posibles mp ON mp.id = m.id_moneda
       LEFT JOIN submetodopago s2 ON s2.id = g.submetodo_pago AND s2.key_id = g.key_id
       LEFT JOIN metodopago m2 ON s2.metodo_pago = m2.id
-      LEFT JOIN cambio cambio_usd ON cambio_usd.moneda_origen = m.id_moneda
-        AND cambio_usd.moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'USD')
-        AND cambio_usd.fecha = (
-          SELECT MAX(fecha)
-          FROM cambio
-          WHERE moneda_origen = m.id_moneda
-            AND moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'USD')
-            AND fecha <= g.fecha
-        )
-      LEFT JOIN cambio cambio_uyu ON cambio_uyu.moneda_origen = m.id_moneda
-        AND cambio_uyu.moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'UYU')
-        AND cambio_uyu.fecha = (
-          SELECT MAX(fecha)
-          FROM cambio
-          WHERE moneda_origen = m.id_moneda
-            AND moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'UYU')
-            AND fecha <= g.fecha
-        )
-      LEFT JOIN cambio cambio_arg ON cambio_arg.moneda_origen = m.id_moneda
-        AND cambio_arg.moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'ARG')
-        AND cambio_arg.fecha = (
-          SELECT MAX(fecha)
-          FROM cambio
-          WHERE moneda_origen = m.id_moneda
-            AND moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'ARG')
-            AND fecha <= g.fecha
-        )
       WHERE g.id = $1 and g.key_id=$2
       `, [id, keyId]);
     if (result.rows.length === 0)

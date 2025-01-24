@@ -213,7 +213,7 @@ loginController.refreshTokenJSON = async (req, res) => {
           SELECT uk.key_id, r.nombre
           FROM user_keys uk
           JOIN role_user_keys r ON uk.role = r.id
-          WHERE uk.user_id = $1 and uk.estado
+          WHERE uk.user_id = $1 and uk.estado = $2
       `, [payload.userId, estado=1]);
 
         const keyRoles = keyRoleResult.rows;

@@ -1,257 +1,111 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { View, Text, TouchableOpacity, PanResponder} from 'react-native';
-import { styleResumen, screenWidth } from '../../styles/styles.js';
-import { months, monedaMaxValues } from '../../../constants.js';
-import { filterData, formatYLabel} from '../../utils.js';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, Text } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
-import theme from '../../theme/theme.js';
-import { lineChart, pointerConfig, alerts, atributos, symbols} from '../../../constants.js';
-import { SegmentedButtons, Card, Icon } from 'react-native-paper';
+import { SegmentedButtons, Card } from 'react-native-paper';
+import useGastos from '../../hooks/useGastos';
+import useIngresos from '../../hooks/useIngresos';
+import { months, monedaMaxValues } from '../../../constants';
+import { styleResumen, screenWidth } from '../../styles/styles';
+import theme from '../../theme/theme';
 
-const IngrGastDiaMes = ({ resumen, search, selectedMoneda }) => {
-  const [areaChartData, setAreaChartData] = useState(null);
-  const [areaChartData2, setAreaChartData2] = useState(null);
-  const [maxValue, setMaxValue] = useState(0);
-  const [months0, setMonths0] = useState({});
+const IngrGastDiaMes = ({ selectedMoneda }) => {
+  const { gastos, loading: loadingGastos, fetchGastos } = useGastos();
+  const { ingresos, loading: loadingIngresos, fetchIngresos } = useIngresos();
   const [selectedValue, setSelectedValue] = useState('Dia');
-  const [selectedMonth, setSelectedMonth] = useState('May');
-  const [card, setCard] = useState(false)
-
-  const handleValueChange = (value) => {
-    setSelectedValue(value);
-    showOrHidePointer(0);
-  };
+  const [chartData, setChartData] = useState({ gastos: [], ingresos: [] });
+  const [maxValue, setMaxValue] = useState(0);
 
   useEffect(() => {
-    const data = resumen[selectedValue === 'Dia'? 2 : 1];
-    const filteredData = filterData(data, search,'','','year');
+    // Llamar a los hooks para cargar datos si no están disponibles
+    if (!gastos.length) fetchGastos();
+    if (!ingresos.length) fetchIngresos();
+  }, [fetchGastos, fetchIngresos, gastos, ingresos]);
 
-    const monthsObj = {};
-      filteredData.forEach(item => {
-        if (!monthsObj[item.month]) {
-          monthsObj[item.month] = true;
-        }
+  useEffect(() => {
+    if (!loadingGastos && !loadingIngresos) {
+      // Agrupar datos según "Dia" o "Mes"
+      const formatKey = selectedValue === 'Dia' ? 'YYYY-MM-DD' : 'YYYY-MM';
+      const gastosGrouped = groupByKey(gastos, formatKey);
+      const ingresosGrouped = groupByKey(ingresos, formatKey);
+
+      // Convertir los datos agrupados en un formato usable por LineChart
+      const gastosChartData = convertToChartData(gastosGrouped, selectedMoneda);
+      const ingresosChartData = convertToChartData(ingresosGrouped, selectedMoneda);
+
+      // Calcular valor máximo
+      const maxGasto = Math.max(...gastosChartData.map((item) => item.value), 0);
+      const maxIngreso = Math.max(...ingresosChartData.map((item) => item.value), 0);
+      setMaxValue(Math.max(maxGasto, maxIngreso) * monedaMaxValues[selectedMoneda]);
+
+      setChartData({
+        gastos: gastosChartData,
+        ingresos: ingresosChartData,
       });
-      setMonths0(monthsObj);
+    }
+  }, [gastos, ingresos, selectedValue, selectedMoneda, loadingGastos, loadingIngresos]);
 
-      const maxGastoAr = Math.max(...filteredData.map(item => parseInt(item[`${atributos.gastoResumen} ${selectedMoneda}`])));
-      const maxIngresoAr = Math.max(...filteredData.map(item => parseInt(item[`${atributos.ingresoResumen} ${selectedMoneda}`])));
-      const maxValue = Math.max(maxGastoAr, maxIngresoAr);     
-      setMaxValue(maxValue * monedaMaxValues[selectedMoneda]);
+  // Función para agrupar datos por fecha
+  const groupByKey = (data, keyFormat) => {
+    return data.reduce((acc, item) => {
+      const dateKey = new Date(item.fecha).toISOString().slice(0, keyFormat.length);
+      acc[dateKey] = (acc[dateKey] || 0) + item[`monto_${selectedMoneda.toLowerCase()}`];
+      return acc;
+    }, {});
+  };
 
-      const areaChartData = filteredData.map((item, index) => ({
-        value: parseInt(item[`${atributos.gastoResumen} ${selectedMoneda}`] || 0),
-        date: selectedValue === 'Dia' ? `${item.day} ${months[item.month]}` : months[item.month],
-        label: selectedValue === 'Dia' ? `${search.length!== 4? `${item.day} ${months[item.month]}\n${item.year}` : `${item.day} ${months[item.month]}`}` : `${months[item.month]}\n${item.year}`,
-        labelTextStyle: { fontSize: 13,margin:-8, color: theme.colors.white},
-        customDataPoint: customDataPoint,
-      }));
-      const areaChartData2 = filteredData.map((item2, index) => ({
-        value: parseInt(item2[`${atributos.ingresoResumen} ${selectedMoneda}`] || 0),
-        date: selectedValue === 'Dia' ? `${item2.day} ${months[item2.month]}` : months[item2.month],
-        label: selectedValue === 'Dia' ? `${search.length!== 4? `${item2.day} ${months[item2.month]}\n${item2.year}` : `${item2.day} ${months[item2.month]}`}` : `${months[item2.month]}\n${item2.year}`,
-        customDataPoint: customDataPoint,
-      }));
+  // Convertir datos agrupados en el formato que acepta LineChart
+  const convertToChartData = (groupedData, moneda) => {
+    return Object.entries(groupedData).map(([key, value]) => ({
+      value,
+      date: selectedValue === 'Dia' ? key : `${months[new Date(key).getMonth()]} ${new Date(key).getFullYear()}`,
+      label: selectedValue === 'Dia' ? key : `${months[new Date(key).getMonth()]}\n${new Date(key).getFullYear()}`,
+    }));
+  };
 
-      setAreaChartData(areaChartData);
-      setAreaChartData2(areaChartData2);
-
-  }, [resumen, search, selectedValue, selectedMoneda]);
-
-const months2 = useMemo(() => Object.keys(months0).map(month => months[month]), [months0]);
-
-const ref = useRef(null);
-
-const showOrHidePointer = useCallback((ind) => {
-  const month = months2[ind];
-  setSelectedMonth(month);
-  const firstDateIndex = areaChartData.findIndex(item => item.date.includes(month));
-  if (firstDateIndex !== -1) {
-    ref.current?.scrollTo({ x: firstDateIndex * 50 });
+  if (loadingGastos || loadingIngresos) {
+    return <Text>Cargando datos...</Text>;
   }
-}, [areaChartData, months2]);
-
-const customDataPoint = useCallback(() => (
-  <View style={styleResumen.datapoint} />
-), []);
-
-const position = useRef({ x: 0, y: 0 }).current;
-const [touchPosition, setTouchPosition] = useState({ x: 0, y: 0 });
-
-const deviceWidth = screenWidth;
-
-const panResponder = useRef(
-   PanResponder.create({
-     onStartShouldSetPanResponder: () => true,
-     onMoveShouldSetPanResponder: () => true,
-     onPanResponderGrant: (evt, gestureState) => {
-       // The touch has started
-       position.x = gestureState.x0;
-       position.y = gestureState.y0;
-       setTouchPosition({ x: gestureState.x0, y: gestureState.y0 });
-     },
-     onPanResponderMove: (evt, gestureState) => {
-       // The touch is moving
-       position.x = gestureState.moveX;
-       position.y = gestureState.moveY;
-       setTouchPosition({ x: gestureState.moveX, y: gestureState.moveY });
-     },
-     onPanResponderRelease: (evt, gestureState) => {
-       // The touch has ended
-       position.x = gestureState.moveX;
-       position.y = gestureState.moveY;
-       setTouchPosition({ x: gestureState.moveX, y: gestureState.moveY });
-     },
-   }),
- ).current;
 
   return (
-    <View style={[styleResumen.viewContainer, {marginTop:10}]}>
-    {areaChartData && areaChartData2 && (
-        <View>
-          {((search.length >= 0 && search.length < 4)   || (search.length === 4 && search.match(/^\d{4}$/) && (areaChartData.some(item => item.value === 0) || areaChartData2.some(item2 => item2.value === 0)))) ? (
-            <Card style={styleResumen.titleContainer} >
-      
-      <TouchableOpacity onPress={() => setCard(!card)}>
-          <Card.Title
-            title={`Por ${selectedValue} ${search.length === 4 && search.match(/^\d{4}$/)? search : ''}`}
-            titleStyle={styleResumen.title}
-            right={(props) => <Icon source={card? theme.icons.arriba : theme.icons.abajo} size={theme.fontSizes.body} color={theme.colors.white} />}
-            rightStyle={styleResumen.rightCardTitle}
+    <View style={styleResumen.viewContainer}>
+      <Card style={styleResumen.titleContainer}>
+        <Card.Title
+          title={`Por ${selectedValue}`}
+          titleStyle={styleResumen.title}
+        />
+        <Card.Content style={styleResumen.container}>
+          <SegmentedButtons
+            value={selectedValue}
+            onValueChange={setSelectedValue}
+            buttons={[
+              { value: 'Dia', label: 'Día' },
+              { value: 'Mes', label: 'Mes' },
+            ]}
+            style={styleResumen.button}
           />
-        </TouchableOpacity>
-      
-            {card && (  <Card.Content style={styleResumen.container}>
-      
-              <SegmentedButtons
-                style={styleResumen.button}
-                theme={{ colors: { secondaryContainer: theme.colors.primary, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white } }}
-                value={selectedValue}
-                onValueChange={handleValueChange}
-                buttons={[
-                  {
-                    value: 'Dia', label: 'Dia',
-                  },
-                  { value: 'Mes', label: 'Mes' },
-                ]}
-              />
-              <View style={styleResumen.Containerbutton}>
-                {search.length === 4 && selectedValue === 'Dia' ? (
-                  <SegmentedButtons
-                    style={styleResumen.button}
-                    theme={{ colors: { secondaryContainer: theme.colors.primary, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white  } }}
-                    value={selectedMonth}
-                    onValueChange={(month) => showOrHidePointer(months2.indexOf(month))}
-                    buttons={months2.map((item, index) => ({
-                      value: item,
-                      label: item,
-                    }))}
-                  />
-                ) : null}
-              </View>
-              <View
-           {...panResponder.panHandlers}
-           style={{}}
-       >
-              <LineChart
-                onScroll={(event) => {
-                  const x = event.nativeEvent.contentOffset.x+10;
-                  const graphWidth = lineChart.width;
-                  const monthWidth = graphWidth / (months2.length*0.2);
-                  const visibleMonthIndex = Math.floor(x / monthWidth);
-                  const visibleMonth = months2[visibleMonthIndex];
-                  setSelectedMonth(visibleMonth);
-                }}    
-                formatYLabel={(value) => formatYLabel(value, selectedMoneda)}
-                scrollRef={ref}
-                data={areaChartData}
-                data2={areaChartData2}
-                maxValue={maxValue}
-                isAnimated
-                areaChart
-                curved
-                rotateLabel
-                showVerticalLines
-                adjustToWidth
-                hideOrigin
-                animationDuration={lineChart.animacionDuration}
-                xAxisTextNumberOfLines={lineChart.xAxisTextNumberOfLines}
-                width={screenWidth-95}
-                height={screenWidth - 130}
-                initialSpacing={lineChart.initialSpacing}
-                endSpacing={lineChart.initialSpacing}
-                spacing={lineChart.spacing}
-                thickness={lineChart.thickness}
-                startOpacity={lineChart.startOpacity}
-                endOpacity={lineChart.endOpacity}
-                noOfSections={lineChart.noOfSections}
-                yAxisThickness={lineChart.ejesThickness}
-                xAxisThickness={lineChart.ejesThickness}
-                verticalLinesColor={theme.colors.pieBackground}
-                color1={theme.colors.primary}
-                color2={theme.colors.primary}
-                startFillColor1={theme.colors.primary}
-                startFillColor2={theme.colors.primary}
-                endFillColor1={theme.colors.primary}
-                endFillColor2={theme.colors.primary}
-                rulesColor={theme.colors.pieBackground}
-                backgroundColor={theme.colors.pieInner}
-                yAxisTextStyle={styleResumen.ejeYstyle}
-                focusEnabled={true}
-                pointerConfig={{
-                  hidePointer1: true,
-                  hidePointer2: true,
-                  pointerStripHeight: pointerConfig.pointerStripHeight,
-                  strokeDashArray: pointerConfig.strokeDashArray,
-                  pointerStripColor: theme.colors.black,
-                  pointerStripWidth: pointerConfig.pointerStripWidth,
-                  pointerColor: theme.colors.gray,
-                  radius: pointerConfig.radius,
-                  pointerLabelWidth: pointerConfig.pointerLabelWidth,
-                  pointerLabelHeight: pointerConfig.pointerLabelHeight,
-                  activatePointersOnLongPress: true,
-                  autoAdjustPointerLabelPosition: false,
-                  shiftPointerLabelX: touchPosition.x < deviceWidth / 4 ? 40 : touchPosition.x > deviceWidth * 0.6 ? -40  : 0 ,
-                  pointerLabelComponent: items => {
-                    return (
-                        <View style={styleResumen.pointer}>
-                          <View style={styleResumen.fechaContainerPointer}> 
-                          <Text style={styleResumen.fechaPointer}>
-                            {items[0].date}
-                          </Text>
-                          </View>
-                          <View style={styleResumen.containerPointer}>
-                            <Text style={styleResumen.titlePointer}>
-                              {atributos.primary}
-                            </Text>
-                            <Text style={styleResumen.textPointer}>
-                              {selectedMoneda + symbols.peso + items[0].value}
-                            </Text>
-                            <Text style={styleResumen.titlePointer}>
-                              {atributos.primary}
-                            </Text>
-                            <Text style={styleResumen.textPointer}>
-                              {selectedMoneda + symbols.peso + items[1].value}
-                            </Text>
-                          </View>
-                        </View>
-           
-                    );
-                 },
-                }}
-              />
-      </View>
-      </Card.Content>
-      )}
-        </Card>
+          {chartData.gastos.length > 0 && chartData.ingresos.length > 0 ? (
+            <LineChart
+              data={chartData.gastos}
+              data2={chartData.ingresos}
+              maxValue={maxValue}
+              isAnimated
+              areaChart
+              curved
+              hideOrigin
+              color1={theme.colors.primary}
+              color2={theme.colors.secondary}
+              width={screenWidth - 40}
+              height={screenWidth - 100}
+              noOfSections={4}
+              yAxisTextStyle={styleResumen.ejeYstyle}
+              xAxisLabelTextStyle={{ color: theme.colors.white }}
+            />
           ) : (
-            <View style={[styleResumen.titleContainer, {backgroundColor:theme.colors.primary}]}>
-            <Text style={[styleResumen.title, {marginBottom:15},{marginHorizontal:20}, {color: theme.colors.white}]}>{`${alerts.noData}${' para el año '}${search}`}</Text>
-            </View>
+            <Text>No hay datos para mostrar</Text>
           )}
-        </View>
-          )}
- </View>
+        </Card.Content>
+      </Card>
+    </View>
   );
 };
 

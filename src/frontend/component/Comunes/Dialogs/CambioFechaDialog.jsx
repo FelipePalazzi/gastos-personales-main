@@ -7,6 +7,7 @@ import { styleDialog } from "../../../styles/styles";
 import useCambioDia from "../../../hooks/useCambio";
 import DatePickerSearchBar from "../Busqueda/DatePickerSearchBar";
 import moment from "moment";
+import MonedaSelector from "../MonedaSelector";
 
 const CambioFechaDialog = ({ visible, setVisible, keyId }) => {
   const [selectedOption, setSelectedOption] = useState("USD");
@@ -43,33 +44,9 @@ const CambioFechaDialog = ({ visible, setVisible, keyId }) => {
       >
         <Dialog.Title style={styleDialog.title}>Buscar Tipo de Cambio</Dialog.Title>
         <Dialog.Content>
-          <SegmentedButtons
-            value={selectedOption}
-            onValueChange={handleOptionChange}
-            buttons={[
-              {
-                value: "USD",
-                label: "USD",
-                checkedColor: theme.colors.white,
-                uncheckedColor: theme.colors.primary,
-                style: { backgroundColor: selectedOption === 'USD' ? theme.colors.primary : theme.colors.white }
-              },
-              {
-                value: "UYU",
-                label: "UYU",
-                checkedColor: theme.colors.white,
-                uncheckedColor: theme.colors.primary,
-                style: { backgroundColor: selectedOption === 'UYU' ? theme.colors.primary : theme.colors.white }
-              },
-              {
-                value: "ARG",
-                label: "ARG",
-                checkedColor: theme.colors.white,
-                uncheckedColor: theme.colors.primary,
-                style: { backgroundColor: selectedOption === 'ARG' ? theme.colors.primary : theme.colors.white }
-              },
-            ]}
-            style={{ marginVertical: 10 }}
+          <MonedaSelector
+            selectedMoneda={selectedOption}
+            onMonedaChange={handleOptionChange}
           />
           <DatePickerSearchBar
             value={fechaSelected}

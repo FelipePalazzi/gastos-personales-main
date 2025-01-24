@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View,Text , ScrollView } from 'react-native';
 import { styleMovimiento, styleResumen } from '../../styles/styles.js';
 import useResumen from '../../hooks/useResumen.js';
-import MonedaSelector from './MonedaSelector.jsx';
+import MonedaSelector from '../Comunes/MonedaSelector.jsx';
 import IngrGastDiaMes from './IngrGastDiaMes.jsx';
 import IngrGastResponsable from './IngrGastResponsable.jsx';
 import theme from '../../theme/theme.js';
@@ -15,7 +15,6 @@ import BalanceResponsable from './BalanceResponsable.jsx';
 const Resumen = () => {
   const [search, setSearch] = useState('');
   const [selectedMoneda, setSelectedMoneda] = useState('ARG')
-  const { loading, resumen } = useResumen();
 
   const scrollViewRef = useRef(null) 
 
@@ -24,9 +23,6 @@ const Resumen = () => {
   const handleScroll = (event) => {
     setContentOffset(event.nativeEvent.contentOffset) 
   } 
-
-  useEffect(() => {
-  }, [loading, resumen]);
 
   return (
     <ScrollView  showsVerticalScrollIndicator={true}
@@ -63,10 +59,10 @@ const Resumen = () => {
             Resumenes de Ingresos y Gastos
         </Text>
       </View>
-          <IngrGastDiaMes resumen={resumen} search={search} selectedMoneda={selectedMoneda} />
-          <IngrGastResponsable resumen={resumen} search={search} selectedMoneda={selectedMoneda} />
+          <IngrGastDiaMes selectedMoneda={selectedMoneda} />
+{/*           <IngrGastResponsable resumen={resumen} search={search} selectedMoneda={selectedMoneda} />
           <StackTGResponsable resumen={resumen} search={search} selectedMoneda={selectedMoneda} />
-          <BalanceResponsable resumen={resumen} selectedMoneda={selectedMoneda} />
+          <BalanceResponsable resumen={resumen} selectedMoneda={selectedMoneda} /> */}
         </>
       )}
     </View>

@@ -117,9 +117,6 @@ ingresoController.getIngresos = async (req, res, next) => {
       s2.metodo_pago as "id_metodopago",
       s2.nombre as "submetododepago",
       i.submetodo_pago as "id_submetodopago",
-      cambio_usd.cambio AS cambio_usd,
-      cambio_uyu.cambio AS cambio_uyu,
-      cambio_arg.cambio AS cambio_arg,
       i.comentario,
       e.nombre
       from ingreso i
@@ -129,35 +126,6 @@ ingresoController.getIngresos = async (req, res, next) => {
       left join monedas_posibles mp on mp.id =m.id_moneda
       left join submetodopago s2 on s2.id = i.submetodo_pago and s2.key_id =i.key_id
       left join metodopago m2 on s2.metodo_pago =m2.id
-      LEFT JOIN cambio cambio_usd ON cambio_usd.moneda_origen = m.id_moneda
-      AND cambio_usd.moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'USD')
-          AND cambio_usd.fecha = (
-              SELECT MAX(fecha)
-              FROM cambio
-              WHERE moneda_origen = m.id_moneda
-                AND moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'USD')
-                AND fecha <= i.fecha
-          )
-      -- Join con la tabla cambio para obtener la tasa de cambio de UYU
-      LEFT JOIN cambio cambio_uyu ON cambio_uyu.moneda_origen= m.id_moneda
-          AND cambio_uyu.moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'UYU')
-          AND cambio_uyu.fecha = (
-              SELECT MAX(fecha)
-              FROM cambio
-              WHERE moneda_origen = m.id_moneda
-                AND moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'UYU')
-                AND fecha <= i.fecha
-          )
-      -- Join con la tabla cambio para obtener la tasa de cambio de ARG
-      LEFT JOIN cambio cambio_arg ON cambio_arg.moneda_origen= m.id_moneda
-          AND cambio_arg.moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'ARG')
-          AND cambio_arg.fecha = (
-              SELECT MAX(fecha)
-              FROM cambio
-              WHERE moneda_origen = m.id_moneda
-                AND moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'ARG')
-                AND fecha <= i.fecha
-          )
       where i.key_id=$1
       ${filters.length ? `AND ${filters.join(' AND ')}` : ''}
       ORDER BY i.fecha DESC
@@ -206,9 +174,6 @@ ingresoController.getIngresobyID = async (req, res, next) => {
       s2.metodo_pago as "id_metodopago",
       s2.nombre as "submetododepago",
       i.submetodo_pago as "id_submetodopago",
-      cambio_usd.cambio AS cambio_usd,
-      cambio_uyu.cambio AS cambio_uyu,
-      cambio_arg.cambio AS cambio_arg,
       i.comentario,
       e.nombre
       from ingreso i
@@ -218,35 +183,6 @@ ingresoController.getIngresobyID = async (req, res, next) => {
       left join monedas_posibles mp on mp.id =m.id_moneda
       left join submetodopago s2 on s2.id = i.submetodo_pago and s2.key_id =i.key_id
       left join metodopago m2 on s2.metodo_pago =m2.id
-      LEFT JOIN cambio cambio_usd ON cambio_usd.moneda_origen = m.id_moneda
-      AND cambio_usd.moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'USD')
-          AND cambio_usd.fecha = (
-              SELECT MAX(fecha)
-              FROM cambio
-              WHERE moneda_origen = m.id_moneda
-                AND moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'USD')
-                AND fecha <= i.fecha
-          )
-      -- Join con la tabla cambio para obtener la tasa de cambio de UYU
-      LEFT JOIN cambio cambio_uyu ON cambio_uyu.moneda_origen= m.id_moneda
-          AND cambio_uyu.moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'UYU')
-          AND cambio_uyu.fecha = (
-              SELECT MAX(fecha)
-              FROM cambio
-              WHERE moneda_origen = m.id_moneda
-                AND moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'UYU')
-                AND fecha <= i.fecha
-          )
-      -- Join con la tabla cambio para obtener la tasa de cambio de ARG
-      LEFT JOIN cambio cambio_arg ON cambio_arg.moneda_origen= m.id_moneda
-          AND cambio_arg.moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'ARG')
-          AND cambio_arg.fecha = (
-              SELECT MAX(fecha)
-              FROM cambio
-              WHERE moneda_origen = m.id_moneda
-                AND moneda_destino = (SELECT id FROM monedas_posibles WHERE codigo = 'ARG')
-                AND fecha <= i.fecha
-          )
       WHERE i.id = $1 and i.key_id=$2
       `, [id, keyId]);
     if (result.rows.length === 0)
