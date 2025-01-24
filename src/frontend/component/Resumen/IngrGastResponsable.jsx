@@ -52,7 +52,7 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
           value: parseInt(item3[`${atributos.gastoResumen} ${selectedMoneda}`] || 0),
           year: item3.year,
           month: months[item3.month],
-          frontColor: theme.colors.gasto,
+          frontColor: theme.colors.primary,
           spacing: 10,
           labelWidth: 50,
           labelTextStyle: styleResumen.labels,
@@ -62,7 +62,7 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
           value: parseInt(item3[`${atributos.ingresoResumen} ${selectedMoneda}`] || 0),
           year: item3.year,
           month: months[item3.month],
-          frontColor: theme.colors.ingreso,
+          frontColor: theme.colors.primary,
           spacing:8,
           labelTextStyle: {color:theme.colors.transparente},
           label: item3.nombre,
@@ -130,7 +130,7 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
               {search.length !== 4 ? (
               <SegmentedButtons
                 style={styleResumen.button}
-                theme={{ colors: { secondaryContainer: theme.colors.segmented, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white  } }}
+                theme={{ colors: { secondaryContainer: theme.colors.primary, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white  } }}
                 value={selectedYear}
                 onValueChange={(year) => setSelectedYear(year)}
                 buttons={uniqueYears.filter(year => stackData.some(item => item.year === year)).map((year) => ({
@@ -143,7 +143,7 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
                 <View style={styleResumen.Containerbutton}>
                 <SegmentedButtons
                     style={styleResumen.button}
-                    theme={{ colors: { secondaryContainer: theme.colors.segmented, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white } }}
+                    theme={{ colors: { secondaryContainer: theme.colors.primary, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white } }}
                     value={selectedMonth2}
                     onValueChange={(month) => setSelectedMonth2(month)}
                     buttons={monthsWithData.map(month => ({ value: Object.keys(months).find(key => months[key] === month), label: month }))}
@@ -175,7 +175,7 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
                 renderTooltip={(item, index) => {
                     return (
                       <View style={styleResumen.tooltipBarChart}>
-                        <Text style={styleResumen.textLegend}>{item.frontColor===theme.colors.gasto && atributos.gasto || atributos.ingreso}</Text>
+                        <Text style={styleResumen.textLegend}>{item.frontColor===theme.colors.primary && atributos.primary || atributos.primary}</Text>
                         <Text style={styleResumen.pieCenterDescription}>{selectedMoneda}${item.value}</Text>
                       </View>
                     );
@@ -185,8 +185,8 @@ const IngrGastResponsable = ({ resumen, search, selectedMoneda })=> {
         </View>
         {stackData && (
         <View>
-            <ResponsablesSection data={pares} selectedMoneda={selectedMoneda} title={atributos.gasto} selectedMonth={months[selectedMonth2]} selectedYear={selectedYear}/>
-            <ResponsablesSection data={impares} selectedMoneda={selectedMoneda} title={atributos.ingreso} selectedMonth={months[selectedMonth2]} selectedYear={selectedYear}/>
+            <ResponsablesSection data={pares} selectedMoneda={selectedMoneda} title={atributos.primary} selectedMonth={months[selectedMonth2]} selectedYear={selectedYear}/>
+            <ResponsablesSection data={impares} selectedMoneda={selectedMoneda} title={atributos.primary} selectedMonth={months[selectedMonth2]} selectedYear={selectedYear}/>
         </View>
         )}
       </Card.Content>

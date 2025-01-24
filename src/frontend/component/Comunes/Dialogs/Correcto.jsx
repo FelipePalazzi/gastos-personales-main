@@ -4,7 +4,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import theme from "../../../theme/theme";
 import { styleDialog, screenWidth } from "../../../styles/styles";
 
-const Error = ({
+const Correcto = ({
     visibleOk,
     setVisibleOk,
     message
@@ -24,4 +24,4 @@ const Error = ({
         </Portal>
     )
 }
-export default Error
+export default Correcto

@@ -68,7 +68,7 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
         }
       
         const ingresoBar = {
-          label: `${item.nombre} ${atributos.ingreso}`,
+          label: `${item.nombre} ${atributos.primary}`,
           labelTextStyle: {color:theme.colors.transparente},
           spacing: 8,
           month: months[item.month],
@@ -76,7 +76,7 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
           stacks: [
             {
               value: parseInt(item[`${atributos.ingresoResumen} ${selectedMoneda}`] || 0),
-              color: theme.colors.ingreso,
+              color: theme.colors.primary,
             },
           ],
         };
@@ -126,7 +126,7 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
 
       const groupedGastos = filteredData.reduce((acc, item) => {
         item.stacks.forEach((stack) => {
-          if (stack.value > 0 && stack.label !== atributos.ingreso && stack.label !==undefined) {
+          if (stack.value > 0 && stack.label !== atributos.primary && stack.label !==undefined) {
             const tipogasto = stack.label;
             const existingTipogasto = acc[tipogasto];
             if (existingTipogasto) {
@@ -177,7 +177,7 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
   };
 
   const renderGastosLegendComponent = () => {
-    const hasGastos = filteredStackData.some(item => item.stacks.some(stack => stack.value > 0 && !item.label.includes(atributos.ingreso)));
+    const hasGastos = filteredStackData.some(item => item.stacks.some(stack => stack.value > 0 && !item.label.includes(atributos.primary)));
   
     if (!hasGastos) return null;
   
@@ -186,7 +186,7 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
         <Text style={styleResumen.title}>{atributos.gasto}</Text>
         <View style={styleResumen.containerLegend}>
           {filteredStackData.flatMap(item => {
-            return item.stacks.filter(stack => stack.value > 0 && !item.label.includes(atributos.ingreso)).map(stack => (
+            return item.stacks.filter(stack => stack.value > 0 && !item.label.includes(atributos.primary)).map(stack => (
                 <View style={styleResumen.containerLegendText}>
                   {renderDot(stack.color)}
                   <Text style={styleResumen.textLegend}>
@@ -201,16 +201,16 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
   };
   
   const renderIngresosLegendComponent = () => {
-    const hasIngresos = filteredStackData.some(item => item.stacks.some(stack => stack.value > 0 && item.label.includes(atributos.ingreso)));
+    const hasIngresos = filteredStackData.some(item => item.stacks.some(stack => stack.value > 0 && item.label.includes(atributos.primary)));
   
     if (!hasIngresos) return null;
   
     return (
       <View style={styleResumen.viewContainerResponsableSection}>
-        <Text style={styleResumen.title}>{atributos.ingreso}</Text>
+        <Text style={styleResumen.title}>{atributos.primary}</Text>
         <View style={styleResumen.containerLegend}>
           {filteredStackData.flatMap(item => {
-            return item.stacks.filter(stack => stack.value > 0 && item.label.includes(atributos.ingreso)).map(stack => (
+            return item.stacks.filter(stack => stack.value > 0 && item.label.includes(atributos.primary)).map(stack => (
                 <View style={styleResumen.containerLegendText}>
                   {renderSquare(stack.color)}
                   <Text style={styleResumen.textLegend}>
@@ -245,7 +245,7 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
               {search.length !== 4 ? (
               <SegmentedButtons
                 style={styleResumen.button}
-                theme={{ colors: { secondaryContainer: theme.colors.segmented, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white  } }}
+                theme={{ colors: { secondaryContainer: theme.colors.primary, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white  } }}
                 value={selectedYear}
                 onValueChange={(year) => setSelectedYear(year)}
                 buttons={uniqueYears.filter(year => stackData.some(item => item.year === year)).map((year) => ({
@@ -258,7 +258,7 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
                 <View style={styleResumen.Containerbutton}>
                 <SegmentedButtons
                     style={styleResumen.button}
-                    theme={{ colors: { secondaryContainer: theme.colors.segmented, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white } }}
+                    theme={{ colors: { secondaryContainer: theme.colors.primary, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white } }}
                     value={selectedMonth2}
                     onValueChange={(month) => setSelectedMonth2(month)}
                     buttons={monthsWithData.map(month => ({ value: Object.keys(months).find(key => months[key] === month), label: month }))}
@@ -290,7 +290,7 @@ const StackTGResponsable = ({ resumen, search, selectedMoneda })=> {
                 renderTooltip={(item, index) => {
                     return (
                       <View style={styleResumen.tooltipBarChart}>
-                        <Text style={styleResumen.textLegend}>{item.spacing===10 && atributos.gasto || atributos.ingreso}</Text>
+                        <Text style={styleResumen.textLegend}>{item.spacing===10 && atributos.gasto || atributos.primary}</Text>
                       </View>
                     );
                   }}

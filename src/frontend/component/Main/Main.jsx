@@ -1,5 +1,5 @@
 import React from 'react'
-import HomeStackNavigator from "./HomeStackNavigator.jsx";
+import HomeStackNavigator from "./NavigatorScreens/HomeStackNavigator.jsx";
 import {AuthProvider} from '../../helpers/AuthContext.js'
 
 const Main = () => {

@@ -2,7 +2,6 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { atributos, button_text, symbols } from '../../../constants.js';
-import { getSortIcon } from '../../utils.js';
 import useGastos from '../../hooks/useGastos.js';
 import useIngresos from '../../hooks/useIngresos.js';
 import BusquedaAvanzada from '../Comunes/Busqueda/BusquedaAvanzada.jsx';
@@ -12,20 +11,11 @@ import Pagination from '../Comunes/DataTable/Pagination.jsx';
 import { styleMovimiento } from '../../styles/styles.js';
 import useCombinedData from '../../hooks/useCombinedData.js';
 import { getColumns, getCardRows, getAtributosSearch } from './listConfig.js';
-
-const getPageData = (data, page, pageSize) => {
-    const startIndex = page * pageSize;
-    const endIndex = startIndex + pageSize;
-    return data.slice(startIndex, endIndex);
-};
+import useTableData from '../Comunes/DataTable/useTableData.jsx';
 
 const MovimientoList = ({ keyId, routeParams }) => {
     const navigation = useNavigation();
-    const [orden, setOrden] = useState('asc');
-    const [columna, setColumna] = useState('id');
     const [refreshing, setRefreshing] = useState(false);
-    const [page, setPage] = useState(0);
-    const [pageSize, setPageSize] = useState(10);
     const [numberOfItemsPerPage, onItemsPerPageChange] = useState(10);
     const [expanded, setExpanded] = useState({});
     const [isLoading, setIsLoading] = useState(false);
@@ -54,12 +44,21 @@ const MovimientoList = ({ keyId, routeParams }) => {
     const handleApplyFilters = (filters) => {
         const query = new URLSearchParams({
             ...filters,
-            limit: 18,
         }).toString();
         setAppliedFilters(filters);
         setIsLoading(true);
         fetchData(query).finally(() => setIsLoading(false));
     };
+
+    const {
+        page,
+        pageSize,
+        currentData,
+        handleSort,
+        getIcon,
+        handlePageChange,
+        handleItemsPerPageChange
+    } = useTableData(data, 10, 'fecha', 'desc');
 
     const handlePressGasto = useCallback((gastoId, index) => {
         setExpanded((prevExpanded) => ({ ...prevExpanded, [gastoId]: !prevExpanded[gastoId] }));
@@ -67,7 +66,7 @@ const MovimientoList = ({ keyId, routeParams }) => {
 
     const onRefresh = async () => {
         setRefreshing(true);
-        await fetchData(`limit=${pageSize*3}`);
+        await fetchData(`limit=${pageSize * 3}`);
         setRefreshing(false);
     };
 
@@ -82,33 +81,10 @@ const MovimientoList = ({ keyId, routeParams }) => {
     );
     const previousKeyId = useRef(keyId);
 
-    const handleSort = useCallback((columna) => {
-        setColumna(columna);
-        const ordenInverso = (orden === 'asc' ? 'desc' : orden === 'desc' ? 'no orden' : 'asc');
-        setOrden(ordenInverso);
-    }, [orden]);
-
-    const getIcon = (columna) => {
-        return getSortIcon(columna, orden, columna);
-    };
-
-    const handlePageChange = (page) => {
-        setPage(page);
-    };
-
-    const handleItemsPerPageChange = (value) => {
-        setPage(0);
-        setPageSize(value);
-        onItemsPerPageChange(value);
-    };
     useEffect(() => {
         onRefresh();
     }, [numberOfItemsPerPage]);
-    
-    const currentData = useMemo(() => {
-        return getPageData(data, page, pageSize);
-    }, [data, page, pageSize]);
-    
+
 
     const handleSubmit = async () => {
         navigation.navigate(MovimientoForm, { deleteMode: false, keyId: keyId, labelHeader: MovimientoLabelForm })
@@ -137,59 +113,59 @@ const MovimientoList = ({ keyId, routeParams }) => {
 
 
 
-    const categorias = React.useMemo(() => 
+    const categorias = React.useMemo(() =>
         categoria.map(item => ({
             nombre: item.categoria,
             activo: item.categoria_activo,
-        })), 
+        })),
         [categoria]
     );
-    
-    const subcategorias = React.useMemo(() => 
+
+    const subcategorias = React.useMemo(() =>
         subcategoria.map(item => ({
             nombre: item.subcategoria,
             activo: item.subcategoria_activo,
-        })), 
+        })),
         [subcategoria]
     );
-    
-    const responsables = React.useMemo(() => 
+
+    const responsables = React.useMemo(() =>
         responsable.map(item => ({
             nombre: item.responsable,
             activo: item.responsable_activo,
-        })), 
+        })),
         [responsable]
     );
-    
-    const monedas = React.useMemo(() => 
+
+    const monedas = React.useMemo(() =>
         moneda.map(item => ({
             nombre: item.codigo_moneda,
             activo: item.moneda_activo,
-        })), 
+        })),
         [moneda]
     );
-    
-    const metodopagos = React.useMemo(() => 
+
+    const metodopagos = React.useMemo(() =>
         metodopago.map(item => ({
             nombre: item.metodopago,
             activo: true,
-        })), 
+        })),
         [metodopago]
     );
-    
-    const submetodopagos = React.useMemo(() => 
+
+    const submetodopagos = React.useMemo(() =>
         submetodopago.map(item => ({
             nombre: item.submetodo_pago,
             activo: item.submetodo_pago_activo,
-        })), 
+        })),
         [submetodopago]
     );
-    
-    const atributosSearch = React.useMemo(() => 
-        getAtributosSearch(esEntrada, { categorias, subcategorias, responsables, monedas, metodopagos, submetodopagos }), 
+
+    const atributosSearch = React.useMemo(() =>
+        getAtributosSearch(esEntrada, { categorias, subcategorias, responsables, monedas, metodopagos, submetodopagos }),
         [esEntrada, categorias, subcategorias, responsables, monedas, metodopagos, submetodopagos]
     );
-    
+
     return (
         <>
             <View style={{ backgroundColor: styleMovimiento.colorBackground }}>

@@ -278,7 +278,7 @@ const MovimientoForm = ({ routeParams }) => {
                                 paddingVertical: 10,
                                 color: theme.colors.white
                             }}
-                            outlineStyle={{ borderColor: deleteMode ? theme.colors.disabled : theme.colors.primary, borderRadius: 27 }}
+                            outlineStyle={{ borderColor:theme.colors.primary, borderRadius: 27 }}
                             disabled={deleteMode}
                             label={label}
                             textColor={item[key] ? theme.colors.white : theme.colors.primary}

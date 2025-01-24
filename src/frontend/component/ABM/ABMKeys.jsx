@@ -16,7 +16,7 @@ import SearchDropdown from '../Comunes/Busqueda/SearchDropdown';
 import useGetKeys from '../../hooks/useGetKeys';
 import Error from '../Comunes/Dialogs/Error';
 
-const AMBKeys = ({ navigation }) => {
+const ABMKeys = ({ navigation }) => {
     const route = useRoute();
     const { labelHeader } = route.params;
     const { accessToken, refreshToken } = useAuth()
@@ -62,7 +62,7 @@ const AMBKeys = ({ navigation }) => {
                         options={data
                             .filter(option => ABM === 'modificar' ? option.activo : true)
                             .map(option => ({ nombre: option.nombre, activo: option.activo }))}
-                        placeholder={label}
+                        placeholder={`Seleccione ${label} a ${item.activo ? ABM : `des${ABM}`}`}
                         value={data.find(option => option.id === item[key])?.nombre}
                         onSelect={(selectedName) => {
                             const selectedOption = data.find(option => option.nombre === selectedName.nombre);
@@ -94,9 +94,9 @@ const AMBKeys = ({ navigation }) => {
                                 color: theme.colors.white,
                                 marginBottom: 20,
                             }}
-                            outlineStyle={{ borderColor: ABM === 'archivar' ? theme.colors.disabled : theme.colors.primary, borderRadius: 27 }}
+                            outlineStyle={{ borderColor:theme.colors.primary, borderRadius: 27 }}
                             disabled={ABM === 'archivar'}
-                            label={'Nombre'}
+                            label={`Nuevo nombre de ${label}`}
                             textColor={item[key] ? theme.colors.white : theme.colors.primary}
                             outlineColor={item[key] ? theme.colors.white : theme.colors.primary}
                             activeOutlineColor={item[key] ? theme.colors.white : theme.colors.primary}
@@ -115,9 +115,9 @@ const AMBKeys = ({ navigation }) => {
                                 paddingVertical: 10,
                                 color: theme.colors.white
                             }}
-                            outlineStyle={{ borderColor: ABM === 'archivar' ? theme.colors.disabled : theme.colors.primary, borderRadius: 27 }}
+                            outlineStyle={{ borderColor:theme.colors.primary, borderRadius: 27 }}
                             disabled={ABM === 'archivar'}
-                            label={'Descripcion'}
+                            label={`Nuevo descripción de ${label}`}
                             textColor={item[key] ? theme.colors.white : theme.colors.primary}
                             outlineColor={item[key] ? theme.colors.white : theme.colors.primary}
                             activeOutlineColor={item[key] ? theme.colors.white : theme.colors.primary}
@@ -292,7 +292,7 @@ const AMBKeys = ({ navigation }) => {
                         navigation={navigation}
                         goBack={true}
                     />
-                    <Error visibleError={visibleError} setVisibleError={setVisibleError} message={message}/>
+                    <Error visibleError={visibleError} setVisibleError={setVisibleError} message={message} />
 
                     {/* Botones de acción */}
                     <View style={styleForm.rowButton}>
@@ -310,7 +310,8 @@ const AMBKeys = ({ navigation }) => {
                         )}
                         {ABM === 'archivar' && (
                             <View style={styleForm.button}>
-                                <Icon.Button backgroundColor={theme.colors.primary} color={theme.colors.white} name={theme.icons.borrar} onPress={() => setvisibleDelete(true)}>
+                                <Icon.Button backgroundColor={theme.colors.primary} color={theme.colors.white} name={theme.icons.borrar} onPress={() => (!selectedItem ?
+                                    (setMessage('Selecciona un valor'), setVisible(true)) : setvisibleDelete(true))}>
                                     {item.activo ? button_text.archivar : button_text.desarchivar}
                                 </Icon.Button>
                             </View>
@@ -323,4 +324,4 @@ const AMBKeys = ({ navigation }) => {
     );
 };
 
-export default AMBKeys;
+export default ABMKeys;

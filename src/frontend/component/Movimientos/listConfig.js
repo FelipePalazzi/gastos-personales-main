@@ -4,6 +4,7 @@ export const getColumns = (esEntrada, atributos) => {
     if (esEntrada) {
         return [
             { key: 'fecha', label: atributos.fecha, sortable: true, render: (value) => moment.utc(value).format('DD/MM/YY') },
+            { key: 'responsable', label: atributos.responsable, sortable: true },
             {
                 key: 'importe', label: 'Importe', sortable: true, render: (value) => {
                     const numberValue = Number(value);
@@ -11,7 +12,6 @@ export const getColumns = (esEntrada, atributos) => {
                 }
             },
             { key: 'monedamonto', label: `Moneda`, sortable: true },
-            { key: 'responsable', label: atributos.responsable, sortable: true },
         ];
     } else {
         return [
@@ -32,9 +32,9 @@ export const getCardRows = (esEntrada, atributos, symbols) => {
     if (esEntrada) {
         return [
             { key: 'responsable', label: `${atributos.responsable}${symbols.colon}` },
-            { key: 'ARG', label: `${symbols.peso}${atributos.ar}`, sortable: true, render: (value) => Number(value).toFixed(2) },
-            { key: 'UYU', label: `${symbols.peso}${atributos.uy}`, sortable: true, render: (value) => Number(value).toFixed(2) },
-            { key: 'USD', label: `${symbols.peso}${atributos.usd}`, sortable: true, render: (value) => Number(value).toFixed(2) },
+            { key: 'ARG', label: `${symbols.peso}${atributos.ar} `, sortable: true, render: (value) => Number(value).toFixed(2) },
+            { key: 'UYU', label: `${symbols.peso}${atributos.uy} `, sortable: true, render: (value) => Number(value).toFixed(2) },
+            { key: 'USD', label: `${symbols.peso}${atributos.usd} `, sortable: true, render: (value) => Number(value).toFixed(2) },
             { key: 'comentario', label: `${atributos.descripcion}${symbols.colon}` },
             { key: 'metodopago', label: `Metodo de pago:` },
             { key: 'submetodopago', label: `Submetodo de pago:` },
@@ -43,6 +43,7 @@ export const getCardRows = (esEntrada, atributos, symbols) => {
         return [
             { key: 'responsable', label: `${atributos.responsable}${symbols.colon}` },
             { key: 'categoria', label: `${atributos.categoria}${symbols.colon}` },
+            { key: 'subcategoria', label: `Subcategoria${symbols.colon}` },
             { key: 'ARG', label: `${atributos.ar} ${symbols.peso}`, sortable: true, render: (value) => Number(value).toFixed(2) },
             { key: 'UYU', label: `${atributos.uy} ${symbols.peso}`, sortable: true, render: (value) => Number(value).toFixed(2) },
             { key: 'USD', label: `${atributos.usd} ${symbols.peso}`, sortable: true, render: (value) => Number(value).toFixed(2) },

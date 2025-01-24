@@ -4,7 +4,7 @@ const cambioController = {};
 
 cambioController.getCambioFecha = async (req, res, next) => {
   try {
-    const { fecha } = req.body; 
+    const { fecha } = req.query; 
     const cambio = await pool.query(`
         SELECT
             c.fecha::date AS fecha,
@@ -26,7 +26,7 @@ cambioController.getCambioFecha = async (req, res, next) => {
             c.fecha::date;
     `, [fecha]);
 
-    res.status(200).json(cambio.rows);
+    res.status(200).json(cambio.rows[0]);
   } catch (err) {
     next(err);
   }

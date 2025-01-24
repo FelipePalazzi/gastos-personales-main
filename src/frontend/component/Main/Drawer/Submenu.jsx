@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, ScrollView, Text } from 'react-native';
 import { DrawerItem } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import theme from '../../theme/theme';
-import { styleForm } from '../../styles/styles';
+import theme from '../../../theme/theme';
+import { styleForm } from '../../../styles/styles';
 
 const Submenu = ({ label, iconName, navigation, keyId, menuItems, }) => {
   const [isSubmenuVisible, setIsSubmenuVisible] = useState(false);
@@ -33,20 +33,55 @@ const Submenu = ({ label, iconName, navigation, keyId, menuItems, }) => {
           ]}
         >
           <ScrollView>
+          <DrawerItem
+                onPress={() =>
+                  navigation.navigate('ABmonedas', {
+                    labelHeader: 'Opciones de Moneda',
+                    keyId: keyId
+                  })
+                }
+                icon={() => (
+                  <Icon
+                    name={'currency-usd'}
+                    size={theme.fontSizes.body}
+                    color={theme.colors.primary}
+                  />
+                )}
+                style={{
+                  marginTop: 5,
+                  marginHorizontal: 5,
+                }}
+                labelStyle={{
+                  color: theme.colors.primary,
+                  fontSize: theme.fontSizes.normal,
+                  textAlign: 'center',
+                }}
+                label={() => (
+                  <Text
+                    style={{
+                      color: theme.colors.primary,
+                      fontSize: theme.fontSizes.normal,
+                      textAlign: 'center',
+                    }}
+                  >
+                    Moneda
+                  </Text>
+                )}
+              />
             {menuItems.map((item) => (
               <DrawerItem
                 key={item.entityType}
                 onPress={() =>
-                  (setIsSubmenuVisible(false), navigation.navigate('AMBEntidades', {
-                    labelHeader: item.label,
+                  navigation.navigate('ABMEntidades', {
+                    labelHeader: `Opciones de ${item.label}`,
                     entityType: item.entityType,
                     keyId: keyId,
                     routeName: item.routeName,
-                  }))
+                  })
                 }
                 icon={() => (
                   <Icon
-                    name={'wrench'}
+                    name={item.icon}
                     size={theme.fontSizes.body}
                     color={theme.colors.primary}
                   />

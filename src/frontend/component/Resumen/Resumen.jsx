@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View,Text , ScrollView } from 'react-native';
-import { styleLista, styleResumen } from '../../styles/styles.js';
+import { styleMovimiento, styleResumen } from '../../styles/styles.js';
 import useResumen from '../../hooks/useResumen.js';
 import MonedaSelector from './MonedaSelector.jsx';
 import IngrGastDiaMes from './IngrGastDiaMes.jsx';
@@ -31,7 +31,7 @@ const Resumen = () => {
   return (
     <ScrollView  showsVerticalScrollIndicator={true}
     vertical
-    style={styleLista.scroll}
+    style={styleMovimiento.scroll}
     onScroll={handleScroll}
     scrollEventThrottle={theme.scroll.desplazamiento}
     ref={scrollViewRef}
@@ -39,18 +39,18 @@ const Resumen = () => {
     <View>
     <Searchbar
       placeholder={button_text.ingreseAño}
-      style={styleLista.search}
+      style={styleMovimiento.search}
       elevation={theme.search.elevation}
       onChangeText={setSearch}
       value={search}
-      inputStyle={styleLista.textRowTable}
-      placeholderTextColor={theme.colors.textPrimary}
-      iconColor={theme.colors.textPrimary}
+      inputStyle={styleMovimiento.textRowTable}
+      placeholderTextColor={theme.colors.primary}
+      iconColor={theme.colors.primary}
     />
     {loading  ? (
-        <View style={styleLista.loadingContainer}>
+        <View style={styleMovimiento.loadingContainer}>
           <ActivityIndicator animating={true} color={theme.colors.primary} size={theme.icons.big} />
-          <Text style={styleLista.loadingText}>{alerts.cargando}</Text>
+          <Text style={styleMovimiento.loadingText}>{alerts.cargando}</Text>
         </View>
       ): (
         <>
@@ -58,8 +58,8 @@ const Resumen = () => {
         selectedMoneda={selectedMoneda}
         onMonedaChange={setSelectedMoneda}
       />
-      <View style={[styleLista.loadingContainer,{padding:0, marginBottom:5}]}>
-        <Text style={styleLista.loadingText}>
+      <View style={[styleMovimiento.loadingContainer,{padding:0, marginBottom:5}]}>
+        <Text style={styleMovimiento.loadingText}>
             Resumenes de Ingresos y Gastos
         </Text>
       </View>

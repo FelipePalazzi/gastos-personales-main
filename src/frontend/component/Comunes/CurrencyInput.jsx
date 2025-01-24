@@ -35,7 +35,7 @@ const CurrencyInput = ({ value = '', onChange, label, deleteMode, style }) => {
                 height: 38,
             }, style]}
             outlineStyle={{
-                borderColor: deleteMode ? theme.colors.disabled : theme.colors.primary,
+                borderColor:theme.colors.primary,
                 borderRadius: 27,
             }}
             disabled={deleteMode}

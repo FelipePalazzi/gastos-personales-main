@@ -8,11 +8,11 @@ resumenController.getResumen1 = async (req, res, next) => {
     const keyIdNum = Number(keyId);
     
     if (!req.user.keyIds.includes(keyIdNum)) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
     }
     const keyCheck = await pool.query(`SELECT * FROM user_keys WHERE key_id = $1`, [keyId]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
     const result = await pool.query(`WITH tipo_cambio_mensual AS (
       SELECT 
@@ -115,11 +115,11 @@ resumenController.getResumen2 = async (req, res, next) => {
     const keyIdNum = Number(keyId);
     
     if (!req.user.keyIds.includes(keyIdNum)) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
     }
     const keyCheck = await pool.query(`SELECT * FROM user_keys WHERE key_id = $1`, [keyId]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
     const result = await pool.query(`SELECT 
     EXTRACT(DAY FROM fecha) AS DAY,
@@ -235,11 +235,11 @@ resumenController.getResumen3 = async (req, res, next) => {
     const keyIdNum = Number(keyId);
     
     if (!req.user.keyIds.includes(keyIdNum)) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
     }
     const keyCheck = await pool.query(`SELECT * FROM user_keys WHERE key_id = $1`, [keyId]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const result = await pool.query(`WITH tipo_cambio_mensual AS (
@@ -348,11 +348,11 @@ resumenController.getResumen4 = async (req, res, next) => {
     const keyIdNum = Number(keyId);
     
     if (!req.user.keyIds.includes(keyIdNum)) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
     }
     const keyCheck = await pool.query(`SELECT * FROM user_keys WHERE key_id = $1`, [keyId]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
     const result = await pool.query(`WITH tipo_cambio_mensual AS (
       SELECT 
@@ -416,11 +416,11 @@ resumenController.getResumen5 = async (req, res, next) => {
     const keyIdNum = Number(keyId);
     
     if (!req.user.keyIds.includes(keyIdNum)) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
     }
     const keyCheck = await pool.query(`SELECT * FROM user_keys WHERE key_id = $1`, [keyId]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
     const result = await pool.query(`
     SELECT 

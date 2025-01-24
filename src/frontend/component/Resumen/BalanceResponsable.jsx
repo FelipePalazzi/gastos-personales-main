@@ -89,7 +89,7 @@ const ref = useRef(null);
       
               <SegmentedButtons
                 style={styleResumen.button}
-                theme={{ colors: { secondaryContainer: theme.colors.segmented, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white } }}
+                theme={{ colors: { secondaryContainer: theme.colors.primary, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white } }}
                 value={selectedResponsable}
                 onValueChange={handleValueChange}
                 buttons={buttons}
@@ -121,12 +121,12 @@ const ref = useRef(null);
                 yAxisThickness={lineChart.ejesThickness}
                 xAxisThickness={lineChart.ejesThickness}
                 verticalLinesColor={theme.colors.primary}
-                colorNegative={theme.colors.gasto}
-                color={theme.colors.ingreso}
-                startFillColorNegative={theme.colors.gasto}
-                startFillColor={theme.colors.ingreso}
-                endFillColorNegative={theme.colors.gasto}
-                endFillColor={theme.colors.ingreso}
+                colorNegative={theme.colors.primary}
+                color={theme.colors.primary}
+                startFillColorNegative={theme.colors.primary}
+                startFillColor={theme.colors.primary}
+                endFillColorNegative={theme.colors.primary}
+                endFillColor={theme.colors.primary}
                 rulesColor={theme.colors.pieBackground}
                 backgroundColor={theme.colors.pieInner}
                 yAxisTextStyle={styleResumen.ejeYstyle}
@@ -141,7 +141,7 @@ const ref = useRef(null);
                         `Balance Actual al: ${areaChartData[areaChartData.length - 1].date}` 
                         : ''}
                     </Text>
-                    <Text style={[styleResumen.title, { color: areaChartData[areaChartData.length - 1].value > 0 ? theme.colors.ingreso : theme.colors.gasto }]}>
+                    <Text style={[styleResumen.title, { color: areaChartData[areaChartData.length - 1].value > 0 ? theme.colors.primary : theme.colors.primary }]}>
                     {areaChartData.length > 0 ? 
                         `${selectedMoneda} ${formatYLabel(areaChartData[areaChartData.length - 1].value, selectedMoneda)}` 
                         : ''}

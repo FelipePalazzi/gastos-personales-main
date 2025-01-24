@@ -16,7 +16,6 @@ const useMonedasFaltantes = (keyId) => {
           "refresh-token": `${refreshToken}`,
         },
       });
-
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }

@@ -43,26 +43,9 @@ const styleComun = StyleSheet.create({
         color: theme.colors.white,
         textAlign:'center',
       },
-      backgroundContainer:{
-        backgroundColor: theme.colors.table,
-      },
       scroll:{
         flex:1,
         backgroundColor:theme.colors.background
-      },
-      search:{
-        margin:20,
-        backgroundColor: theme.colors.search,
-    },
-    picker: {
-        flex: 1,
-        fontSize: theme.fontSizes.ingresar,
-        height: 40,
-        marginEnd:16,
-        width: screenWidth * 0.6,
-        borderColor: theme.colors.gray,
-        borderWidth: 1,
-        backgroundColor: theme.colors.picker
       },
       text_input:{
         flex: 1,

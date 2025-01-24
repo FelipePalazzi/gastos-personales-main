@@ -55,8 +55,8 @@ loginController.login = async (req, res) => {
                     SELECT uk.key_id, r.nombre
                     FROM user_keys uk
                     JOIN role_user_keys r ON uk.role = r.id
-                    WHERE uk.user_id = $1
-                `, [user.user_id]);
+                    WHERE uk.user_id = $1 and uk.estado = $2
+                `, [user.user_id, estado=1]);
 
                 const keyRoles = keyRoleResult.rows;
                 const keyIds = keyRoles.map(row => row.key_id);
@@ -151,8 +151,8 @@ loginController.refreshToken = async (req, res) => {
           SELECT uk.key_id, r.nombre
           FROM user_keys uk
           JOIN role_user_keys r ON uk.role = r.id
-          WHERE uk.user_id = $1
-      `, [payload.userId]);
+          WHERE uk.user_id = $1 and uk.estado = $2
+      `, [payload.userId, estado=1]);
 
         const keyRoles = keyRoleResult.rows;
         const keyIds = keyRoles.map(row => row.key_id);
@@ -213,8 +213,8 @@ loginController.refreshTokenJSON = async (req, res) => {
           SELECT uk.key_id, r.nombre
           FROM user_keys uk
           JOIN role_user_keys r ON uk.role = r.id
-          WHERE uk.user_id = $1
-      `, [payload.userId]);
+          WHERE uk.user_id = $1 and uk.estado
+      `, [payload.userId, estado=1]);
 
         const keyRoles = keyRoleResult.rows;
         const keyIds = keyRoles.map(row => row.key_id);

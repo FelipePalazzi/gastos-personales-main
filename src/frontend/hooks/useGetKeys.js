@@ -9,7 +9,7 @@ const useGetKeys = () => {
   const [getkeys, setGetkeys] = useState([]);
   const [loading, setLoading] = useState(true);
   const { accessToken, refreshToken, refreshAccessToken } = useAuth();
-  const fetchGetKeys = async (query = 'activo=null') => {
+  const fetchGetKeys = async (query = 'activo=true&estado=Activo') => {
     try {
       const userId = decodeTokenUserId(accessToken)
       if (!userId) throw new Error('Usuario no autenticado');
@@ -22,10 +22,9 @@ const useGetKeys = () => {
       });
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
-          const tokenRefreshed = await refreshAccessToken(); // Ejecutar correctamente la función
+          const tokenRefreshed = await refreshAccessToken();
           if (tokenRefreshed) {
-            console.log('Token renovado, puedes reintentar la solicitud.');
-            return await fetchGetKeys(query); // Reintenta la solicitud con el nuevo token
+            return await fetchGetKeys(query);
           } else {
             console.error('No se pudo renovar el token. Usuario no autenticado.');
           }

@@ -18,7 +18,7 @@ import Error from '../Comunes/Dialogs/Error';
 import SearchDropdown from '../Comunes/Busqueda/SearchDropdown';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
-const AMBEntidades = ({ navigation }) => {
+const ABMEntidades = ({ navigation }) => {
   const route = useRoute();
   const { labelHeader, entityType, keyId, routeName } = route.params;
   const { accessToken, refreshToken } = useAuth()
@@ -139,7 +139,7 @@ const AMBEntidades = ({ navigation }) => {
                 color: theme.colors.white,
                 marginBottom: 15
               }}
-              outlineStyle={{ borderColor: ABM === 'archivar' ? theme.colors.disabled : theme.colors.primary, borderRadius: 27 }}
+              outlineStyle={{ borderColor: theme.colors.primary, borderRadius: 27 }}
               disabled={ABM === 'archivar'}
               label={`Nuevo nombre de ${label}`}
               textColor={item[key] ? theme.colors.white : theme.colors.primary}
@@ -156,7 +156,6 @@ const AMBEntidades = ({ navigation }) => {
                 placeholder={'Categoria asociada'}
                 value={categorias.find(option => option.id === item.categoria)?.nombre}
                 onSelect={(selectedName) => {
-                  console.log(selectedName)
                   handleChange('categoria', selectedName.id)
                 }}
                 onClear={() => { handleChange('categoria', null) }}
@@ -384,7 +383,8 @@ const AMBEntidades = ({ navigation }) => {
             )}
             {ABM === 'archivar' && (
               <View style={styleForm.button}>
-                <Icon.Button backgroundColor={theme.colors.primary} color={theme.colors.white} name={theme.icons.borrar} onPress={() => setvisibleDelete(true)}>
+                <Icon.Button backgroundColor={theme.colors.primary} color={theme.colors.white} name={theme.icons.borrar} onPress={() => (!selectedItem ?
+                  (setMessage('Selecciona un valor'), setVisible(true)) : setvisibleDelete(true))}>
                   {item.activo ? button_text.archivar : button_text.desarchivar}
                 </Icon.Button>
               </View>
@@ -397,4 +397,4 @@ const AMBEntidades = ({ navigation }) => {
   );
 };
 
-export default AMBEntidades;
+export default ABMEntidades;

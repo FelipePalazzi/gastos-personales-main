@@ -1,6 +1,6 @@
-import themeaqua from './themeaqua.js';
-import themeblue from './themeblue.js';
+import themelight from './themelight.js';
+import themedark from './themedark.js';
 
-const theme = themeaqua;
+const theme = themelight;
 
 export default theme;

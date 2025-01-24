@@ -7,13 +7,14 @@ import { styleDialog, screenWidth } from "../../../styles/styles"
 const Error = ({
     visible,
     setVisible,
-    message
+    message,
+    registro
 }) => {
     return (
         <Portal>
             <Dialog style={{ backgroundColor: theme.colors.white }} visible={visible} onDismiss={() => setVisible(false)}>
                 <Dialog.Icon color={theme.colors.primary} icon={'alert'} />
-                <Dialog.Title style={styleDialog.title}>{message ? `${'Error con las credenciales'}` : `Error identificando la huella`}</Dialog.Title>
+                <Dialog.Title style={styleDialog.title}>{registro ? 'Faltan datos' : message ? 'Error con las credenciales' : `Error identificando la huella`}</Dialog.Title>
                 {message ? <Dialog.Content>
                     <Text style={styleDialog.dateText}>{`${message}`}</Text>
                 </Dialog.Content> : null}

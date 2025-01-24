@@ -10,18 +10,18 @@ gastoController.getGastos = async (req, res, next) => {
     const allowedRoles = ['admin', 'admin_creator', 'user'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
-  }
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
+    }
 
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1`, [keyId]);
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado = 1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const {
@@ -100,7 +100,7 @@ gastoController.getGastos = async (req, res, next) => {
       filters.push(`g.monto_${monedaFiltro.toLowerCase()} >= $${values.length + 1}`);
       values.push(montoMinValid);
     }
-    if (!isNaN(montoMaxValid)&& monedaFiltro) {
+    if (!isNaN(montoMaxValid) && monedaFiltro) {
       filters.push(`g.monto_${monedaFiltro.toLowerCase()} <= $${values.length + 1}`);
       values.push(montoMaxValid);
     }
@@ -180,7 +180,7 @@ gastoController.getGastos = async (req, res, next) => {
   }
 };
 
-  
+
 gastoController.getGastobyID = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -189,17 +189,17 @@ gastoController.getGastobyID = async (req, res, next) => {
     const allowedRoles = ['admin', 'admin_creator', 'user'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
-  }
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1`, [keyId]);
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
+    }
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado = 1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
     const result = await pool.query(`
       SELECT g.id,
@@ -272,24 +272,24 @@ gastoController.getGastobyID = async (req, res, next) => {
 
 gastoController.createGasto = async (req, res, next) => {
   try {
-    const { keyId } = req.params;  
+    const { keyId } = req.params;
     const keyIdNum = Number(keyId);
     const allowedRoles = ['admin', 'admin_creator'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
-  }
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1`, [keyId]);
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
+    }
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado = 1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
-    
+
     const { fecha, subcategoria, id_moneda_origen, comentario, responsable, submetodopago } = req.body;
 
     const monedaQuery = await pool.query(`
@@ -323,7 +323,7 @@ gastoController.createGasto = async (req, res, next) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *
     `, [
-      fecha, subcategoria, idMoneda, comentario, responsable, keyId, monto_uyu, monto_usd, monto_arg , submetodopago]);
+      fecha, subcategoria, idMoneda, comentario, responsable, keyId, monto_uyu, monto_usd, monto_arg, submetodopago]);
 
     res.status(200).json(newGasto.rows[0]);
 
@@ -334,22 +334,22 @@ gastoController.createGasto = async (req, res, next) => {
 
 gastoController.updateGasto = async (req, res, next) => {
   try {
-    const { keyId,id } = req.params;
+    const { keyId, id } = req.params;
     const keyIdNum = Number(keyId);
     const allowedRoles = ['admin', 'admin_creator'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
-  }
-    const keyCheck = await pool.query(`SELECT * FROM user_keys WHERE key_id = $1`, [keyId]);
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
+    }
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado = 1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const { fecha, subcategoria, id_moneda_origen, comentario, responsable, submetodopago, estado } = req.body;
@@ -396,7 +396,7 @@ gastoController.updateGasto = async (req, res, next) => {
       WHERE id = $11 AND key_id = $12
       RETURNING *
     `, [
-      fecha, subcategoria, idMoneda, comentario, responsable, monto_uyu, monto_usd, monto_arg, submetodopago,estado, id, keyId]);
+      fecha, subcategoria, idMoneda, comentario, responsable, monto_uyu, monto_usd, monto_arg, submetodopago, estado, id, keyId]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'Gasto no encontrado.' });
@@ -411,22 +411,22 @@ gastoController.updateGasto = async (req, res, next) => {
 gastoController.deleteGasto = async (req, res, next) => {
   try {
     const { keyId, id } = req.params;
-    const {estado} = req.body;
+    const { estado } = req.body;
     const keyIdNum = Number(keyId);
     const allowedRoles = ['admin', 'admin_creator'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
-  }
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1`, [keyId]);
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
+    }
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado = 1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const result = await pool.query(`
@@ -434,7 +434,7 @@ gastoController.deleteGasto = async (req, res, next) => {
       SET estado = (SELECT id FROM estado WHERE nombre = $1)
       WHERE id = $2 AND key_id = $3
       RETURNING *
-    `, [estado,id, keyId]);
+    `, [estado, id, keyId]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'Gasto no encontrado.' });

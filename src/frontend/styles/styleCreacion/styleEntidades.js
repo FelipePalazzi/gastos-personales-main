@@ -27,9 +27,6 @@ rowContainer: {
     marginRight: 8,
     marginLeft: 15
   },
-  backgroundContainer:{
-    backgroundColor: theme.colors.table,
-  },
   scroll:{
     flex:1,
     backgroundColor:theme.colors.background
@@ -38,16 +35,6 @@ rowContainer: {
     margin:20,
     backgroundColor: theme.colors.search,
 },
-picker: {
-    flex: 1,
-    fontSize: theme.fontSizes.ingresar,
-    height: 40,
-    marginEnd:16,
-    width: screenWidth * 0.6,
-    borderColor: theme.colors.gray,
-    borderWidth: 1,
-    backgroundColor: theme.colors.picker
-  },
   text_input:{
     flex: 1,
     marginRight: 16, 

@@ -7,7 +7,7 @@ const hasRoleKey = require('../middlewares/verificacion/hasRoleKey.js');
 invitacionesController.getInvitacionsbyUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const { estado } = req.query;
+    const { estado, fechaEnvioDesde, fechaEnvioHasta, fechaExpiracionDesde, fechaExpiracionHasta } = req.query;
     if (req.user.userId !== Number(userId)) {
       return res.status(403).json({ message: 'No tienes acceso a este Usuario.' });
     }
@@ -32,8 +32,10 @@ invitacionesController.getInvitacionsbyUser = async (req, res, next) => {
         right join "keys" k on k.key_id = i.key_id 
         right join invitaciones_estado ie on i.estado = ie.id 
         WHERE i.user_id = $1 and ie.nombre = $2
+        AND i.fecha_envio BETWEEN $3 AND $4
+        AND i.fecha_expiracion BETWEEN $5 AND $6
         order by i.fecha_envio desc
-    `, [userId, estado]);
+    `, [userId, estado, fechaEnvioDesde, fechaEnvioHasta, fechaExpiracionDesde, fechaExpiracionHasta]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'No se encontraron invitaciones para este usuario.' });
@@ -49,16 +51,16 @@ invitacionesController.getInvitacionsbyKeyId = async (req, res, next) => {
   try {
     const { keyId } = req.params;
     const keyIdNum = Number(keyId);
-    const { estado } = req.query;
+    const { estado, username, fechaEnvioDesde, fechaEnvioHasta, fechaExpiracionDesde, fechaExpiracionHasta } = req.query;
     const allowedRoles = ['admin_creator'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
     }
 
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1`, [keyId]);
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado = 1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
@@ -94,8 +96,11 @@ invitacionesController.getInvitacionsbyKeyId = async (req, res, next) => {
             right join "keys" k on k.key_id = i.key_id 
             right join invitaciones_estado ie on i.estado = ie.id 
             WHERE i.key_id = $1 and ie.nombre = $2
+            AND (u.username ILIKE '%' || $3 || '%' OR $3 = '')
+            AND i.fecha_envio BETWEEN $4 AND $5
+            AND i.fecha_expiracion BETWEEN $6 AND $7
             order by i.fecha_envio desc
-      `, [keyId, estado]);
+      `, [keyId, estado, username, fechaEnvioDesde, fechaEnvioHasta, fechaExpiracionDesde, fechaExpiracionHasta]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'No se encontraron invitaciones para esta cuenta.' });

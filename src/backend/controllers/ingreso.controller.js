@@ -10,18 +10,18 @@ ingresoController.getIngresos = async (req, res, next) => {
     const allowedRoles = ['admin', 'admin_creator', 'user'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
-  }
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
+    }
 
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1`, [keyId]);
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado = 1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const {
@@ -95,7 +95,7 @@ ingresoController.getIngresos = async (req, res, next) => {
       filters.push(`i.monto_${monedaFiltro.toLowerCase()} >= $${values.length + 1}`);
       values.push(montoMinValid);
     }
-    if (!isNaN(montoMaxValid)&& monedaFiltro) {
+    if (!isNaN(montoMaxValid) && monedaFiltro) {
       filters.push(`i.monto_${monedaFiltro.toLowerCase()} <= $${values.length + 1}`);
       values.push(montoMaxValid);
     }
@@ -171,7 +171,7 @@ ingresoController.getIngresos = async (req, res, next) => {
   }
 };
 
-  
+
 ingresoController.getIngresobyID = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -180,17 +180,17 @@ ingresoController.getIngresobyID = async (req, res, next) => {
     const allowedRoles = ['admin', 'admin_creator', 'user'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
-  }
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1`, [keyId]);
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
+    }
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado = 1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
     const result = await pool.query(`
       select i.id,
@@ -259,24 +259,24 @@ ingresoController.getIngresobyID = async (req, res, next) => {
 
 ingresoController.createIngreso = async (req, res, next) => {
   try {
-    const { keyId } = req.params;  
+    const { keyId } = req.params;
     const keyIdNum = Number(keyId);
     const allowedRoles = ['admin', 'admin_creator'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
-  }
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1`, [keyId]);
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
+    }
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado = 1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
-    
+
     const { fecha, id_moneda_origen, comentario, responsable, submetodopago } = req.body;
 
     const monedaQuery = await pool.query(`
@@ -310,7 +310,7 @@ ingresoController.createIngreso = async (req, res, next) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `, [
-      fecha, idMoneda, comentario, responsable, keyId, monto_uyu, monto_usd, monto_arg , submetodopago]);
+      fecha, idMoneda, comentario, responsable, keyId, monto_uyu, monto_usd, monto_arg, submetodopago]);
 
     res.status(200).json(newIngreso.rows[0]);
 
@@ -321,22 +321,22 @@ ingresoController.createIngreso = async (req, res, next) => {
 
 ingresoController.updateIngreso = async (req, res, next) => {
   try {
-    const { keyId,id } = req.params;
+    const { keyId, id } = req.params;
     const keyIdNum = Number(keyId);
     const allowedRoles = ['admin', 'admin_creator'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
-  }
-    const keyCheck = await pool.query(`SELECT * FROM user_keys WHERE key_id = $1`, [keyId]);
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
+    }
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado = 1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const { fecha, id_moneda_origen, comentario, responsable, submetodopago, estado } = req.body;
@@ -382,7 +382,7 @@ ingresoController.updateIngreso = async (req, res, next) => {
       WHERE id = $10 AND key_id = $11
       RETURNING *
     `, [
-      fecha, idMoneda, comentario, responsable, monto_uyu, monto_usd, monto_arg, submetodopago,estado, id, keyId]);
+      fecha, idMoneda, comentario, responsable, monto_uyu, monto_usd, monto_arg, submetodopago, estado, id, keyId]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'Ingreso no encontrado.' });
@@ -397,22 +397,22 @@ ingresoController.updateIngreso = async (req, res, next) => {
 ingresoController.deleteIngreso = async (req, res, next) => {
   try {
     const { keyId, id } = req.params;
-    const {estado} = req.body;
+    const { estado } = req.body;
     const keyIdNum = Number(keyId);
     const allowedRoles = ['admin', 'admin_creator'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
-  }
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1`, [keyId]);
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
+    }
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado = 1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
 
     if (!userRole) {
-        return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
+      return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
     const result = await pool.query(`
@@ -420,7 +420,7 @@ ingresoController.deleteIngreso = async (req, res, next) => {
       SET estado = (SELECT id FROM estado WHERE nombre = $1)
       WHERE id = $2 AND key_id = $3
       RETURNING *
-    `, [estado,id, keyId]);
+    `, [estado, id, keyId]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'Ingreso no encontrado.' });

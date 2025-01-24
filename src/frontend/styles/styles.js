@@ -1,4 +1,3 @@
-import styleLista from './styleGastosIngresos/styleLista.js';
 import styleMovimiento from './styleGastosIngresos/styleMovimiento.js';
 import styleForm from './styleGastosIngresos/styleForm.js';
 import styleBusquedaAvanzada from './styleGastosIngresos/styleBusquedaAvanzada.js';
@@ -16,7 +15,6 @@ const screenWidth = Dimensions.get('window').width;
 
 export {
   styleComun,
-  styleLista,
   styleMovimiento,
   styleBusquedaAvanzada,
   styleResumen,

@@ -8,7 +8,6 @@ const styleDrawer = StyleSheet.create({
     backgroundColor: theme.colors.primary
 },
 container: {
-    flex:1,
     backgroundColor: theme.colors.primary,
     borderBottomWidth:0.8,
     borderBottomColor:theme.colors.white
@@ -21,14 +20,6 @@ list:{
     paddingBottom: 25,
     alignContent: 'center',
     justifyContent: 'center'
-  },
-  picker: {
-    flex: 1,
-    alignContent:'center',
-    fontSize: theme.fontSizes.ingresar,
-    height: 40,
-    marginHorizontal:10,
-    backgroundColor: theme.colors.card
   },
 })
 export default styleDrawer

@@ -6,7 +6,7 @@ const styleMovimiento = StyleSheet.create({
   container: {
     borderRadius: 5,
     overflow: 'hidden',
-    width: screenWidth,
+    width: screenWidth*1.1,
     backgroundColor:theme.colors.white
   },
   row: {
@@ -16,11 +16,12 @@ const styleMovimiento = StyleSheet.create({
   },
   textTitleTable: {
     fontSize: theme.fontSizes.header,
-    color: theme.colors.table.textHeader,
+    color: theme.colors.white,
     fontWeight: theme.fontWeights.bold,
+    marginLeft:28
   },
   textRowTable: {
-    color: theme.colors.table.textPrimary,
+    color: theme.colors.primary,
   },
   card: {
     elevation: 2,
@@ -30,15 +31,15 @@ const styleMovimiento = StyleSheet.create({
   SinDatos: {
     fontSize: theme.fontSizes.body,
     fontWeight: theme.fontWeights.bold,
-    color: theme.colors.table.textPrimary,
+    color: theme.colors.primary,
   },
   description: {
     fontWeight: theme.fontWeights.bold,
-    color: theme.colors.table.textPrimary,
+    color: theme.colors.primary,
 
   },
   descriptionItem: {
-    color: theme.colors.table.textPrimary,
+    color: theme.colors.primary,
   },
   descriptionRow: {
     flexDirection: 'row',
@@ -46,9 +47,9 @@ const styleMovimiento = StyleSheet.create({
     marginBottom: 8,
   },
   headerRow: {
-    paddingStart: 20,
+    paddingStart: 0,
     borderBottomWidth: 1,
-    backgroundColor: theme.colors.table.header,
+    backgroundColor: theme.colors.primary,
   },
   expandedrow: {
     backgroundColor: theme.colors.table.expanded,
@@ -62,7 +63,7 @@ const styleMovimiento = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  colorLoading: theme.colors.table.textPrimary,
+  colorLoading: theme.colors.primary,
   colorBackground: theme.colors.white
 });
 export default styleMovimiento

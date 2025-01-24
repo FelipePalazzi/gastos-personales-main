@@ -12,12 +12,12 @@ monedaController.getMoneda = async (req, res, next) => {
     const allowedRoles = ['admin', 'admin_creator', 'user'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
   }
 
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1`, [keyId]);
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
@@ -53,12 +53,12 @@ monedaController.getMonedaFaltante = async (req, res, next) => {
     const allowedRoles = ['admin', 'admin_creator', 'user'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
   }
 
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1`, [keyId]);
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
@@ -94,12 +94,12 @@ monedaController.getMonedabyID = async (req, res, next) => {
     const allowedRoles = ['admin', 'admin_creator', 'user'];
 
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
   }
 
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1`, [keyId]);
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
@@ -139,12 +139,12 @@ monedaController.createMoneda = async (req, res, next) => {
     const allowedRoles = ['admin', 'admin_creator'];
     
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
   }
 
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1`, [keyId]);
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
@@ -179,12 +179,12 @@ monedaController.updateMoneda = async (req, res, next) => {
     const allowedRoles = ['admin', 'admin_creator'];
     
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
   }
 
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1`, [keyId]);
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);
@@ -217,12 +217,12 @@ monedaController.deleteMoneda = async (req, res, next) => {
     const allowedRoles = ['admin', 'admin_creator'];
     
     if (!(await hasAccessToKey(req.user.userId, keyIdNum))) {
-      return res.status(403).json({ message: 'No tienes acceso a esta key ID.' });
+      return res.status(403).json({ message: 'No tienes acceso a esta ID cuenta.' });
   }
 
-    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1`, [keyId]);
+    const keyCheck = await pool.query(`SELECT user_key_id FROM user_keys WHERE key_id = $1 and estado=$2`, [keyId, estado=1]);
     if (keyCheck.rows.length === 0) {
-      return res.status(404).json({ message: 'Key ID no válida.' });
+      return res.status(404).json({ message: 'ID cuenta no válida.' });
     }
 
     const userRole = await hasRoleKey(req.user.userId, keyId, allowedRoles);

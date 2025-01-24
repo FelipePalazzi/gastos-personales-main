@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { symbols } from '../../../constants.js';
 import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useNavigation } from '@react-navigation/native';
 import { TextInput, } from 'react-native-paper'
-import { styleComun, styleForm } from '../../styles/styles.js';
+import { screenWidth, styleComun, styleForm } from '../../styles/styles.js';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import theme from '../../theme/theme.js';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
@@ -24,6 +24,7 @@ const LoginScreen = () => {
   const [password, setPassword] = useState('');
   const [visibleOK, setvisibleOK] = useState(false);
   const [visibleLogout, setVisibleLogout] = useState(false);
+  const [visibleLogoutOK, setVisibleLogoutOK] = useState(false);
   const [visibleError, setVisibleError] = useState(false);
   const [message, setMessage] = useState([]);
   const [fingertip, setFingertip] = useState(false);
@@ -34,7 +35,6 @@ const LoginScreen = () => {
   const navigation = useNavigation();
   const { accessToken, refreshToken, refreshAccessToken, saveTokensAndUser, clearTokensAndUser, getSavedUser } = useAuth();
   const [requestPin, setRequestPin] = useState(false);
-  const [pin, setPin] = useState('');
 
   const handleLogin = async () => {
     try {
@@ -51,6 +51,7 @@ const LoginScreen = () => {
         const username = decodeTokenUsername(accessToken)
         saveTokensAndUser(accessToken, refreshToken, username);
         setNombreUsuario(username)
+        await AsyncStorage.setItem('tutorialShown', 'true')
         setvisibleOK(true)
         setFingertip(true)
         setRegistrarse(false)
@@ -75,10 +76,11 @@ const LoginScreen = () => {
       setRequestPin(false)
       clearTokensAndUser()
       await AsyncStorage.removeItem('keyId');
-      setVisibleLogout(true)
+      await AsyncStorage.setItem('tutorialShown', 'false')
       setFingertip(false)
       setLoading(false)
       setRegistrarse(true)
+      setVisibleLogoutOK(true)
     } catch (error) {
       setVisibleError(true)
     }
@@ -163,15 +165,26 @@ const LoginScreen = () => {
       if (result.success) {
         if (!accessToken) {
           const refreshed = await refreshAccessToken();
+          if (refreshed) {
+            setRequestPin(false);
+            setLoading(false);
+            setMessage(null);
+            navigation.navigate('Drawer');
+          } else {
+            setMessage("No se pudo refrescar el token de acceso.");
+            setVisibleError(true);
+            setLoading(false);
+          }
+        } else {
+          setRequestPin(false);
+          setLoading(false);
+          setMessage(null);
+          navigation.navigate('Drawer');
         }
-        setRequestPin(false)
-        setLoading(false);
-        setMessage(null)
-        navigation.navigate('Drawer');
       }
     } else {
-      setLoading(false)
-      setMessage(null)
+      setLoading(false);
+      setMessage(null);
       setFingertip(false);
     }
   };
@@ -224,9 +237,13 @@ const LoginScreen = () => {
       ) : (
         <View style={{ marginTop: requestPin ? 120 : 160, marginHorizontal: 10, backgroundColor: theme.colors.white, borderColor: theme.colors.gray, borderRadius: 5, borderWidth: 2 }}>
 
-          <View style={{ justifyContent: 'center', paddingHorizontal: 161, marginTop: 10 }}>
-            <Icon.Button backgroundColor={theme.colors.transparente} name={'account-circle'} size={30} color={theme.colors.primary} iconStyle={{ marginRight: 0 }} />
+          <View style={{ alignItems: 'center', width:screenWidth-20, marginTop: 10 }}>
+            <Image
+              source={require('../../../../assets/icon.png')}
+              style={{ width: 30, height: 30 }}
+            />
           </View>
+
           {fingertip && (<View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 15 }}>
             <Text style={{ fontSize: theme.fontSizes.body, fontWeight: theme.fontWeights.bold, color: theme.colors.primary }}>{`Bienvenido de vuelta`}</Text>
             <Text style={{ fontSize: theme.fontSizes.body, fontWeight: theme.fontWeights.bold, color: theme.colors.primary }}>{`${nombreUsuario}`}</Text>
@@ -234,26 +251,26 @@ const LoginScreen = () => {
           {!fingertip && (<View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 15 }}>
             <Text style={{ fontSize: theme.fontSizes.body, fontWeight: theme.fontWeights.bold, color: theme.colors.primary }}>{`Inicio de Sesion`}</Text>
           </View>)}
-          {requestPin ? <PinInput onValidatePin={onValidatePin} title={'Ingresa tu PIN'}/> : renderEmailPasswordForm()}
+          {requestPin ? <PinInput onValidatePin={onValidatePin} title={'Ingresa tu PIN'} /> : renderEmailPasswordForm()}
           {!requestPin && <View style={{ paddingHorizontal: 10, marginBottom: 20, justifyContent: 'center' }}>
             <Icon.Button backgroundColor={theme.colors.primary} color={theme.colors.white} name={'login'} onPress={handleLogin} size={30} iconStyle={{ marginRight: 110 }}>{'Acceder'}</Icon.Button>
           </View>}
           <View style={styleForm.rowButton}>
             <View style={styleForm.button}>
-              <Icon.Button backgroundColor={theme.colors.white} color={theme.colors.primary} name={fingertip ? 'fingerprint' : 'fingerprint-off'} onPress={handleAuthentication} size={30} iconStyle={{ marginRight: 0 }} />
+              <Icon.Button backgroundColor={theme.colors.white} color={theme.colors.primary} name={fingertip ? 'fingerprint' : 'fingerprint-off'} onPress={!fingertip ? null : handleAuthentication} size={30} iconStyle={{ marginRight: 0 }} />
             </View>
             {registrarse && (<View style={{ paddingHorizontal: 10, marginLeft: 50, marginRight: 3, justifyContent: 'flex-start' }}>
               <Icon.Button backgroundColor={theme.colors.white} color={theme.colors.primary} name={'account-plus'} onPress={() => navigation.navigate('Register')} size={30} iconStyle={{ marginRight: 0 }} />
             </View>)}
             {!registrarse && (<View style={{ paddingHorizontal: 10, marginLeft: 50, marginRight: 3, justifyContent: 'flex-start' }}>
-              <Icon.Button backgroundColor={theme.colors.white} color={theme.colors.primary} name={'logout'} onPress={logout} size={30} iconStyle={{ marginRight: 0 }} />
+              <Icon.Button backgroundColor={theme.colors.white} color={theme.colors.primary} name={'logout'} onPress={() => setVisibleLogout(true)} size={30} iconStyle={{ marginRight: 0 }} />
             </View>)}
 
           </View>
 
           <Correcto visible={visibleOK} setVisible={setvisibleOK} navigation={navigation} nombreUsuario={nombreUsuario} />
 
-          <Logout visible={visibleLogout} setVisible={setVisibleLogout} />
+          <Logout visible={visibleLogout} setVisible={setVisibleLogout} onConfirm={logout} visibleLogout={visibleLogoutOK} setVisibleLogout={setVisibleLogoutOK}/>
 
           <Error visible={visibleError} setVisible={setVisibleError} message={message} />
 

@@ -8,10 +8,10 @@ const useGetUserperKey = (keyId) => {
   const [userperkey, setUserperkey] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserperkey = async () => {
+  const fetchUserperkey = async (query = 'estado=Activo') => {
     try {
       setLoading(true)
-      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_key}${symbols.barra}keyid${symbols.barra}${keyId}`, {
+      const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_key}${symbols.barra}keyid${symbols.barra}${keyId}?${query}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${accessToken}`,

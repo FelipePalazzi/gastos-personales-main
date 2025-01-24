@@ -10,7 +10,7 @@ const MonedaSelector = ({ selectedMoneda, onMonedaChange }) => {
       <Text style={styleResumen.textPointer}>Seleccione tipo de moneda</Text>
       <SegmentedButtons
         style={styleResumen.button}
-        theme={{ colors: { secondaryContainer: theme.colors.segmented } }}
+        theme={{ colors: { secondaryContainer: theme.colors.primary } }}
         value={selectedMoneda}
         onValueChange={onMonedaChange}
         buttons={[

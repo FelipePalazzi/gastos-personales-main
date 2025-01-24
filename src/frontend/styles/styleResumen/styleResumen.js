@@ -70,7 +70,7 @@ const styleResumen = StyleSheet.create({
       paddingHorizontal: 14,
       paddingVertical: 6,
       borderRadius: 16,
-      backgroundColor: theme.colors.card,
+      backgroundColor: theme.colors.primary,
     },
     fechaContainerPointer:{
       paddingHorizontal: 5,
@@ -79,10 +79,10 @@ const styleResumen = StyleSheet.create({
       marginHorizontal:10,
       borderTopRightRadius: 16,
       borderTopLeftRadius:16,
-      backgroundColor: theme.colors.textPrimary,
+      backgroundColor: theme.colors.primary,
     },
     titlePointer:{
-      color: theme.colors.textPrimary,
+      color: theme.colors.primary,
       fontSize: theme.fontSizes.pointer,
       fontWeight: theme.fontWeights.bold,
     },
@@ -100,7 +100,7 @@ const styleResumen = StyleSheet.create({
     tooltipBarChart:{
       marginBottom: 1,
       marginLeft: -6,
-      backgroundColor: theme.colors.textSecondary,
+      backgroundColor: theme.colors.primary,
       paddingHorizontal: 6,
       paddingVertical: 4,
       borderRadius: 4,

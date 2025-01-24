@@ -8,13 +8,14 @@ const Correcto = ({
   visible,
   setVisible,
   navigation,
-  nombreUsuario
+  nombreUsuario,
+  registro
 }) => {
   return (
     <Portal>
     <Dialog style={{backgroundColor:theme.colors.white}} visible={visible} onDismiss={() => [setVisible(false), navigation.navigate(`Drawer`, {nombreUsuario:nombreUsuario})]}>
       <Dialog.Icon color={theme.colors.primary}  icon={'account-check'} />
-      <Dialog.Title style={styleDialog.title}>{'Inicio de sesion correcto'}</Dialog.Title>
+      <Dialog.Title style={styleDialog.title}>{registro ? 'Registro correcto' : 'Inicio de sesion correcto'}</Dialog.Title>
       <Dialog.Content>
         <Text style={styleDialog.dateText}>{`Bienvenido ${nombreUsuario}!`}</Text>
       </Dialog.Content>

@@ -125,7 +125,7 @@ const panResponder = useRef(
       
               <SegmentedButtons
                 style={styleResumen.button}
-                theme={{ colors: { secondaryContainer: theme.colors.segmented, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white } }}
+                theme={{ colors: { secondaryContainer: theme.colors.primary, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white } }}
                 value={selectedValue}
                 onValueChange={handleValueChange}
                 buttons={[
@@ -139,7 +139,7 @@ const panResponder = useRef(
                 {search.length === 4 && selectedValue === 'Dia' ? (
                   <SegmentedButtons
                     style={styleResumen.button}
-                    theme={{ colors: { secondaryContainer: theme.colors.segmented, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white  } }}
+                    theme={{ colors: { secondaryContainer: theme.colors.primary, onSecondaryContainer:theme.colors.pieBackground, onSurface:theme.colors.white  } }}
                     value={selectedMonth}
                     onValueChange={(month) => showOrHidePointer(months2.indexOf(month))}
                     buttons={months2.map((item, index) => ({
@@ -188,12 +188,12 @@ const panResponder = useRef(
                 yAxisThickness={lineChart.ejesThickness}
                 xAxisThickness={lineChart.ejesThickness}
                 verticalLinesColor={theme.colors.pieBackground}
-                color1={theme.colors.gasto}
-                color2={theme.colors.ingreso}
-                startFillColor1={theme.colors.gasto}
-                startFillColor2={theme.colors.ingreso}
-                endFillColor1={theme.colors.gasto}
-                endFillColor2={theme.colors.ingreso}
+                color1={theme.colors.primary}
+                color2={theme.colors.primary}
+                startFillColor1={theme.colors.primary}
+                startFillColor2={theme.colors.primary}
+                endFillColor1={theme.colors.primary}
+                endFillColor2={theme.colors.primary}
                 rulesColor={theme.colors.pieBackground}
                 backgroundColor={theme.colors.pieInner}
                 yAxisTextStyle={styleResumen.ejeYstyle}
@@ -203,7 +203,7 @@ const panResponder = useRef(
                   hidePointer2: true,
                   pointerStripHeight: pointerConfig.pointerStripHeight,
                   strokeDashArray: pointerConfig.strokeDashArray,
-                  pointerStripColor: theme.colors.edit,
+                  pointerStripColor: theme.colors.black,
                   pointerStripWidth: pointerConfig.pointerStripWidth,
                   pointerColor: theme.colors.gray,
                   radius: pointerConfig.radius,
@@ -222,13 +222,13 @@ const panResponder = useRef(
                           </View>
                           <View style={styleResumen.containerPointer}>
                             <Text style={styleResumen.titlePointer}>
-                              {atributos.gasto}
+                              {atributos.primary}
                             </Text>
                             <Text style={styleResumen.textPointer}>
                               {selectedMoneda + symbols.peso + items[0].value}
                             </Text>
                             <Text style={styleResumen.titlePointer}>
-                              {atributos.ingreso}
+                              {atributos.primary}
                             </Text>
                             <Text style={styleResumen.textPointer}>
                               {selectedMoneda + symbols.peso + items[1].value}
@@ -245,7 +245,7 @@ const panResponder = useRef(
       )}
         </Card>
           ) : (
-            <View style={[styleResumen.titleContainer, {backgroundColor:theme.colors.gasto}]}>
+            <View style={[styleResumen.titleContainer, {backgroundColor:theme.colors.primary}]}>
             <Text style={[styleResumen.title, {marginBottom:15},{marginHorizontal:20}, {color: theme.colors.white}]}>{`${alerts.noData}${' para el año '}${search}`}</Text>
             </View>
           )}

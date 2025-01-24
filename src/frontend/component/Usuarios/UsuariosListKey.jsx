@@ -1,54 +1,50 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import { getSortIcon, decodeTokenUsername } from '../../utils.js';
+import { getSortIcon } from '../../utils.js';
 import Header from '../Comunes/DataTable/Header.jsx';
 import Rows from '../Comunes/DataTable/Rows.jsx';
 import Pagination from '../Comunes/DataTable/Pagination.jsx';
-import { styleMovimiento, styleComun, screenWidth } from '../../styles/styles.js';
+import { styleMovimiento, styleComun } from '../../styles/styles.js';
 import { getColumns, getCardRows, getAtributosSearch } from './listUserConfig.js';
-import useInvitacionesUser from '../../hooks/useInvitacionesUser.js';
+import useGetUserperKey from '../../hooks/useGetUserperKey.js';
+import PickerModal from '../Keys/PickerModal.jsx';
 import theme from '../../theme/theme.js';
-import CancelarInvitacion from './Dialogs/CancelarInvitacion.jsx';
-import { useAuth } from '../../helpers/AuthContext.js';
-import CodigoInvitacionIngresar from './Dialogs/CodigoInvitacionIngresar.jsx';
 import BusquedaAvanzada from '../Comunes/Busqueda/BusquedaAvanzada.jsx';
+import CodigoInvitacion from '../Invitaciones/Dialogs/CodigoInvitacion.jsx';
 import useTableData from '../Comunes/DataTable/useTableData.jsx';
 
-const InvitacionesListUser = ({ keyId, navigation }) => {
+const UsuariosListKey = ({ keyId, nombreKey, codigo, navigation }) => {
     const [message, setMessage] = useState('');
     const [refreshing, setRefreshing] = useState(false);
     const [numberOfItemsPerPage, onItemsPerPageChange] = useState(10);
     const [expanded, setExpanded] = useState({});
+    const [modalVisible, setModalVisible] = useState(false);
+    const [visibleCodigo, setVisibleCodigo] = useState(false);
+    const [visibleAprobar, setVisibleAprobar] = useState(false);
     const [visibleCancelar, setVisibleCancelar] = useState(false);
-    const { accessToken } = useAuth()
-    const nombreUsuario = decodeTokenUsername(accessToken)
-    const { getinvitacionesuser, loading, fetchInvitacionesuser } = useInvitacionesUser();
     const [isLoading, setIsLoading] = useState(false);
 
+    const { userperkey, loading, fetchUserperkey } = useGetUserperKey(keyId);
+
     const data = useMemo(() => {
-        return Array.isArray(getinvitacionesuser)
-            ? getinvitacionesuser.map(({ id_invitacion, ...rest }) => ({
-                id: id_invitacion,
+        return Array.isArray(userperkey)
+            ? userperkey.map(({ user_id, ...rest }) => ({
+                id: user_id,
                 ...rest,
             }))
             : [];
-    }, [getinvitacionesuser]);
+    }, [userperkey]);
 
-    const handlePressRow = useCallback((invitacionId, index) => {
-        setExpanded((prevExpanded) => ({ ...prevExpanded, [invitacionId]: !prevExpanded[invitacionId] }));
+    const handlePressRow = useCallback((userId, index) => {
+        setExpanded((prevExpanded) => ({ ...prevExpanded, [userId]: !prevExpanded[userId] }));
     }, []);
 
-    const fetchData = useCallback(
-        async (filters) => {
-            await fetchInvitacionesuser(filters);
-        },
-        [fetchInvitacionesuser]
-    );
+    const prevKeyId = useRef(keyId);
 
     const handleApplyFilters = (filters) => {
         const query = new URLSearchParams({
-            ...filters,
+            ...filters
         }).toString();
         setAppliedFilters(filters);
         setIsLoading(true);
@@ -58,30 +54,35 @@ const InvitacionesListUser = ({ keyId, navigation }) => {
     const atributosSearch = getAtributosSearch()
 
     const [appliedFilters, setAppliedFilters] = useState({});
-    
-    const [hasRefreshed, setHasRefreshed] = useState(false);
+
+    const fetchData = useCallback(
+        async (query) => {
+            if (keyId) {
+                await fetchUserperkey(query);
+            }
+        },
+        [fetchUserperkey, keyId]
+    );
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
-        await fetchData(appliedFilters);
+        await fetchData();
         setRefreshing(false);
-        setHasRefreshed(true);
-    }, [fetchData, appliedFilters]);
+    }, [fetchData]);
 
-    const prevStates = useRef({ visibleCancelar: false, visibleCodigo: false });
+    const handlePress = () => {
+        setVisibleCodigo(false);
+    };
+    const handleSumbit = () => {
+        setVisibleCodigo(true);
+    };
 
     useEffect(() => {
-        const { visibleCancelar: prevVisibleCancelar, visibleCodigo: prevVisibleCodigo } = prevStates.current;
-
-        if (
-            (prevVisibleCancelar && !visibleCancelar) ||
-            (prevVisibleCodigo && !visibleCodigo)
-        ) {
+        if (keyId !== prevKeyId.current) {
+            prevKeyId.current = keyId;
             onRefresh();
         }
-
-        prevStates.current = { visibleCancelar, visibleCodigo };
-    }, [visibleCancelar, visibleCodigo, onRefresh]);
+    }, [keyId, onRefresh]);
 
     const {
         page,
@@ -91,13 +92,18 @@ const InvitacionesListUser = ({ keyId, navigation }) => {
         getIcon,
         handlePageChange,
         handleItemsPerPageChange
-    } = useTableData(data, 10, 'enviado', 'desc');
+    } = useTableData(data, 10, 'fecha_union', 'desc');
 
     useEffect(() => {
         onRefresh();
     }, [numberOfItemsPerPage]);
 
     const [invitacionId, setInvitacionId] = useState(null);
+
+    const handleAprobar = async (item) => {
+        setInvitacionId(item.id)
+        setVisibleAprobar(true)
+    }
 
     const handleCancelar = async (item) => {
         setInvitacionId(item.id)
@@ -111,16 +117,11 @@ const InvitacionesListUser = ({ keyId, navigation }) => {
     const numberOfPages = Math.ceil(data.length / pageSize)
     const numberOfItemsPerPageList = [10, 15, 20, 50, 100];
 
-    const [visibleCodigo, setVisibleCodigo] = useState(false);
-    const handlePressCodigo = () => {
-        setVisibleCodigo(!visibleCodigo);
-    };
-
     return (
         <>
             <View style={{ backgroundColor: styleMovimiento.colorBackground }}>
 
-                <View style={{ justifyContent: 'space-between', flexDirection: 'row', backgroundColor: theme.colors.primary, paddingTop: 45, paddingBottom: 8 }}>
+                <View style={{ flexDirection: 'row', backgroundColor: theme.colors.primary, paddingTop: 45, paddingBottom: 8, alignItems: 'center' }}>
                     <View style={{ alignItems: 'center' }}>
                         <TouchableOpacity
                             style={{
@@ -134,13 +135,21 @@ const InvitacionesListUser = ({ keyId, navigation }) => {
 
                         </TouchableOpacity>
                     </View>
-                    <View style={[styleComun.keys.container, { width: screenWidth / 2 }]}>
-                        <Icon name="account" size={20} color={theme.colors.white} style={{ marginLeft: 10 }} />
-                        <Text style={styleComun.keys.buttonText}>
-                            {nombreUsuario ? nombreUsuario : 'Cargando...'}
-                        </Text>
+                    <View style={styleComun.keys.container}>
+                        <TouchableOpacity
+                            style={styleComun.keys.button}
+                            onPress={() => setModalVisible(true)}
+                        >
+                            <Text style={styleComun.keys.buttonText}>
+                                {nombreKey}
+                            </Text>
+                            <Icon name="menu-down" size={20} color={theme.colors.white} style={{ marginLeft: 10 }} />
+                        </TouchableOpacity>
+
                     </View>
                 </View>
+                <PickerModal modalVisible={modalVisible} setModalVisible={setModalVisible} navigation={navigation} />
+                <CodigoInvitacion visible={visibleCodigo} handlePress={handlePress} codigo={codigo} keyName={nombreKey} />
 
                 <BusquedaAvanzada
                     onApplyFilters={handleApplyFilters}
@@ -165,13 +174,19 @@ const InvitacionesListUser = ({ keyId, navigation }) => {
                 Cardrows={cardrows}
                 onRefresh={onRefresh}
                 refreshing={refreshing}
+                onEdit={handleAprobar}
+                boton1={(appliedFilters?.estado === 'Activo' || appliedFilters?.estado === '') ? 'Aprobar' : null}
                 onDelete={handleCancelar}
-                boton2={(appliedFilters?.estado === 'Pendiente' || appliedFilters?.estado === '') ? 'Cancelar' : null}
+                boton2={(appliedFilters?.estado === 'Activo' || appliedFilters?.estado === '') ? 'Cancelar' : null}
                 loading={isLoading}
                 page={page}
                 pageSize={pageSize}
                 style={styleMovimiento}
-                message={message}
+                message={
+                    userperkey.message === 'No tienes acceso a esta funcionalidad'
+                        ? userperkey.message
+                        : message
+                }
             />
 
             <Pagination
@@ -180,16 +195,14 @@ const InvitacionesListUser = ({ keyId, navigation }) => {
                 numberOfPages={numberOfPages}
                 numberOfItemsPerPageList={numberOfItemsPerPageList}
                 numberOfItemsPerPage={numberOfItemsPerPage}
+                handleSubmit={handleSumbit}
                 onItemsPerPageChange={handleItemsPerPageChange}
                 style={styleMovimiento}
-                handleSubmit={handlePressCodigo}
-                IconHandleSumbit={'clipboard-plus-outline'}
-                textIconSumbit={'Unirse'}
+                IconHandleSumbit={'clipboard-outline'}
+                textIconSumbit={'Copiar codigo'}
             />
-            <CancelarInvitacion visible={visibleCancelar} setVisible={setVisibleCancelar} invitacionId={invitacionId} />
-            <CodigoInvitacionIngresar visible={visibleCodigo} handlePress={handlePressCodigo} />
         </>
     );
 };
 
-export default InvitacionesListUser;
+export default UsuariosListKey;

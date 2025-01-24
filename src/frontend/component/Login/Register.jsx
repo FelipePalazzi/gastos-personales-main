@@ -11,6 +11,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import theme from '../../theme/theme.js';
 import LoadingScreen from '../Comunes/Loading/LoadingScreen.jsx';
 import PinRegistration from './PinRegister.jsx';
+import Correcto from './Dialogs/Correcto.jsx';
+import Error from './Dialogs/Error.jsx';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 
 const Register = () => {
@@ -27,17 +29,31 @@ const Register = () => {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [secureConfirmTextEntry, setSecureConfirmTextEntry] = useState(true);
   const [pin, setPin] = useState('');
-  const [pinDialogVisible, setPinDialogVisible] = useState(false); 
-
+  const [pinDialogVisible, setPinDialogVisible] = useState(false);
 
   const handlePin = (newPin) => {
     setPin(newPin);
-    setPinDialogVisible(false); 
+    setPinDialogVisible(false);
   };
 
   const handleRegister = async () => {
     try {
       setRole(3)
+
+      const missingFields = [];
+      if (!username) missingFields.push('Nombre de Usuario');
+      if (!email) missingFields.push('Email');
+      if (!emailConfirm) missingFields.push('Confirmacion del Email');
+      if (!password) missingFields.push('Contraseña');
+      if (!passwordConfirm) missingFields.push('Confirmacion de la Contraseña');
+      if (!pin) missingFields.push('PIN');
+    
+      if (missingFields.length > 0) {
+        const message = missingFields.map((field) => `\n\n→ ${field}`).join('\n');
+        setMessage(message);
+        setVisibleError(true);
+        return;
+      }
       setLoading(true)
       if ((password === passwordConfirm) && (email === emailConfirm)) {
         const response = await fetch(`${PAGINA_URL}${symbols.barra}register`, {
@@ -74,7 +90,8 @@ const Register = () => {
         setLoading(false)
       }
     } catch (error) {
-      Alert.alert('Error', 'Hubo un problema al iniciar sesión');
+      setMessage(error)
+      setVisibleError(true)
       console.error(error);
     }
   };
@@ -164,7 +181,7 @@ const Register = () => {
       {loading ?
         <LoadingScreen Nombre={'Registro'} />
         : (
-          <View style={{ marginTop: 105, marginHorizontal: 10, backgroundColor: theme.colors.white, borderColor: theme.colors.gray, borderRadius: 5, borderWidth: 2 }}>
+          <View style={{ marginTop: 80, marginHorizontal: 10, backgroundColor: theme.colors.white, borderColor: theme.colors.gray, borderRadius: 5, borderWidth: 2 }}>
 
             <View style={{ justifyContent: 'center', paddingHorizontal: 161, marginTop: 10 }}>
               <Icon.Button backgroundColor={theme.colors.transparente} name={'account-circle'} size={30} color={theme.colors.primary} iconStyle={{ marginRight: 0 }} />
@@ -181,7 +198,7 @@ const Register = () => {
               color={theme.colors.white}
               onPress={() => setPinDialogVisible(true)}
               underlayColor={theme.colors.white}
-              style={{ paddingVertical: 10, marginBottom: 20, backgroundColor: theme.colors.primary, width: pin ? screenWidth / 1.5 : screenWidth / 3, marginLeft: pin ? screenWidth / 7 : screenWidth / 3.2 }}
+              style={{ paddingVertical: 10, marginBottom: 20, backgroundColor: theme.colors.primary, width: pin ? screenWidth / 1.5 : screenWidth / 3, marginLeft: pin ? screenWidth / 7 : screenWidth / 3.2, justifyContent: 'center' }}
             >
               {pin ? `Cambiar PIN (Actual: ${pin})` : 'Configurar PIN'}
             </Icon.Button>
@@ -196,28 +213,8 @@ const Register = () => {
 
             </View>
 
-            <Portal>
-              <Dialog visible={visibleOK} onDismiss={() => [navigation.navigate('Login'), setvisibleOK(false)]}>
-                <Dialog.Icon icon={'account-check'} />
-                <Dialog.Title style={styleForm.title}>{'Registro correcto'}</Dialog.Title>
-                <Dialog.Actions>
-                  <Icon.Button name={'check'} onPress={() => [navigation.navigate('Login'), setvisibleOK(false)]}>{'Volver'}</Icon.Button>
-                </Dialog.Actions>
-              </Dialog>
-            </Portal>
-
-            <Portal>
-              <Dialog visible={visibleError} onDismiss={() => setVisibleError(false)}>
-                <Dialog.Icon icon={'alert-octagon'} />
-                <Dialog.Title style={styleForm.title}>{`${'Error con las credenciales'}`}</Dialog.Title>
-                <Dialog.Content>
-                  <Text style={styleForm.dateText}>{`${message}`}</Text>
-                </Dialog.Content>
-                <Dialog.Actions>
-                  <Icon.Button name={'alert-circle-check'} onPress={() => setVisibleError(false)}>{'Ok'}</Icon.Button>
-                </Dialog.Actions>
-              </Dialog>
-            </Portal>
+            <Correcto setVisible={setvisibleOK} visible={visibleOK} nombreUsuario={username} navigation={navigation} registro={true} />
+            <Error visible={visibleError} setVisible={setVisibleError} message={message} registro={true}/>
 
           </View>
         )}

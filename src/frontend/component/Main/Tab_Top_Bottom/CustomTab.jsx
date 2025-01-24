@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { View, Dimensions, Animated, StyleSheet, TouchableOpacity, Text, } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import theme from '../../theme/theme';
+import theme from '../../../theme/theme';
 
 const { width, height } = Dimensions.get('window');
 const TAB_HEIGHT = 90;
@@ -31,7 +31,7 @@ const CustomTab = ({ screens, screenTitles, icons }) => {
 
     const handleMomentumScrollEnd = (event) => {
         const newIndex = Math.round(event.nativeEvent.contentOffset.x / width);
-        setActiveIndex(newIndex); // Cambiar el índice activo
+        setActiveIndex(newIndex); 
     };
 
     const handleTabPress = (index) => {
