@@ -8,34 +8,47 @@ invitacionesController.getInvitacionsbyUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
     const { estado, fechaEnvioDesde, fechaEnvioHasta, fechaExpiracionDesde, fechaExpiracionHasta } = req.query;
+
     if (req.user.userId !== Number(userId)) {
       return res.status(403).json({ message: 'No tienes acceso a este Usuario.' });
     }
-    const estadoValido = await pool.query(
-      `SELECT nombre FROM invitaciones_estado WHERE nombre = $1`,
-      [estado]
-    );
-    if (estadoValido.rows.length === 0) {
-      return res.status(400).json({ message: `El estado '${estado}' no es válido.` });
+
+    const filters = [];
+    const values = [userId];
+
+    if (estado) {
+      filters.push(`ie.nombre ILIKE '%' || $${values.length + 1} || '%'`);
+      values.push(estado);
     }
 
-    const result = await pool.query(`
-        SELECT 
+    if (fechaEnvioDesde && fechaEnvioHasta) {
+      filters.push(`i.fecha_envio BETWEEN TO_TIMESTAMP($${values.length + 1}, 'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP($${values.length + 2}, 'YYYY-MM-DD HH24:MI:SS')`);
+      values.push(fechaEnvioDesde, fechaEnvioHasta);
+    }
+    
+    if (fechaExpiracionDesde && fechaExpiracionHasta) {
+      filters.push(`i.fecha_expiracion BETWEEN TO_TIMESTAMP($${values.length + 1}, 'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP($${values.length + 2}, 'YYYY-MM-DD HH24:MI:SS')`);
+      values.push(fechaExpiracionDesde, fechaExpiracionHasta);
+    }    
+
+    const query = `
+      SELECT 
         i.id as "id_invitacion", 
         k.nombre as "nombre_key",
         k.descripcion as "descripcion_key",
         ie.nombre as "estado",
         i.fecha_envio as "enviado",
         i.fecha_expiracion as "vence"
-        FROM invitaciones i
-        right join users u on u.user_id = i.user_id 
-        right join "keys" k on k.key_id = i.key_id 
-        right join invitaciones_estado ie on i.estado = ie.id 
-        WHERE i.user_id = $1 and ie.nombre = $2
-        AND i.fecha_envio BETWEEN $3 AND $4
-        AND i.fecha_expiracion BETWEEN $5 AND $6
-        order by i.fecha_envio desc
-    `, [userId, estado, fechaEnvioDesde, fechaEnvioHasta, fechaExpiracionDesde, fechaExpiracionHasta]);
+      FROM invitaciones i
+      RIGHT JOIN users u ON u.user_id = i.user_id 
+      RIGHT JOIN "keys" k ON k.key_id = i.key_id 
+      RIGHT JOIN invitaciones_estado ie ON i.estado = ie.id 
+      WHERE i.user_id = $1
+      ${filters.length > 0 ? 'AND ' + filters.join(' AND ') : ''}
+      ORDER BY i.fecha_envio DESC;
+    `;
+
+    const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'No se encontraron invitaciones para este usuario.' });
@@ -46,6 +59,7 @@ invitacionesController.getInvitacionsbyUser = async (req, res, next) => {
     next(err);
   }
 };
+
 // Obtener las claves asociadas a un key_id
 invitacionesController.getInvitacionsbyKeyId = async (req, res, next) => {
   try {
@@ -63,38 +77,53 @@ invitacionesController.getInvitacionsbyKeyId = async (req, res, next) => {
       return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
-    const estadoValido = await pool.query(
-      `SELECT nombre FROM invitaciones_estado WHERE nombre = $1`,
-      [estado]
-    );
-    if (estadoValido.rows.length === 0) {
-      return res.status(400).json({ message: `El estado '${estado}' no es válido.` });
+    const filters = [];
+    const values = [keyId];
+
+    if (estado) {
+      filters.push(`ie.nombre ILIKE '%' || $${values.length + 1} || '%'`);
+      values.push(estado);
     }
 
-    const result = await pool.query(`
-            SELECT
-            i.id as "id_invitacion", 
-            u.username as "nombre_usuario",
-            CONCAT(
-                SUBSTRING(u.email FROM 1 FOR 3), 
-                '*****', 
-                SUBSTRING(u.email FROM POSITION('@' IN u.email) - 3 FOR 3),
-                '@',
-                SUBSTRING(u.email FROM POSITION('@' IN u.email) + 1 FOR LENGTH(u.email))
-            ) AS "email",
-            ie.nombre as "estado",
-            i.fecha_envio as "enviado",
-            i.fecha_expiracion as "vence"
-            FROM invitaciones i
-            right join users u on u.user_id = i.user_id 
-            right join "keys" k on k.key_id = i.key_id 
-            right join invitaciones_estado ie on i.estado = ie.id 
-            WHERE i.key_id = $1 and ie.nombre = $2
-            AND (u.username ILIKE '%' || $3 || '%' OR $3 = '')
-            AND i.fecha_envio BETWEEN $4 AND $5
-            AND i.fecha_expiracion BETWEEN $6 AND $7
-            order by i.fecha_envio desc
-      `, [keyId, estado, username, fechaEnvioDesde, fechaEnvioHasta, fechaExpiracionDesde, fechaExpiracionHasta]);
+    if (username) {
+      filters.push(`u.username ILIKE '%' || $${values.length + 1} || '%'`);
+      values.push(username);
+    }
+
+    if (fechaEnvioDesde && fechaEnvioHasta) {
+      filters.push(`i.fecha_envio BETWEEN TO_TIMESTAMP($${values.length + 1}, 'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP($${values.length + 2}, 'YYYY-MM-DD HH24:MI:SS')`);
+      values.push(fechaEnvioDesde, fechaEnvioHasta);
+    }
+    
+    if (fechaExpiracionDesde && fechaExpiracionHasta) {
+      filters.push(`i.fecha_expiracion BETWEEN TO_TIMESTAMP($${values.length + 1}, 'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP($${values.length + 2}, 'YYYY-MM-DD HH24:MI:SS')`);
+      values.push(fechaExpiracionDesde, fechaExpiracionHasta);
+    }    
+
+    const query = `
+      SELECT
+        i.id as "id_invitacion", 
+        u.username as "nombre_usuario",
+        CONCAT(
+          SUBSTRING(u.email FROM 1 FOR 3), 
+          '*****', 
+          SUBSTRING(u.email FROM POSITION('@' IN u.email) - 3 FOR 3),
+          '@',
+          SUBSTRING(u.email FROM POSITION('@' IN u.email) + 1 FOR LENGTH(u.email))
+        ) AS "email",
+        ie.nombre as "estado",
+        i.fecha_envio as "enviado",
+        i.fecha_expiracion as "vence"
+      FROM invitaciones i
+      RIGHT JOIN users u ON u.user_id = i.user_id 
+      RIGHT JOIN "keys" k ON k.key_id = i.key_id 
+      RIGHT JOIN invitaciones_estado ie ON i.estado = ie.id 
+      WHERE i.key_id = $1
+      ${filters.length > 0 ? 'AND ' + filters.join(' AND ') : ''}
+      ORDER BY i.fecha_envio DESC;
+    `;
+
+    const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'No se encontraron invitaciones para esta cuenta.' });

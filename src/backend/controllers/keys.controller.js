@@ -7,13 +7,46 @@ const hasRoleKey = require('../middlewares/verificacion/hasRoleKey.js');
 keysController.getKeysbyUserId = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const { estado, activo, nombre, role } = req.query; 
-    const activeFilter = activo === 'null' ? null : activo === 'true';
+    const { estado, nombre, role } = req.query;
+    const activo = req.query.activo === 'true' ? true : req.query.activo === 'false' ? false : null;
 
     if (req.user.userId !== Number(userId)) {
       return res.status(403).json({ message: 'No tienes acceso a este Usuario.' });
     }
-    const result = await pool.query(`
+
+    const filters = [];
+    const values = [];
+
+    values.push(userId);
+
+    if (estado) {
+      filters.push(`uke.nombre ILIKE '%' || $${values.length + 1} || '%'`);
+      values.push(estado);
+    }
+
+    if (activo !== null) {
+      filters.push(`activo = $${values.length + 1}`);
+      values.push(activo);
+    }
+
+    if (nombre) {
+      filters.push(`k.nombre ILIKE '%' || $${values.length + 1} || '%'`);
+      values.push(nombre);
+    }
+
+    if (role) {
+      filters.push(`
+        CASE 
+          WHEN ruk.nombre = 'admin_creator' THEN 'Dueño'
+          WHEN ruk.nombre = 'admin' THEN 'Administrador'
+          WHEN ruk.nombre = 'user' THEN 'Usuario'
+          WHEN ruk.nombre = 'resumen_only' THEN 'Resumenes'
+        END ILIKE '%' || $${values.length + 1} || '%'
+      `);
+      values.push(role);
+    }
+
+    const query = `
       SELECT k.nombre as "nombre", 
              k.descripcion as "descripcion", 
              k.key_id as "id_key", 
@@ -28,20 +61,13 @@ keysController.getKeysbyUserId = async (req, res, next) => {
       FROM "keys" k
       LEFT JOIN user_keys uk ON uk.key_id = k.key_id
       LEFT JOIN role_user_keys ruk ON uk.role = ruk.id
-      left join user_keys_estado uke on uk.estado = uke.id
-      WHERE uk.user_id = $1 AND (uke.nombre ILIKE '%' || $2 || '%' OR $2 = '')
-      AND ($3::boolean IS NULL OR activo = $3)
-      AND (k.nombre ILIKE '%' || $4 || '%' OR $4 = '')
-      AND (
-    CASE 
-        WHEN ruk.nombre = 'admin_creator' THEN 'Dueño'
-        WHEN ruk.nombre = 'admin' THEN 'Administrador'
-        WHEN ruk.nombre = 'user' THEN 'Usuario'
-        WHEN ruk.nombre = 'resumen_only' THEN 'Resumenes'
-    END ILIKE '%' || $5 || '%' OR $5 = ''
-  )
-      ORDER BY (Lower(k.nombre)) asc
-    `, [userId,estado, activeFilter, nombre, role]);
+      LEFT JOIN user_keys_estado uke ON uk.estado = uke.id
+      WHERE uk.user_id = $1
+      ${filters.length > 0 ? 'AND ' + filters.join(' AND ') : ''}
+      ORDER BY LOWER(k.nombre) ASC
+    `;
+
+    const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'No se encontraron cuentas para este usuario.' });
@@ -52,6 +78,7 @@ keysController.getKeysbyUserId = async (req, res, next) => {
     next(err);
   }
 };
+
 
 // Obtener los usuarios asociados a un key_id
 keysController.getUsersByKeyId = async (req, res, next) => {
@@ -70,7 +97,39 @@ keysController.getUsersByKeyId = async (req, res, next) => {
       return res.status(403).json({ message: 'No tienes acceso a esta funcionalidad' });
     }
 
-    const result = await pool.query(`
+    const filters = [];
+    const values = [];
+
+    values.push(keyId);
+
+    if (estado) {
+      filters.push(`uke.nombre ILIKE '%' || $${values.length + 1} || '%'`);
+      values.push(estado);
+    }
+
+    if (role) {
+      filters.push(`
+        CASE 
+          WHEN ruk.nombre = 'admin_creator' THEN 'Dueño'
+          WHEN ruk.nombre = 'admin' THEN 'Administrador'
+          WHEN ruk.nombre = 'user' THEN 'Usuario'
+          WHEN ruk.nombre = 'resumen_only' THEN 'Resumenes'
+        END ILIKE '%' || $${values.length + 1} || '%'
+      `);
+      values.push(role);
+    }
+
+    if (username) {
+      filters.push(`u.username ILIKE '%' || $${values.length + 1} || '%'`);
+      values.push(username);
+    }
+
+    if (fechaDesde && fechaHasta) {
+      filters.push(`uk.fecha_union BETWEEN $${values.length + 1} AND $${values.length + 2}`);
+      values.push(fechaDesde, fechaHasta);
+    }
+
+    const query = `
       SELECT u.username as "username", 
             u.user_id as "user_id", 
               CASE 
@@ -78,7 +137,7 @@ keysController.getUsersByKeyId = async (req, res, next) => {
                   WHEN ruk.nombre = 'admin' THEN 'Administrador'
                   WHEN ruk.nombre = 'user' THEN 'Usuario'
                   WHEN ruk.nombre = 'resumen_only' THEN 'Resumenes'
-              END AS "role" 
+              END AS "role" ,
             uk.fecha_union as "fecha_union",
             CONCAT(
               SUBSTRING(u.email FROM 1 FOR 3), 
@@ -92,20 +151,10 @@ keysController.getUsersByKeyId = async (req, res, next) => {
       FROM user_keys uk
       LEFT JOIN users u ON uk.user_id = u.user_id
       LEFT JOIN role_user_keys ruk ON uk.role = ruk.id
-      left join "keys" k on k.key_id = uk.key_id 
-      left join user_keys_estado uke on uk.estado = uke.id
+      LEFT JOIN "keys" k on k.key_id = uk.key_id 
+      LEFT JOIN user_keys_estado uke on uk.estado = uke.id
       WHERE uk.key_id = $1
-        AND (uke.nombre ILIKE '%' || $2 || '%' OR $2 = '')
-        AND (
-          CASE 
-              WHEN ruk.nombre = 'admin_creator' THEN 'Dueño'
-              WHEN ruk.nombre = 'admin' THEN 'Administrador'
-              WHEN ruk.nombre = 'user' THEN 'Usuario'
-              WHEN ruk.nombre = 'resumen_only' THEN 'Resumenes'
-          END ILIKE '%' || $3 || '%' OR $3 = ''
-        )
-        AND (u.username ILIKE '%' || $4 || '%' OR $4 = '')
-        AND uk.fecha_union BETWEEN $5 AND $6
+      ${filters.length > 0 ? 'AND ' + filters.join(' AND ') : ''}
       ORDER BY 
         CASE 
           WHEN ruk.nombre = 'admin_creator' THEN 0 
@@ -113,7 +162,9 @@ keysController.getUsersByKeyId = async (req, res, next) => {
         END,
         uk.role ASC,
         uk.fecha_union DESC;
-    `, [keyId, estado, role, username, fechaDesde, fechaHasta]);
+    `;
+
+    const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'No se encontraron usuarios para esta cuenta.' });

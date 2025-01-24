@@ -8,12 +8,11 @@ const verifyKeyId = async (req, res, next) => {
             return res.status(399).json({ message: 'El parámetro keyId es obligatorio.' });
         }
 
-        const estadoKeyCheck = 1;
         const keyCheck = await pool.query(
             `SELECT user_key_id 
              FROM user_keys 
-             WHERE key_id = $1 AND estado = $2`,
-            [keyId, estadoKeyCheck]
+             WHERE key_id = $1`,
+            [keyId]
         );
 
         if (keyCheck.rows.length === 0) {

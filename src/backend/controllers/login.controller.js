@@ -93,7 +93,7 @@ loginController.login = async (req, res) => {
                 res.status(399).send('Contraseña incorrecta');
             }
         } else {
-            res.status(399).send('Usuario no encontrado');
+            res.status(399).send('Email no encontrado');
         }
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
