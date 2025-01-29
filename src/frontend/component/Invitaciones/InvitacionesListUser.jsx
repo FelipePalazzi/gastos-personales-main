@@ -18,7 +18,6 @@ import useTableData from '../Comunes/DataTable/useTableData.jsx';
 const InvitacionesListUser = ({ keyId, navigation }) => {
     const [message, setMessage] = useState('');
     const [refreshing, setRefreshing] = useState(false);
-    const [numberOfItemsPerPage, onItemsPerPageChange] = useState(10);
     const [expanded, setExpanded] = useState({});
     const [visibleCancelar, setVisibleCancelar] = useState(false);
     const { accessToken } = useAuth()
@@ -57,7 +56,7 @@ const InvitacionesListUser = ({ keyId, navigation }) => {
 
     const atributosSearch = getAtributosSearch()
 
-    const [appliedFilters, setAppliedFilters] = useState({});
+    const [appliedFilters, setAppliedFilters] = useState({estado:'Pendiente'});
     
     const [hasRefreshed, setHasRefreshed] = useState(false);
 
@@ -86,16 +85,18 @@ const InvitacionesListUser = ({ keyId, navigation }) => {
     const {
         page,
         pageSize,
+        numberOfPages,
         currentData,
         handleSort,
         getIcon,
         handlePageChange,
-        handleItemsPerPageChange
+        handleItemsPerPageChange,
+        numberOfItemsPerPageList
     } = useTableData(data, 10, 'enviado', 'desc');
 
     useEffect(() => {
         onRefresh();
-    }, [numberOfItemsPerPage]);
+    }, [pageSize]);
 
     const [invitacionId, setInvitacionId] = useState(null);
 
@@ -107,9 +108,6 @@ const InvitacionesListUser = ({ keyId, navigation }) => {
     const columns = useMemo(() => getColumns(), []);
 
     const cardrows = useMemo(() => getCardRows(), []);
-
-    const numberOfPages = Math.ceil(data.length / pageSize)
-    const numberOfItemsPerPageList = [10, 15, 20, 50, 100];
 
     const [visibleCodigo, setVisibleCodigo] = useState(false);
     const handlePressCodigo = () => {
@@ -179,7 +177,7 @@ const InvitacionesListUser = ({ keyId, navigation }) => {
                 onPageChange={handlePageChange}
                 numberOfPages={numberOfPages}
                 numberOfItemsPerPageList={numberOfItemsPerPageList}
-                numberOfItemsPerPage={numberOfItemsPerPage}
+                numberOfItemsPerPage={pageSize}
                 onItemsPerPageChange={handleItemsPerPageChange}
                 style={styleMovimiento}
                 handleSubmit={handlePressCodigo}

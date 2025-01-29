@@ -18,9 +18,6 @@ const useGetUserperKey = (keyId) => {
           "refresh-token": `${refreshToken}`,
         },
       });
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
       const json = await response.json();
       setUserperkey(json);
       setLoading(false);
@@ -32,7 +29,7 @@ const useGetUserperKey = (keyId) => {
 
   useEffect(() => {
     fetchUserperkey();
-  }, [accessToken, keyId]);
+  }, [accessToken]);
 
   return { userperkey, loading, fetchUserperkey };
 };

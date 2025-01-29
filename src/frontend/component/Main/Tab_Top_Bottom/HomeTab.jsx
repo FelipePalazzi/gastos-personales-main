@@ -11,7 +11,7 @@ import TutorialDialog from '../../Comunes/Dialogs/TutorialDialog.jsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Resumen from '../../Resumen/Resumen.jsx';
 
-function HomeTab({ keyId, nombreKey, navigation}) {
+function HomeTab({ keyId, nombreKey, navigation, parentScrollEnabled, setParentScrollEnabled}) {
   const [modalVisible, setModalVisible] = useState(false);
   const [tutorialDialog, setTutorialDialog] = useState(false);
 
@@ -27,7 +27,7 @@ function HomeTab({ keyId, nombreKey, navigation}) {
 
   const screens = [
     <MovimientoList keyId={keyId} routeParams={{ tipo: 'salidas' }} />,
-    <Resumen/>,
+    <Resumen keyId={keyId} parentScrollEnabled={parentScrollEnabled} setParentScrollEnabled={setParentScrollEnabled}/>,
     <MovimientoList keyId={keyId} routeParams={{ tipo: 'entradas' }} />,
   ];
 
@@ -91,7 +91,7 @@ function HomeTab({ keyId, nombreKey, navigation}) {
       </View>
   
       <PickerModal modalVisible={modalVisible} setModalVisible={setModalVisible} navigation={navigation} />
-      <CustomTab screens={screens} screenTitles={screenTitles} icons={icons} />
+      <CustomTab screens={screens} screenTitles={screenTitles} icons={icons} parentScrollEnabled={parentScrollEnabled}/>
       <TutorialDialog visible={tutorialDialog} setVisible={setTutorialDialog} />
     </>
   );

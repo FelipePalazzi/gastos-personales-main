@@ -62,6 +62,7 @@ const styleMovimiento = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    width:screenWidth
   },
   colorLoading: theme.colors.primary,
   colorBackground: theme.colors.white

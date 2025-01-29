@@ -21,7 +21,9 @@ function DrawerNavigator() {
   const [keyId, setKeyId] = useState(1)
   const [nombreKey, setNombreKey] = useState('Seleccione una Cuenta...')
   const [codigo, setCodigo] = useState('')
+  const [parentScrollEnabled , setParentScrollEnabled] = useState(true);
   
+
   const navigation = useNavigation()
   useEffect(() => {
     if (route.params?.keyId && route.params?.nombreKey) {
@@ -44,19 +46,20 @@ function DrawerNavigator() {
         headerStyle: { backgroundColor: theme.colors.primary },
         headerTitleStyle: { color: theme.colors.white },
         headerTintColor: theme.colors.white,
+        swipeEnabled:parentScrollEnabled,
       }}
     >
       <Drawer.Screen
         name="HomeTab"
         options={{ headerShown: false }}
       >
-        {(props) => <HomeTab {...props} keyId={keyId} nombreKey={nombreKey} navigation={navigation}/> || <LoadingScreen Nombre={"Datos"} />}
+        {(props) => <HomeTab {...props} keyId={keyId} nombreKey={nombreKey} navigation={navigation} parentScrollEnabled={parentScrollEnabled} setParentScrollEnabled={setParentScrollEnabled}/> || <LoadingScreen Nombre={"Datos"} />}
       </Drawer.Screen>
       <Drawer.Screen
         name="AdministrarUsuarios"
         options={{ headerShown: false, animation: "slide" }}
       >
-        {(props) => <UsuariosListKey {...props} keyId={keyId} nombreKey={nombreKey} navigation={navigation} codigo={codigo}/> || <LoadingScreen Nombre={"Invitaciones"} />}
+        {(props) => <UsuariosListKey {...props} keyId={keyId} nombreKey={nombreKey} navigation={navigation} codigo={codigo}/> || <LoadingScreen Nombre={"Usuarios"} />}
       </Drawer.Screen>
       <Drawer.Screen
         name="Invitacioneskey"

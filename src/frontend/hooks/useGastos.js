@@ -8,7 +8,7 @@ const useGastos = (keyId) => {
   const [gastos, setGastos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchGastos = async (query = 'limit=30') => {
+  const fetchGastos = async (query = 'limit=100&estado=Activo') => {
     try {
       setLoading(true)
       const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_gasto}${symbols.barra}${keyId}?${query}`, {

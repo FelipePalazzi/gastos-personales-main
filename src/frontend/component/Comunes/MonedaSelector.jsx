@@ -3,19 +3,16 @@ import { View, Text } from 'react-native';
 import { SegmentedButtons } from 'react-native-paper';
 import theme from '../../theme/theme.js';
 
-const MonedaSelector = ({ selectedMoneda, onMonedaChange }) => {
+const MonedaSelector = ({ selectedMoneda, onMonedaChange, title }) => {
   return (
     <View style={{
-      alignContent: 'center',
+      alignItems: 'center',
       marginBottom: 10,
+      justifyContent:'center'
     }}>
-      <Text style={{
-        fontWeight: theme.fontWeights.bold,
-        textAlign: 'center',
-        color:theme.colors.primary
-      }}>Seleccione tipo de moneda</Text>
+      <Text style={{color:theme.colors.primary,fontSize:theme.fontSizes.normal}}>{title}</Text>
       <SegmentedButtons
-        style={{ marginVertical: 10 }}
+        style={{ marginVertical: 10, marginHorizontal:30 }}
         theme={{ colors: { secondaryContainer: theme.colors.primary } }}
         value={selectedMoneda}
         onValueChange={onMonedaChange}

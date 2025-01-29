@@ -16,7 +16,6 @@ import useTableData from '../Comunes/DataTable/useTableData.jsx';
 const MovimientoList = ({ keyId, routeParams }) => {
     const navigation = useNavigation();
     const [refreshing, setRefreshing] = useState(false);
-    const [numberOfItemsPerPage, onItemsPerPageChange] = useState(10);
     const [expanded, setExpanded] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const route = useRoute();
@@ -53,11 +52,13 @@ const MovimientoList = ({ keyId, routeParams }) => {
     const {
         page,
         pageSize,
+        numberOfPages,
         currentData,
         handleSort,
         getIcon,
         handlePageChange,
-        handleItemsPerPageChange
+        handleItemsPerPageChange,
+        numberOfItemsPerPageList
     } = useTableData(data, 10, 'fecha', 'desc');
 
     const handlePressGasto = useCallback((gastoId, index) => {
@@ -66,7 +67,7 @@ const MovimientoList = ({ keyId, routeParams }) => {
 
     const onRefresh = async () => {
         setRefreshing(true);
-        await fetchData(`limit=${pageSize * 3}`);
+        await fetchData(`limit=${pageSize * 3}&estado=Activo`);
         setRefreshing(false);
     };
 
@@ -75,7 +76,7 @@ const MovimientoList = ({ keyId, routeParams }) => {
             if (keyId && keyId !== previousKeyId.current) {
                 previousKeyId.current = keyId;
                 setIsLoading(true);
-                fetchData('limit=30').finally(() => setIsLoading(false));
+                fetchData('limit=100&estado=Activo').finally(() => setIsLoading(false));
             }
         }, [keyId, fetchData])
     );
@@ -83,7 +84,7 @@ const MovimientoList = ({ keyId, routeParams }) => {
 
     useEffect(() => {
         onRefresh();
-    }, [numberOfItemsPerPage]);
+    }, [pageSize]);
 
 
     const handleSubmit = async () => {
@@ -104,10 +105,7 @@ const MovimientoList = ({ keyId, routeParams }) => {
 
     const cardrows = useMemo(() => getCardRows(esEntrada, atributos, symbols), [esEntrada, atributos, symbols]);
 
-    const numberOfPages = Math.ceil(data.length / pageSize)
-    const numberOfItemsPerPageList = [10, 15, 20, 50, 100];
-
-    const [appliedFilters, setAppliedFilters] = useState({});
+    const [appliedFilters, setAppliedFilters] = useState({estado:'Activo'});
 
     const { categoria, subcategoria, responsable, moneda, metodopago, submetodopago } = useCombinedData(keyId);
 
@@ -209,7 +207,7 @@ const MovimientoList = ({ keyId, routeParams }) => {
                 onPageChange={handlePageChange}
                 numberOfPages={numberOfPages}
                 numberOfItemsPerPageList={numberOfItemsPerPageList}
-                numberOfItemsPerPage={numberOfItemsPerPage}
+                pageSize={pageSize}
                 handleSubmit={handleSubmit}
                 onItemsPerPageChange={handleItemsPerPageChange}
                 style={styleMovimiento}

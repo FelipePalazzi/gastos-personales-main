@@ -9,7 +9,7 @@ const useIngresos = (keyId) => {
   const [ingresos, setIngresos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchIngresos = async (query = '') => {
+  const fetchIngresos = async (query = 'limit=100&estado=Activo') => {
     try {
       setLoading(true)
       const response = await globalThis.fetch(`${PAGINA_URL}${symbols.barra}${pagina.pagina_ingreso}${symbols.barra}${keyId}?${query}`, {

@@ -9,7 +9,7 @@ const styleDialog = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
-    color: theme.colors.primary
+    color: theme.colors.primary,
   },
   text: {
     fontSize: theme.fontSizes.ingresar,

@@ -29,7 +29,7 @@ const CardTable = ({
                     </View>
                 ))}
                 <View>
-                    <Card.Actions>
+                    <Card.Actions style={{marginRight:30}}>
                         {boton1 && <View>
                             <Icon.Button
                                 backgroundColor={theme.colors.primary}

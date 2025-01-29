@@ -9,7 +9,7 @@ import moment from 'moment'
 import 'moment/locale/es'
 import DatePickerSearchBar from './DatePickerSearchBar.jsx';
 import CurrencyInput from '../CurrencyInput.jsx';
-import { TextInput } from 'react-native-paper';
+import TextInputCustom from '../TextInputCustom.jsx';
 
 const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, keyId }) => {
   const [modalVisible, setModalVisible] = React.useState(false);
@@ -65,40 +65,13 @@ const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, key
     switch (renderType) {
       case 'textInput':
         return (
-          <TextInput
+          <TextInputCustom
             key={key}
-            placeholder={label}
-            mode={'outlined'}
             label={label}
-            value={filters[key] || ''}
-            onChangeText={(value) => handleInputChange(key, value)}
-            style={{
-              width: '100%',
-              backgroundColor: filters[key] ? theme.colors.primary : theme.colors.white,
-              paddingVertical: 10,
-              color: theme.colors.white,
-              height: 38,
-              marginTop: -5, marginBottom: 5
-            }}
-            outlineStyle={{
-              borderColor: theme.colors.primary,
-              borderRadius: 27,
-            }}
-            textColor={filters[key] ? theme.colors.white : theme.colors.primary}
-            outlineColor={filters[key] ? theme.colors.white : theme.colors.primary}
-            activeOutlineColor={filters[key] ? theme.colors.white : theme.colors.primary}
-            theme={{ colors: { onSurfaceVariant: filters[key] ? theme.colors.white : theme.colors.primary } }}
-            right={
-              filters[key] ? (
-                <TextInput.Icon
-                  icon="close"
-                  onPress={() => handleInputChange(key, '')}
-                  size={26}
-                  color={theme.colors.white}
-                  style={{ marginTop: 34 }}
-                />
-              ) : null
-            }
+            placeholder={label}
+            value={filters[key]}
+            onChangeText={(value) =>  handleInputChange(key, value)}
+            onPressClose={() => handleInputChange(key, '')}
           />
         );
       case 'searchDropdown':
@@ -124,7 +97,7 @@ const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, key
             onSelect={(date) => {
               handleInputChange(key, moment(date).format('YYYY-MM-DD HH:mm:ss'));
             }}
-            onClear={() => handleInputChange(key, null)}
+            onClear={() => handleInputChange(key, '')}
             placeholder={label}
           />
         );

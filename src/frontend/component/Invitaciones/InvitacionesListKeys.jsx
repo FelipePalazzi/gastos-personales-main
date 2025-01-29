@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import { getSortIcon } from '../../utils.js';
 import Header from '../Comunes/DataTable/Header.jsx';
 import Rows from '../Comunes/DataTable/Rows.jsx';
 import Pagination from '../Comunes/DataTable/Pagination.jsx';
@@ -19,7 +18,6 @@ import useTableData from '../Comunes/DataTable/useTableData.jsx';
 const InvitacionesListKeys = ({ keyId, nombreKey, codigo, navigation }) => {
     const [message, setMessage] = useState('');
     const [refreshing, setRefreshing] = useState(false);
-    const [numberOfItemsPerPage, onItemsPerPageChange] = useState(10);
     const [expanded, setExpanded] = useState({});
     const [modalVisible, setModalVisible] = useState(false);
     const [visibleCodigo, setVisibleCodigo] = useState(false);
@@ -64,11 +62,11 @@ const InvitacionesListKeys = ({ keyId, nombreKey, codigo, navigation }) => {
 
     const atributosSearch = getAtributosSearch()
 
-    const [appliedFilters, setAppliedFilters] = useState({});
+    const [appliedFilters, setAppliedFilters] = useState({estado:'Pendiente'});
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
-        await fetchData();
+        await fetchData(appliedFilters);
         setRefreshing(false);
     }, [fetchData]);
 
@@ -86,16 +84,18 @@ const InvitacionesListKeys = ({ keyId, nombreKey, codigo, navigation }) => {
     const {
         page,
         pageSize,
+        numberOfPages,
         currentData,
         handleSort,
         getIcon,
         handlePageChange,
-        handleItemsPerPageChange
+        handleItemsPerPageChange,
+        numberOfItemsPerPageList
     } = useTableData(data, 10, 'enviado', 'desc');
 
     useEffect(() => {
         onRefresh();
-    }, [numberOfItemsPerPage]);
+    }, [pageSize]);
 
     const handleSubmit = async () => {
         setVisibleCodigo(true)
@@ -115,9 +115,6 @@ const InvitacionesListKeys = ({ keyId, nombreKey, codigo, navigation }) => {
     const columns = useMemo(() => getColumns(), []);
 
     const cardrows = useMemo(() => getCardRows(), []);
-
-    const numberOfPages = Math.ceil(data.length / pageSize)
-    const numberOfItemsPerPageList = [10, 15, 20, 50, 100];
 
     return (
         <>
@@ -196,7 +193,7 @@ const InvitacionesListKeys = ({ keyId, nombreKey, codigo, navigation }) => {
                 onPageChange={handlePageChange}
                 numberOfPages={numberOfPages}
                 numberOfItemsPerPageList={numberOfItemsPerPageList}
-                numberOfItemsPerPage={numberOfItemsPerPage}
+                numberOfItemsPerPage={pageSize}
                 handleSubmit={handleSubmit}
                 onItemsPerPageChange={handleItemsPerPageChange}
                 style={styleMovimiento}

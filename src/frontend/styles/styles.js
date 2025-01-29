@@ -12,6 +12,7 @@ import styleComun from './styleComunes/styleComun.js';
 import styleDialog from './styleComunes/styleDialog.js';
 import styleDrawer from './styleMain/styleDrawer.js';
 const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
 
 export {
   styleComun,
@@ -19,6 +20,7 @@ export {
   styleBusquedaAvanzada,
   styleResumen,
   screenWidth,
+  screenHeight,
   styleForm,
   styleLoading,
   styleSearchDropdown,

@@ -8,12 +8,14 @@ import useCambioDia from "../../../hooks/useCambio";
 import DatePickerSearchBar from "../Busqueda/DatePickerSearchBar";
 import moment from "moment";
 import MonedaSelector from "../MonedaSelector";
+import TextInputCustom from "../TextInputCustom";
 
 const CambioFechaDialog = ({ visible, setVisible, keyId }) => {
   const [selectedOption, setSelectedOption] = useState("USD");
   const [fechaSelected, setFechaSelected] = useState(moment().format("YYYY-MM-DD"));
   const { cambio, fetchCambioDia } = useCambioDia(keyId);
   const [filteredCambio, setFilteredCambio] = useState({});
+  const [importe, setImporte] = useState(0)
 
   const handleOptionChange = (value) => {
     setSelectedOption(value);
@@ -47,6 +49,7 @@ const CambioFechaDialog = ({ visible, setVisible, keyId }) => {
           <MonedaSelector
             selectedMoneda={selectedOption}
             onMonedaChange={handleOptionChange}
+            title={'Moneda del cambio'}
           />
           <DatePickerSearchBar
             value={fechaSelected}
@@ -55,6 +58,13 @@ const CambioFechaDialog = ({ visible, setVisible, keyId }) => {
             }}
             onClear={() => setFechaSelected(null)}
             placeholder="Fecha"
+          />
+          <TextInputCustom 
+          placeholder={'Importe para calcular el cambio...'}
+          label={'Importe'}
+          value={importe}
+          onChangeText={(value) => setImporte(value)}
+          onPressClose={() => setImporte(null)}
           />
           <View style={{ marginTop: 20 }}>
             {Object.keys(filteredCambio).map((key) => (
@@ -67,9 +77,8 @@ const CambioFechaDialog = ({ visible, setVisible, keyId }) => {
                 }}
               >
                 <Text style={{ fontWeight: "bold", color: theme.colors.primary }}>
-                  {key.toUpperCase().replace(/([A-Z]{3})([A-Z]{3})/, "$1-$2")}:
+                  {key.toUpperCase().replace(/([A-Z]{3})([A-Z]{3})/, `1 $1  ➪ ${filteredCambio[key].toFixed(2)} $2`)}
                 </Text>
-                <Text style={{ color: theme.colors.primary }}>{filteredCambio[key] || "N/A"}</Text>
               </View>
             ))}
           </View>

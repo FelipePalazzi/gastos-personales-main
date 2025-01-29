@@ -15,7 +15,7 @@ const styleComun = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 16,
         marginEnd:20,
-        width:screenWidth*0.97,
+        width:screenWidth*0.897,
       },
       text:{
         padding: 10,

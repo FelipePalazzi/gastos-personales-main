@@ -12,7 +12,7 @@ const Pagination = ({
     onPageChange,
     onItemsPerPageChange,
     numberOfItemsPerPageList,
-    numberOfItemsPerPage,
+    pageSize,
     handleSubmit,
     style,
     IconHandleSumbit,
@@ -28,7 +28,7 @@ const Pagination = ({
                 onItemsPerPageChange={onItemsPerPageChange}
                 selectPageDropdownLabel={alerts.cantidad}
                 numberOfItemsPerPageList={numberOfItemsPerPageList}
-                numberOfItemsPerPage={numberOfItemsPerPage}
+                numberOfItemsPerPage={pageSize}
                 style={style.pagination}
             />
             {handleSubmit && <View style={styleComun.agregar.container}>

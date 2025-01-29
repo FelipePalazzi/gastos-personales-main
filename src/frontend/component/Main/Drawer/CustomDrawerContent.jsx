@@ -68,7 +68,7 @@ function CustomDrawerContent({ keyId, nombreKey, navigation, codigo }) {
         />
         <DrawerItem
           label="Volver al Inicio"
-          onPress={() => navigation.navigate('Login')}
+          onPress={() => navigation.push('Login')}
           icon={({ }) => <Icon name="logout" size={theme.fontSizes.body} color={theme.colors.white} />}
           style={{ marginTop: 10 }}
           labelStyle={{ color: theme.colors.white }}

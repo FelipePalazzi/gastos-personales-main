@@ -19,7 +19,7 @@ L${width},${TAB_HEIGHT}
 Z
 `;
 
-const CustomTab = ({ screens, screenTitles, icons }) => {
+const CustomTab = ({ screens, screenTitles, icons, parentScrollEnabled }) => {
     const scrollX = useRef(new Animated.Value(width)).current;
     const scrollViewRef = useRef(null);
     const [activeIndex, setActiveIndex] = React.useState(1);
@@ -58,6 +58,7 @@ const CustomTab = ({ screens, screenTitles, icons }) => {
                 onMomentumScrollEnd={handleMomentumScrollEnd}
                 scrollEventThrottle={16}
                 ref={scrollViewRef}
+                scrollEnabled={parentScrollEnabled}
             >
                 {screens.map((screen, index) => (
                     <View key={index} style={[styles.screen, { width }]}>
@@ -117,17 +118,18 @@ const CustomTab = ({ screens, screenTitles, icons }) => {
                         },
                     ]}
                 >
-                    <Svg
-                        height={80 * 2}
-                        width={80 * 2.2}
-                        viewBox="49.3 102.5 50 50"
-                        style={styles.iconBorder}
-                    >
-                        <Path
-                            d="m 59.013726,129.18642 c 3.827127,0.2442 6.171532,-0.0923 6.652457,3.86271 0.172099,4.23847 -0.353636,6.23039 2.289018,10.44364 3.362822,6.09088 17.126437,7.87062 21.960258,0 2.288418,-3.50742 2.420258,-6.5642 2.646678,-10.37212 0.918813,-4.00592 2.148826,-3.513 6.652455,-3.8627 z"
-                            fill={theme.colors.white}
-                        />
-                    </Svg>
+<Svg
+    height={60}
+    width={80 * 2.2}
+    viewBox="49 130 50 18.8"
+    style={styles.iconBorder}
+>
+    <Path
+        d="m 59.013726,129.18642 c 3.827127,0.2442 6.171532,-0.0923 6.652457,3.86271 0.172099,4.23847 -0.353636,6.23039 2.289018,10.44364 3.362822,6.09088 17.126437,7.87062 21.960258,0 2.288418,-3.50742 2.420258,-6.5642 2.646678,-10.37212 0.918813,-4.00592 2.148826,-3.513 6.652455,-3.8627 z"
+        fill={theme.colors.white}
+    />
+</Svg>
+
                     {screens.map((_, index) => {
                         const opacity = scrollX.interpolate({
                             inputRange: [
@@ -223,7 +225,7 @@ const styles = StyleSheet.create({
         height: 80,
     },
     iconBorder: {
-        bottom: 27,
+        bottom: -10,
         left: 0,
     },
     button: {

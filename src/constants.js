@@ -132,7 +132,7 @@ const pointerConfig = {
   dataPointLabelShiftY: 20,
   pointerStripHeight: 150,
   strokeDashArray: [2, 1],
-  pointerStripWidth: 4,
+  pointerStripWidth: 8,
   radius: 6,
   pointerLabelWidth: 100,
   pointerLabelHeight: 90,

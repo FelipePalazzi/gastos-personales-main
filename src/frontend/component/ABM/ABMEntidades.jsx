@@ -57,7 +57,7 @@ const ABMEntidades = ({ navigation }) => {
     setSubmetodopagos(submetodopago.map(item => ({
       id: item.id_submetodo_pago,
       nombre: item.submetodo_pago,
-      id_metodopago: item.id_metodopago, activo: item.subemtodo_pago_activo
+      id_metodopago: item.id_metodopago, activo: item.submetodo_pago_activo
     })));
   }, [keyId, categoria, subcategoria, responsable, moneda, metodopago, submetodopago]);
 

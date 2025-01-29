@@ -19,13 +19,14 @@ import SearchDropdown from '../Comunes/Busqueda/SearchDropdown.jsx';
 import { getAtributosForm } from './formConfig.js';
 import DatePickerSearchBar from '../Comunes/Busqueda/DatePickerSearchBar.jsx';
 import CurrencyInput from '../Comunes/CurrencyInput.jsx';
+import TextInputCustom from '../Comunes/TextInputCustom.jsx';
 
 const MovimientoForm = ({ routeParams }) => {
     const navigation = useNavigation();
     const route = useRoute();
     const { itemParam, deleteMode, keyId, labelHeader } = route.params;
-    const [item, setItem] = useState({ fecha: moment().format('YYYY-MM-DD HH:mm:ss'), ...itemParam, });
-    const [loading, setLoading] = useState(true);
+    const [item, setItem] = useState({});
+    const [loading, setLoading] = useState(false);
     const { categoria, subcategoria, responsable, moneda, metodopago, submetodopago } = useCombinedData(keyId);
     const [visible, setVisible] = useState(false);
     const [visibleOK, setvisibleOK] = useState(false);
@@ -45,17 +46,54 @@ const MovimientoForm = ({ routeParams }) => {
 
     React.useEffect(() => {
         if (itemParam) {
-            updateItemProperty('estado', itemParam.nombre === 'Activo' ? 'Archivado' : 'Activo')
-            updateItemProperty('id_moneda_origen', itemParam.id_moneda)
-            updateItemProperty('monto', item[item.monedamonto].toFixed(2))
-            updateItemProperty('metodopago', item.id_metodopago)
-            updateItemProperty('submetodopago', item.id_submetodopago)
-            updateItemProperty('categoria', item.id_categoria)
-            updateItemProperty('subcategoria', item.id_subcategoria)
-            updateItemProperty('responsable', item.id_responsable)
-            setLoading(false)
+            setLoading(true)
+            updateItemProperty('id', itemParam.id)
+            // Actualiza propiedades
+            updateItemProperty('fecha', itemParam.fecha)
+            updateItemProperty('estado', itemParam.nombre === 'Activo' ? 'Archivado' : 'Activo');
+            updateItemProperty('id_moneda_origen', itemParam.id_moneda);
+            updateItemProperty('monto', itemParam[itemParam.monedamonto]?.toFixed(2));
+            updateItemProperty('metodopago', itemParam.id_metodopago);
+            updateItemProperty('submetodopago', itemParam.id_submetodopago);
+            updateItemProperty('responsable', itemParam.id_responsable);
+
+            if (itemParam.categoria && itemParam.subcategoria) {
+                updateItemProperty('categoria', itemParam.id_categoria);
+                updateItemProperty('subcategoria', itemParam.id_subcategoria);
+            }
+            if (itemParam.comentario) {
+                updateItemProperty('comentario', itemParam.comentario)
+            }
+
+            // Espera hasta que todas las propiedades estén asignadas
+            const checkProperties = () => {
+                const isComplete =
+                    itemParam.id !== undefined &&
+                    itemParam.nombre !== undefined &&
+                    itemParam.id_moneda !== undefined &&
+                    itemParam[itemParam.monedamonto] !== undefined &&
+                    itemParam.id_metodopago !== undefined &&
+                    itemParam.id_submetodopago !== undefined &&
+                    itemParam.id_responsable !== undefined &&
+                    (!itemParam.categoria || itemParam.id_categoria !== undefined) &&
+                    (!itemParam.subcategoria || itemParam.id_subcategoria !== undefined);
+
+                return isComplete;
+            };
+
+            // Configura un pequeño retraso para asegurarse de que todas las actualizaciones hayan terminado
+            setTimeout(() => {
+                if (checkProperties()) {
+                    setLoading(false);
+                }
+            }, 100); // 100 ms para garantizar que todas las actualizaciones asíncronas hayan terminado
+
+        } else {
+            setItem({ fecha: moment().format('YYYY-MM-DD HH:mm:ss') })
+            setLoading(false); // Si no hay `itemParam`, cambia a `false` inmediatamente
         }
-    }, [itemParam])
+    }, [itemParam]);
+
     React.useEffect(() => {
         setCategorias(categoria.map(item => ({
             id: item.id_categoria,
@@ -94,14 +132,6 @@ const MovimientoForm = ({ routeParams }) => {
             activo: item.submetodo_pago_activo
         })));
     }, [keyId, categoria, subcategoria, responsable, moneda, metodopago, submetodopago]);
-
-    React.useEffect(() => {
-        if (categorias.find(option => option.id === item.categoria)?.nombre &&
-            responsables.find(option => option.id === item.responsable)?.nombre &&
-            subcategorias.find(option => option.id === item.subcategoria)?.nombre) {
-            setLoading(true);
-        }
-    }, [categorias, responsables, subcategorias]);
 
     const atributosForm = useMemo(() => getAtributosForm(esEntrada, { categorias, subcategorias, responsables, monedas, metodopagos, submetodopagos }), [
         esEntrada,
@@ -217,7 +247,7 @@ const MovimientoForm = ({ routeParams }) => {
                     <SearchDropdown
                         options={metodopagos.map(option => ({ nombre: option.nombre, activo: option.activo }))}
                         placeholder={label}
-                        value={!itemParam ? metodopagos.find(option => option.id === item.metodopago)?.nombre : item.metododepago}
+                        value={metodopagos.find(option => option.id === item.metodopago)?.nombre}
                         onSelect={(value) => {
                             const selected = metodopagos.find(option => option.nombre === value.nombre);
                             updateItemProperty('metodopago', selected ? selected.id : null);
@@ -245,7 +275,7 @@ const MovimientoForm = ({ routeParams }) => {
                     <SearchDropdown
                         options={filteredSubmetodopagos.map(option => ({ nombre: option.nombre, activo: option.activo }))}
                         placeholder={label}
-                        value={!itemParam ? submetodopagos.find(option => option.id === item.submetodo_pago)?.nombre : item.submetododepago}
+                        value={submetodopagos.find(option => option.id === item.submetodopago)?.nombre}
                         onSelect={(value) => {
                             const selected = submetodopagos.find(option => option.nombre === value.nombre);
                             updateItemProperty('submetodopago', selected ? selected.id : null);
@@ -263,43 +293,18 @@ const MovimientoForm = ({ routeParams }) => {
         }
         if (renderType === 'textInput' || key === 'id_moneda_origen') {
             return (
-                <View key={key} style={[styleComun.rowContainer, { marginBottom: 20, height: 55 }]}>
+                <View key={key} style={[styleComun.rowContainer, { marginBottom: 15, marginTop: 9, height: 50 }]}>
                     {renderType === 'textInput' && key !== 'monto' ?
-                        <TextInput
-                            mode='outlined'
-                            value={item[key] || ''}
-                            onChangeText={(value) => updateItemProperty(key, value)}
-                            placeholder={`${label}${symbols.space}${button_text.opcional}`}
-                            style={{
-                                marginRight: 0,
-                                width: screenWidth - 40,
-                                backgroundColor: item[key] ? theme.colors.primary : theme.colors.white,
-                                height: 38,
-                                paddingVertical: 10,
-                                color: theme.colors.white
-                            }}
-                            outlineStyle={{ borderColor:theme.colors.primary, borderRadius: 27 }}
-                            disabled={deleteMode}
+                        <TextInputCustom
                             label={label}
-                            textColor={item[key] ? theme.colors.white : theme.colors.primary}
-                            outlineColor={item[key] ? theme.colors.white : theme.colors.primary}
-                            activeOutlineColor={item[key] ? theme.colors.white : theme.colors.primary}
-                            theme={{ colors: { onSurfaceVariant: item[key] ? theme.colors.white : theme.colors.primary, onSurfaceDisabled: theme.colors.white } }}
-                            right={
-                                item[key] && !deleteMode ? (
-                                    <TextInput.Icon
-                                        icon="close"
-                                        onPress={() => updateItemProperty(key, '')}
-                                        size={26}
-                                        color={theme.colors.white}
-                                        style={{ marginTop: 34 }}
-                                    />
-                                ) : null
-                            }
+                            placeholder={`${label}${symbols.space}${button_text.opcional}`}
+                            value={item[key]}
+                            onChangeText={(value) => updateItemProperty(key, value)}
+                            onPressClose={() => updateItemProperty(key, '')}
                         />
                         :
                         key === 'id_moneda_origen' ?
-                            (<View style={[styleComun.rowContainer, { marginVertical: 20, height: 55 }]}>
+                            (<View style={[styleComun.rowContainer, { marginTop: 0, marginBottom: 10, height: 55 }]}>
                                 <SearchDropdown
                                     key={key}
                                     options={data.map(option => ({ nombre: option.nombre, activo: option.activo }))}
@@ -357,7 +362,7 @@ const MovimientoForm = ({ routeParams }) => {
 
     const create = async (item) => {
         try {
-            setLoading(false)
+            setLoading(true)
             const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina[`pagina_${tipo}`]}${symbols.barra}${keyId}`, {
                 method: "POST",
                 headers: {
@@ -368,7 +373,7 @@ const MovimientoForm = ({ routeParams }) => {
                 body: JSON.stringify(item)
             })
             const data = await response.json()
-            setLoading(true)
+            setLoading(false)
             setvisibleOK(true);
         } catch (error) {
             console.error(error)
@@ -376,7 +381,7 @@ const MovimientoForm = ({ routeParams }) => {
     }
     const update = async (item) => {
         try {
-            setLoading(false)
+            setLoading(true)
             const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina[`pagina_${tipo}`]}${symbols.barra}${keyId}${symbols.barra}${item.id}`, {
                 method: "PUT",
                 headers: {
@@ -387,7 +392,7 @@ const MovimientoForm = ({ routeParams }) => {
                 body: JSON.stringify(item),
             })
             const data = await response.json()
-            setLoading(true)
+            setLoading(false)
             setvisibleOK(true);
         } catch (error) {
             console.error(error)
@@ -397,7 +402,7 @@ const MovimientoForm = ({ routeParams }) => {
     const handleDelete = async () => {
         if (item.id) {
             try {
-                setLoading(false)
+                setLoading(true)
                 const response = await fetch(`${PAGINA_URL}${symbols.barra}${pagina[`pagina_${tipo}`]}${symbols.barra}${keyId}${symbols.barra}${item.id}`, {
                     method: 'DELETE',
                     headers: {
@@ -407,7 +412,7 @@ const MovimientoForm = ({ routeParams }) => {
                     },
                     body: JSON.stringify({ estado: item.estado }),
                 })
-                setLoading(true)
+                setLoading(false)
                 setvisibleDelete(false)
                 setvisibleOKDelete(true)
             }
@@ -441,7 +446,7 @@ const MovimientoForm = ({ routeParams }) => {
     return (
 
         <>
-            {!loading ? (
+            {loading ? (
                 <View style={styleLoading.loadingContainer}>
                     <ActivityIndicator animating={true} color={theme.colors.primary} size={theme.icons.big} />
                     <Text style={styleLoading.loadingText}>{alerts.cargando} datos...</Text>
@@ -460,7 +465,7 @@ const MovimientoForm = ({ routeParams }) => {
                     />
                     {/* Vistas modales */}
                     <FaltanDatos visible={visible} setVisible={setVisible} message={message} />
-                    <Correcto visible={visibleOK} setVisible={setvisibleOK} navigation={navigation} RutaAnterior={RutaAnterior} goBack={false} />
+                    <Correcto visible={visibleOK} setVisible={setvisibleOK} navigation={navigation} goBack={true} />
                     <Delete
                         visible={visibleDelete}
                         setVisible={setvisibleDelete}

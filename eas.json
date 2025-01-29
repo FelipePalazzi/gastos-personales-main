@@ -16,7 +16,13 @@
         "DB_USER": "public",
         "DB_PASS": "public",
         "DB_NAME": "public",
-        "DB_PORT": "public"
+        "DB_PORT": "public",
+        "PAGINA_API_MONEDA_CAMBIO": "public",
+        "KEY_API_MONEDA_CAMBIO": "public",
+        "JWT_SECRET":"public",
+        "REFRESH_TOKEN_SECRET": "public",
+        "NODE_VERSION":"public",
+        "NODE_ENV": "public"
       }
     },
     "preview": {
@@ -31,7 +37,13 @@
         "DB_USER": "public",
         "DB_PASS": "public",
         "DB_NAME": "public",
-        "DB_PORT": "public"
+        "DB_PORT": "public",
+        "PAGINA_API_MONEDA_CAMBIO": "public",
+        "KEY_API_MONEDA_CAMBIO": "public",
+        "JWT_SECRET":"public",
+        "REFRESH_TOKEN_SECRET": "public",
+        "NODE_VERSION":"public",
+        "NODE_ENV": "public"
       }
     },
     "production": {
@@ -45,7 +57,13 @@
         "DB_USER": "public",
         "DB_PASS": "public",
         "DB_NAME": "public",
-        "DB_PORT": "public"
+        "DB_PORT": "public",
+        "PAGINA_API_MONEDA_CAMBIO": "public",
+        "KEY_API_MONEDA_CAMBIO": "public",
+        "JWT_SECRET":"public",
+        "REFRESH_TOKEN_SECRET": "public",
+        "NODE_VERSION":"public",
+        "NODE_ENV": "public"
       }
     }
   },
