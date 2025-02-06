@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 9.2.0"
+    "version": ">= 9.2.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -8,62 +9,18 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      },
-      "env": {
-        "PAGINA_URL": "public",
-        "PORT": "public",
-        "DB_HOST": "public",
-        "DB_USER": "public",
-        "DB_PASS": "public",
-        "DB_NAME": "public",
-        "DB_PORT": "public",
-        "PAGINA_API_MONEDA_CAMBIO": "public",
-        "KEY_API_MONEDA_CAMBIO": "public",
-        "JWT_SECRET":"public",
-        "REFRESH_TOKEN_SECRET": "public",
-        "NODE_VERSION":"public",
-        "NODE_ENV": "public"
       }
     },
     "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      },
-      "env": {
-        "PAGINA_URL": "public",
-        "PORT": "public",
-        "DB_HOST": "public",
-        "DB_USER": "public",
-        "DB_PASS": "public",
-        "DB_NAME": "public",
-        "DB_PORT": "public",
-        "PAGINA_API_MONEDA_CAMBIO": "public",
-        "KEY_API_MONEDA_CAMBIO": "public",
-        "JWT_SECRET":"public",
-        "REFRESH_TOKEN_SECRET": "public",
-        "NODE_VERSION":"public",
-        "NODE_ENV": "public"
       }
     },
     "production": {
       "android": {
-        "buildType": "apk"
-      },
-      "env": {
-        "PAGINA_URL": "public",
-        "PORT": "public",
-        "DB_HOST": "public",
-        "DB_USER": "public",
-        "DB_PASS": "public",
-        "DB_NAME": "public",
-        "DB_PORT": "public",
-        "PAGINA_API_MONEDA_CAMBIO": "public",
-        "KEY_API_MONEDA_CAMBIO": "public",
-        "JWT_SECRET":"public",
-        "REFRESH_TOKEN_SECRET": "public",
-        "NODE_VERSION":"public",
-        "NODE_ENV": "public"
+        "buildType": "app-bundle",
+        "autoIncrement": true
       }
     }
   },

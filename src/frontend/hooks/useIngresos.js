@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { pagina, symbols, alerts, atributos } from '../../constants';
 import { useAuth } from "../helpers/AuthContext";
 import * as Keychain from 'react-native-keychain';
-import { PAGINA_URL } from '@env';
+const PAGINA_URL  = process.env.PAGINA_URL
+
 
 const useIngresos = (keyId) => {
   const { accessToken, refreshToken } = useAuth();

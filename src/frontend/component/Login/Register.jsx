@@ -3,7 +3,8 @@ import { View, Alert, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Keychain from 'react-native-keychain';
 import { alerts, symbols } from '../../../constants.js';
-import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
+const PAGINA_URL_ENV  = process.env.PAGINA_URL
+
 import { useNavigation } from '@react-navigation/native';
 import { ActivityIndicator, Dialog, Portal, TextInput, Button } from 'react-native-paper'
 import { styleForm, styleComun, screenWidth } from '../../styles/styles.js';

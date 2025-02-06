@@ -117,7 +117,7 @@ const UsuariosListKey = ({ keyId, nombreKey, codigo, navigation }) => {
         <>
             <View style={{ backgroundColor: styleMovimiento.colorBackground }}>
 
-                <View style={{ flexDirection: 'row', backgroundColor: theme.colors.primary, paddingTop: 45, paddingBottom: 8, alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', backgroundColor: theme.colors.primary, paddingBottom: 8, alignItems: 'center' }}>
                     <View style={{ alignItems: 'center' }}>
                         <TouchableOpacity
                             style={{

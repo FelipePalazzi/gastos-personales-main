@@ -4,7 +4,7 @@ import { Portal, Dialog, Searchbar } from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import theme from "../../../theme/theme";
 import { styleDialog, screenWidth } from "../../../styles/styles";
-//import Clipboard from '@react-native-clipboard/clipboard';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 const CodigoInvitacion = ({
     visible,
@@ -19,7 +19,7 @@ const CodigoInvitacion = ({
     };
 
     const copyToClipboard = () => {
-        // Clipboard.setString(codigo);
+        Clipboard.setString(codigo);
         setCopiado(true);
         setTimeout(() => {
             setCopiado(false);

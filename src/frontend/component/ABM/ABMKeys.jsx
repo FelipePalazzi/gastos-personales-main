@@ -6,7 +6,7 @@ import { symbols, button_text, alerts, pagina } from '../../../constants';
 import { styleForm, } from '../../styles/styles';
 import theme from '../../theme/theme'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import { PAGINA_URL } from '@env';
+const PAGINA_URL  = process.env.PAGINA_URL
 import { styleLoading, screenWidth } from '../../styles/styles.js';
 import { useAuth } from '../../helpers/AuthContext';
 import FaltanDatos from '../Comunes/Dialogs/FaltanDatos.jsx';

@@ -70,7 +70,7 @@ const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, key
             label={label}
             placeholder={label}
             value={filters[key]}
-            onChangeText={(value) =>  handleInputChange(key, value)}
+            onChangeText={(value) => handleInputChange(key, value)}
             onPressClose={() => handleInputChange(key, '')}
           />
         );
@@ -104,6 +104,7 @@ const BusquedaAvanzada = ({ onApplyFilters, atributosSearch, appliedFilters, key
       case 'monedaInput':
         return (
           filters.monedaFiltro && <CurrencyInput
+            placeholder={`Ingresar Monto ${filters.monedaFiltro} ${label}...`}
             key={key}
             value={filters[key]}
             onChange={(value) => handleInputChange(key, value)}

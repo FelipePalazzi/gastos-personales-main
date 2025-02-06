@@ -8,7 +8,7 @@ import useCambioDia from "../../../hooks/useCambio";
 import DatePickerSearchBar from "../Busqueda/DatePickerSearchBar";
 import moment from "moment";
 import MonedaSelector from "../MonedaSelector";
-import TextInputCustom from "../TextInputCustom";
+import CurrencyInput from "../CurrencyInput";
 
 const CambioFechaDialog = ({ visible, setVisible, keyId }) => {
   const [selectedOption, setSelectedOption] = useState("USD");
@@ -59,12 +59,12 @@ const CambioFechaDialog = ({ visible, setVisible, keyId }) => {
             onClear={() => setFechaSelected(null)}
             placeholder="Fecha"
           />
-          <TextInputCustom 
+          <CurrencyInput 
           placeholder={'Importe para calcular el cambio...'}
           label={'Importe'}
           value={importe}
-          onChangeText={(value) => setImporte(value)}
-          onPressClose={() => setImporte(null)}
+          onChange={(value) => setImporte(value)}
+          style={{width:'100%'}}
           />
           <View style={{ marginTop: 20 }}>
             {Object.keys(filteredCambio).map((key) => (
@@ -77,7 +77,7 @@ const CambioFechaDialog = ({ visible, setVisible, keyId }) => {
                 }}
               >
                 <Text style={{ fontWeight: "bold", color: theme.colors.primary }}>
-                  {key.toUpperCase().replace(/([A-Z]{3})([A-Z]{3})/, `1 $1  ➪ ${filteredCambio[key].toFixed(2)} $2`)}
+                  {key.toUpperCase().replace(/([A-Z]{3})([A-Z]{3})/, `${importe === 0 ? 1 : importe === '' ? 1 : importe} $1  ➪ ${importe === 0 ? filteredCambio[key].toFixed(5) : importe*filteredCambio[key].toFixed(5)} $2`)}
                 </Text>
               </View>
             ))}

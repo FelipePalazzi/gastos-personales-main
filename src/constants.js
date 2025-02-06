@@ -77,7 +77,7 @@ const atributos = {
 }
 const pagina = {
   nombre: 'Página',
-  mensaje: 'Gastos Personales',
+  mensaje: 'Expenzzi',
   pagina_gasto: 'gasto',
   pagina_salidas: 'gasto',
   pagina_entradas: 'ingreso',

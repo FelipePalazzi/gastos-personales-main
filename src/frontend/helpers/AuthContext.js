@@ -1,7 +1,8 @@
 import React, { createContext, useState, useContext, useCallback } from 'react';
 import * as Keychain from 'react-native-keychain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PAGINA_URL } from '@env';
+const PAGINA_URL  = process.env.PAGINA_URL
+
 
 const AuthContext = createContext();
 

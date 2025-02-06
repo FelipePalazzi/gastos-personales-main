@@ -29,7 +29,7 @@ const Delete = ({
         </Dialog>
       </Portal>
       <Portal>
-        <Dialog visible={visibleOk} onDismiss={() => setVisibleOk(false)} style={{backgroundColor:theme.colors.white}}>
+        <Dialog visible={visibleOk} onDismiss={() => (setVisibleOk(false), goBack ? navigation.goBack() : navigation.navigate(RutaAnterior, { refresh: true }))} style={{backgroundColor:theme.colors.white}}>
           <Dialog.Icon icon={theme.icons.deleteComplete} color={theme.colors.primary}/>
           <Dialog.Title style={styleDialog.title}>{archivar ? alerts.archivado_exito : alerts.desarchivado_exito}</Dialog.Title>
           <Dialog.Actions style={{ marginEnd: screenWidth / 5, marginTop: 10 }}>

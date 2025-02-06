@@ -35,6 +35,8 @@ app.use((err, req, res, next) => {
 
 require('./backend/cronjobs');
 
+app.use(express.static('assets'));
+
 app.listen(port, () => {
   console.log(`Server on port ${port}`)
 })

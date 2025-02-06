@@ -21,11 +21,12 @@ const parseCurrency = (text) => {
     
     return cleanText;
 };
-const CurrencyInput = ({ value = '', onChange, label, deleteMode, style }) => {
+const CurrencyInput = ({ value = '', onChange, label, deleteMode, style, placeholder }) => {
     return (
         <TextInput
             mode="outlined"
             label={label}
+            placeholder={placeholder}
             style={[{
                 width: screenWidth / 3 * 2 - 50,
                 marginLeft: 10,

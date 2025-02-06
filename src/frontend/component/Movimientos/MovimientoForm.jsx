@@ -9,7 +9,8 @@ import 'moment/locale/es'
 import { alerts, button_text, symbols, pagina } from '../../../constants'
 import { styleForm, styleComun, screenWidth, styleLoading } from '../../styles/styles.js'
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
+const PAGINA_URL_ENV  = process.env.PAGINA_URL
+
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
 import { useAuth } from '../../helpers/AuthContext.js';
 import FaltanDatos from '../Comunes/Dialogs/FaltanDatos.jsx';
@@ -50,7 +51,7 @@ const MovimientoForm = ({ routeParams }) => {
             updateItemProperty('id', itemParam.id)
             // Actualiza propiedades
             updateItemProperty('fecha', itemParam.fecha)
-            updateItemProperty('estado', itemParam.nombre === 'Activo' ? 'Archivado' : 'Activo');
+            updateItemProperty('estado', itemParam.nombre === 'Activo' ? 'Activo' : 'Archivado');
             updateItemProperty('id_moneda_origen', itemParam.id_moneda);
             updateItemProperty('monto', itemParam[itemParam.monedamonto]?.toFixed(2));
             updateItemProperty('metodopago', itemParam.id_metodopago);
@@ -330,6 +331,7 @@ const MovimientoForm = ({ routeParams }) => {
                                     onChange={(value) => updateItemProperty('monto', value)}
                                     label={'Importe'}
                                     deleteMode={deleteMode}
+                                    placeholder={'Ingresar Importe...'}
                                 />
                             </View>)
                             : null}

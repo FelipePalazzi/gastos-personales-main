@@ -6,7 +6,7 @@ import { symbols, button_text, alerts, pagina } from '../../../constants';
 import { styleComun, styleForm, } from '../../styles/styles';
 import theme from '../../theme/theme'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
+const PAGINA_URL_ENV  = process.env.PAGINA_URL
 import { styleLoading, screenWidth } from '../../styles/styles.js';
 import { getMonedas } from './monedasConfig';
 import { useAuth } from '../../helpers/AuthContext';

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { symbols } from '../../../constants.js';
-import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
+const PAGINA_URL_ENV  = process.env.PAGINA_URL
+
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useNavigation } from '@react-navigation/native';
 import { TextInput, } from 'react-native-paper'
@@ -195,7 +196,7 @@ const LoginScreen = () => {
 
   const renderEmailPasswordForm = () => (
     <>
-      <View style={[styleForm.rowContainer, { paddingHorizontal: 10 }]}>
+      <View style={[styleForm.rowContainer, { width:'97%', marginEnd:0}]}>
         <TextInput
           textContentType='email'
           mode='outlined'
@@ -210,7 +211,7 @@ const LoginScreen = () => {
           theme={{ colors: { onSurfaceVariant: theme.colors.primary } }}
         />
       </View>
-      <View style={[styleForm.rowContainer, { paddingHorizontal: 10 }]}>
+      <View style={[styleForm.rowContainer, { width:'97%', marginEnd:0  }]}>
         <TextInput
           textContentType='password'
           mode='outlined'
@@ -235,7 +236,7 @@ const LoginScreen = () => {
       {loading ? (
         <LoadingScreen Nombre={"Login"} />
       ) : (
-        <View style={{ marginTop: requestPin ? 120 : 160, marginHorizontal: 10, backgroundColor: theme.colors.white, borderColor: theme.colors.gray, borderRadius: 5, borderWidth: 2 }}>
+        <View style={{alignItems:'center', justifyContent:'center',marginTop:160,marginHorizontal:10, backgroundColor: theme.colors.white, borderColor: theme.colors.gray, borderRadius: 5, borderWidth: 2 }}>
 
           <View style={{ alignItems: 'center', width:screenWidth-20, marginTop: 10 }}>
             <Image
@@ -252,7 +253,7 @@ const LoginScreen = () => {
             <Text style={{ fontSize: theme.fontSizes.body, fontWeight: theme.fontWeights.bold, color: theme.colors.primary }}>{`Inicio de Sesion`}</Text>
           </View>)}
           {requestPin ? <PinInput onValidatePin={onValidatePin} title={'Ingresa tu PIN'} /> : renderEmailPasswordForm()}
-          {!requestPin && <View style={{ paddingHorizontal: 10, marginBottom: 20, justifyContent: 'center' }}>
+          {!requestPin && <View style={{ marginVertical: 10, width:'97%' }}>
             <Icon.Button backgroundColor={theme.colors.primary} color={theme.colors.white} name={'login'} onPress={handleLogin} size={30} iconStyle={{ marginRight: 110 }}>{'Acceder'}</Icon.Button>
           </View>}
           <View style={styleForm.rowButton}>

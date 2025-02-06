@@ -7,7 +7,8 @@ import { useState } from "react"
 import Error from "../../Comunes/Dialogs/Error"
 import Correcto from "../../Comunes/Dialogs/Correcto"
 import { useAuth } from "../../../helpers/AuthContext";
-import { PAGINA_URL } from '@env';
+const PAGINA_URL  = process.env.PAGINA_URL
+
 import LoadingDialog from "../../Comunes/Loading/LoadingDialog"
 
 const CancelarInvitacion = ({

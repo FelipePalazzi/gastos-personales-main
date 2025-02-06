@@ -6,7 +6,7 @@ import { symbols, button_text, alerts } from '../../../constants';
 import { styleForm, } from '../../styles/styles';
 import theme from '../../theme/theme'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import { PAGINA_URL as PAGINA_URL_ENV } from '@env';
+const PAGINA_URL_ENV  = process.env.PAGINA_URL
 import { styleLoading, screenWidth } from '../../styles/styles.js';
 import { getEntidades } from './entidadesConfig';
 import { useAuth } from '../../helpers/AuthContext';
@@ -17,7 +17,6 @@ import Delete from '../Comunes/Dialogs/Delete.jsx';
 import Error from '../Comunes/Dialogs/Error';
 import SearchDropdown from '../Comunes/Busqueda/SearchDropdown';
 const PAGINA_URL = process.env.PAGINA_URL || PAGINA_URL_ENV;
-
 const ABMEntidades = ({ navigation }) => {
   const route = useRoute();
   const { labelHeader, entityType, keyId, routeName } = route.params;

@@ -6,9 +6,9 @@ import theme from "../../../theme/theme";
 import { styleDialog, screenWidth } from "../../../styles/styles";
 import { pagina, symbols, alerts, atributos } from '../../../../constants';
 import { useAuth } from "../../../helpers/AuthContext";
-import { PAGINA_URL } from '@env';
+const PAGINA_URL  = process.env.PAGINA_URL
 import { decodeTokenUserId } from "../../../utils";
-//import Clipboard from '@react-native-clipboard/clipboard';
+import Clipboard from '@react-native-clipboard/clipboard';
 import Error from "../../Comunes/Dialogs/Error";
 import Correcto from "../../Comunes/Dialogs/Correcto";
 
@@ -17,10 +17,12 @@ const CodigoInvitacionIngresar = ({
     handlePress,
 }) => {
     const { accessToken, refreshToken } = useAuth()
-    const pasteClipboard = () => {
-        // const copiedText = await Clipboard.getString();
-        setCodigo('9df8cdda-8f56-4bec-989b-7fb9ea72163a')
-        setPegado(true);
+    const pasteClipboard = async () => {
+        const copiedText = await Clipboard.getString();
+        if (copiedText) {
+            setCodigo(copiedText);
+            setPegado(true);
+        }
     };
     const [pegado, setPegado] = useState(false);
     const [codigo, setCodigo] = useState('')

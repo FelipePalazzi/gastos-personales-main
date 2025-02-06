@@ -30,13 +30,14 @@ const styleForm = StyleSheet.create({
       flexDirection: 'row',
       alignItems: 'center',
       marginBottom: 16,
-      marginEnd:20,
-      width:screenWidth*0.97,
+      marginStart:15,
+      width:'100%',
     },
     rowButton: {
       flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      alignItems:'center',
+      justifyContent:'space-between',
+      width:'100%',
       marginBottom: 16,
     },
      title: {
